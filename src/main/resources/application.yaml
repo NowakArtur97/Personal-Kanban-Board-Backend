@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: Personal Kanban Board Backend
+  r2dbc:
+    username: postgres
+    password: postgres
+    url: r2dbc:postgresql://localhost:5432/kanban_board
