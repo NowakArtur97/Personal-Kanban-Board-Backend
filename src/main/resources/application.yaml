@@ -1,7 +1,13 @@
 spring:
+  profiles:
+    active: local
   application:
     name: Personal Kanban Board Backend
   r2dbc:
     username: postgres
     password: postgres
     url: r2dbc:postgresql://localhost:5432/kanban_board
+  flyway:
+    user: postgres
+    password: postgres
+    url: jdbc:postgresql://localhost:5432/kanban_board
