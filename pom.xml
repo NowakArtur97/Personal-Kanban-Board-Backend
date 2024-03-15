@@ -8,7 +8,7 @@
 		<version>3.2.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.nowarkartur97</groupId>
+	<groupId>com.nowakartur97</groupId>
 	<artifactId>personalkanbanboardbackend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Personal Kanban Board Backend</name>

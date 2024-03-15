@@ -1,8 +1,8 @@
 spring:
-  profiles:
-    active: local
   application:
     name: Personal Kanban Board Backend
+  profiles:
+    active: local
   r2dbc:
     username: postgres
     password: postgres

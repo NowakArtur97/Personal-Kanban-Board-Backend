@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.Date;
 import java.util.UUID;
@@ -16,7 +17,7 @@ import java.util.UUID;
 public class TaskEntity extends Auditable<UUID> {
 
     @Id
-    @Column(name = "task_id")
+    @Column(name = "task_id", updatable = false)
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID taskId;
     @Column(nullable = false, length = 100)
