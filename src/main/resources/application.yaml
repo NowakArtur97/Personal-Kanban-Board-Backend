@@ -3,6 +3,9 @@ spring:
     name: Personal Kanban Board Backend
   profiles:
     active: local
+  graphql:
+    graphiql:
+      enabled: true
   r2dbc:
     username: postgres
     password: postgres
