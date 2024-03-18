@@ -9,10 +9,10 @@ public record TaskResponse(UUID taskId,
                            TaskStatus status,
                            TaskPriority priority,
                            LocalDate targetEndDate,
-                           UUID createdBy,
+                           String createdBy,
                            LocalDate createdOn,
-                           UUID updatedBy,
+                           String updatedBy,
                            LocalDate updatedOn,
-                           UUID assignedTo
+                           String assignedTo
 ) {
 }

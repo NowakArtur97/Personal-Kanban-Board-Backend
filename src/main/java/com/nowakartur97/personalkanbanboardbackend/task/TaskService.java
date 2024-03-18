@@ -27,10 +27,10 @@ public class TaskService {
         return userService.findByUsername(username)
                 .map(UserEntity::getUserId)
                 .flatMapMany(taskRepository::findAllByAssignedTo)
-                .map(this::mapToResponse);
+                .map(task -> this.mapToResponse(task, username));
     }
 
-    private TaskResponse mapToResponse(TaskEntity taskEntity) {
+    private TaskResponse mapToResponse(TaskEntity taskEntity, String username) {
         return new TaskResponse(
                 taskEntity.getTaskId(),
                 taskEntity.getTitle(),
@@ -38,11 +38,11 @@ public class TaskService {
                 taskEntity.getStatus(),
                 taskEntity.getPriority(),
                 taskEntity.getTargetEndDate(),
-                taskEntity.getCreatedBy(),
+                username,
                 taskEntity.getCreatedOn(),
-                taskEntity.getUpdatedBy(),
+                username,
                 taskEntity.getUpdatedOn(),
-                taskEntity.getAssignedTo()
+                username
         );
     }
 }
