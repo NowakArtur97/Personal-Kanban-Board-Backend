@@ -1,4 +1,9 @@
 spring:
+  graphql:
+    cors:
+      allow-credentials: true
+      allowed-origins:
+        - http://localhost:4200
   jpa:
     properties:
       hibernate:
