@@ -1,6 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.sst.SST;
+import com.nowakartur97.personalkanbanboardbackend.integration.IntragrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
@@ -10,10 +10,10 @@ import org.springframework.graphql.execution.ErrorType;
 import java.time.LocalDate;
 import java.util.List;
 
-import static com.nowakartur97.personalkanbanboardbackend.sst.GraphQLQueries.GET_TASKS;
+import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.GET_TASKS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class TaskControllerTest extends SST {
+public class TaskControllerTest extends IntragrationTest {
 
     private final static String TASKS_PATH = "tasks";
 

@@ -1,4 +1,4 @@
-package com.nowakartur97.personalkanbanboardbackend.sst;
+package com.nowakartur97.personalkanbanboardbackend.integration;
 
 public class GraphQLQueries {
 
@@ -16,6 +16,18 @@ public class GraphQLQueries {
                 createdOn
                 updatedBy
                 updatedOn
+              }
+            }
+            """;
+
+    public static final String REGISTER_USER = """
+            mutation REGISTER_USER($userDTO: UserDTO!) {
+              registerUser(userDTO: $userDTO) {
+                username
+                email
+                password
+                token
+                expirationTimeInMilliseconds
               }
             }
             """;
