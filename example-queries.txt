@@ -13,3 +13,13 @@ query TASKS_BY_USERNAME {
     updatedOn
   }
 }
+
+mutation REGISTER_USER {
+  registerUser(userDTO: {username: "user", password: "user123", email: "uesr@domain.com"}) {
+    username
+    email
+    password
+    token
+    expirationTimeInMilliseconds
+  }
+}

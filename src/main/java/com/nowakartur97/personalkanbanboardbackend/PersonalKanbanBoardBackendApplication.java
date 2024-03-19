@@ -29,6 +29,12 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
     @Override
     public void run(String... args) {
 
+//        UserEntity user = createUser();
+//
+//        createTask(user);
+    }
+
+    private UserEntity createUser() {
         UserEntity user = new UserEntity();
         user.setUsername("user");
         user.setPassword("pass1");
@@ -36,7 +42,10 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
 
         userService.saveUser(user).block();
 //        UserEntity user = userService.findByUsername("user").block();
+        return user;
+    }
 
+    private void createTask(UserEntity user) {
         TaskEntity task = new TaskEntity();
         task.setTitle("task1");
         task.setDescription("desc1");
