@@ -14,3 +14,11 @@ spring:
     user: postgres
     password: postgres
     url: jdbc:postgresql://localhost:5432/kanban_board
+
+app:
+  jwt:
+    secret-key: 8f9879e8-1afd-4a88-81b8-04d68f32fdaf
+    expiration-time-in-milliseconds: 10800000
+    authorization-header: Authorization
+    authorization-type: Bearer
+    authorization-header-length: 7
