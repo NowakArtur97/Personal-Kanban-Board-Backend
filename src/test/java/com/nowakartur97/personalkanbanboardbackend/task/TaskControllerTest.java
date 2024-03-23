@@ -24,6 +24,12 @@ public class TaskControllerTest extends IntragrationTest {
         TaskEntity taskEntity = createTask(userEntity);
 
         List<TaskResponse> taskResponses = httpGraphQlTester
+                .mutate()
+                .headers(headers -> headers.add(jwtConfigurationProperties.getAuthorizationHeader(),
+                        jwtConfigurationProperties.getAuthorizationType()
+                                + " "
+                                + jwtUtil.generateToken(userEntity.getUsername(), userEntity.getRole().name())))
+                .build()
                 .document(GET_TASKS)
                 .variable("username", userEntity.getUsername())
                 .execute()
