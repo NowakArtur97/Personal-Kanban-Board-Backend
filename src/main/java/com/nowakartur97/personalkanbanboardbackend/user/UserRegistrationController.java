@@ -4,7 +4,6 @@ import com.nowakartur97.personalkanbanboardbackend.auth.JWTConfigurationProperti
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,22 +14,20 @@ import reactor.core.publisher.Mono;
 @Controller
 @Validated
 @RequiredArgsConstructor
-@Slf4j
 public class UserRegistrationController {
 
     private final UserService userService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JWTUtil jwtUtil;
     private final JWTConfigurationProperties jwtConfigurationProperties;
+    private final UserValidator userValidator;
 
     @MutationMapping
     public Mono<UserResponse> registerUser(@Argument @Valid UserDTO userDTO) {
-
-        log.info("Registration of new user: ${}", userDTO);
-
-        return Mono.just(mapToEntity(userDTO))
+        return userValidator.validate(userDTO)
+                .map(__ -> mapToEntity(userDTO))
                 .flatMap(userService::saveUser)
-                .map(userEntity -> mapToUserResponse(userEntity));
+                .map(this::mapToUserResponse);
     }
 
     private UserEntity mapToEntity(UserDTO userDTO) {
