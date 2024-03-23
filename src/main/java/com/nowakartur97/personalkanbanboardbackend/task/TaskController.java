@@ -14,7 +14,7 @@ public class TaskController {
     private final TaskService taskService;
 
     @QueryMapping
-    @PreAuthorize("hasAuthority('USER')")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public Flux<TaskResponse> tasks(@Argument String username) {
         return taskService.getAllTasksForUser(username)
                 .map(task -> this.mapToResponse(task, username));
