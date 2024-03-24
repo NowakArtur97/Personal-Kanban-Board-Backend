@@ -1,0 +1,3 @@
+app:
+  jwt:
+    secret-key: 8f9879e8-1afd-4a88-81b8-04d68f32fdaf-test
