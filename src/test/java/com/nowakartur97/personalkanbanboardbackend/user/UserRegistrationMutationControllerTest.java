@@ -4,9 +4,7 @@ import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import graphql.ErrorType;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.ResponseError;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
 
@@ -17,9 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
     private final static String REGISTER_USER_PATH = "registerUser";
-
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Test
     public void whenRegisterUser_shouldReturnUserResponse() {
