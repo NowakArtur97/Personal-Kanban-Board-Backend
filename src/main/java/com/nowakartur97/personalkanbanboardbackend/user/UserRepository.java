@@ -9,5 +9,6 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends R2dbcRepository<UserEntity, UUID> {
     Mono<UserEntity> findByUsername(String username);
+    Mono<UserEntity> findByUsernameOrEmail(String username, String email);
     Mono<Boolean> existsByUsernameOrEmail(String username, String email);
 }

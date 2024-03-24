@@ -21,6 +21,14 @@ public class UserService {
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("User", "username", username)));
     }
 
+    public Mono<UserEntity> findByUsernameOrEmail(String usernameOrEmail) {
+
+        log.info("Looking up user by username or email: '{}'", usernameOrEmail);
+
+        return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("User", "username/email", usernameOrEmail)));
+    }
+
     public Mono<Boolean> existsByUsernameOrEmail(String username, String email) {
 
         log.info("Checking if user exists by username: '{}' or email: '{}'", username, email);
