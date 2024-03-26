@@ -1,6 +1,5 @@
 type UserResponse {
     username: String!
-    password: String!
     email: String!
     token: String!
     expirationTimeInMilliseconds: Int!

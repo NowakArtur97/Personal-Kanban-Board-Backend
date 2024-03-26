@@ -31,10 +31,18 @@ public class UserRegistrationController {
     }
 
     private UserEntity mapToEntity(UserDTO userDTO) {
-        return new UserEntity(userDTO.getUsername(), bCryptPasswordEncoder.encode(userDTO.getPassword()), userDTO.getEmail(), UserRole.USER);
+        return new UserEntity(
+                userDTO.getUsername(),
+                bCryptPasswordEncoder.encode(userDTO.getPassword()),
+                userDTO.getEmail(),
+                UserRole.USER);
     }
 
     private UserResponse mapToUserResponse(UserEntity userEntity) {
-        return new UserResponse(userEntity.getUsername(), userEntity.getPassword(), userEntity.getEmail(), jwtUtil.generateToken(userEntity.getUsername(), userEntity.getRole().name()), jwtConfigurationProperties.getExpirationTimeInMilliseconds());
+        return new UserResponse(
+                userEntity.getUsername(),
+                userEntity.getEmail(),
+                jwtUtil.generateToken(userEntity.getUsername(), userEntity.getRole().name()),
+                jwtConfigurationProperties.getExpirationTimeInMilliseconds());
     }
 }
