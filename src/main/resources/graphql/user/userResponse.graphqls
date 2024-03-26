@@ -1,4 +1,5 @@
 type UserResponse {
+    userId: ID!
     username: String!
     email: String!
     token: String!

@@ -29,6 +29,7 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
                 .entity(UserResponse.class)
                 .get();
 
+        assertThat(userResponse.userId()).isEqualTo(user.getUserId());
         assertThat(userResponse.username()).isEqualTo(user.getUsername());
         assertThat(userResponse.email()).isEqualTo(user.getEmail());
         assertThat(userResponse.token()).isEqualTo(jwtUtil.generateToken(user.getUsername(), UserRole.USER.name()));

@@ -23,6 +23,7 @@ public class GraphQLQueries {
     public static final String REGISTER_USER = """
             mutation REGISTER_USER($userDTO: UserDTO!) {
               registerUser(userDTO: $userDTO) {
+                userId
                 username
                 email
                 token
@@ -34,6 +35,7 @@ public class GraphQLQueries {
     public static final String AUTHENTICATE_USER = """
             query AUTHENTICATE_USER($authenticationRequest: AuthenticationRequest!) {
               loginUser(authenticationRequest: $authenticationRequest) {
+                userId
                 username
                 email
                 token
