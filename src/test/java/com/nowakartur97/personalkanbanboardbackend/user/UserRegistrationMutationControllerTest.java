@@ -10,7 +10,6 @@ import java.util.List;
 
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.REGISTER_USER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
@@ -32,7 +31,6 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
                 .get();
 
         assertThat(userResponse.username()).isEqualTo(userDTO.getUsername());
-        assertTrue(bCryptPasswordEncoder.matches(userDTO.getPassword(), userResponse.password()));
         assertThat(userResponse.email()).isEqualTo(userDTO.getEmail());
         assertThat(userResponse.token()).isEqualTo(jwtUtil.generateToken(userDTO.getUsername(), UserRole.USER.name()));
         assertThat(userResponse.expirationTimeInMilliseconds()).isEqualTo(jwtConfigurationProperties.getExpirationTimeInMilliseconds());
@@ -50,8 +48,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
                             ResponseError responseError = responseErrors.getFirst();
-                            assertErrorResponse(responseError, ErrorType.ValidationError,
-                                    "Variable 'userDTO' has an invalid value: Variable 'userDTO' has coerced Null value for NonNull type 'UserDTO!'");
+                            assertValidationErrorResponse(responseError, "Variable 'userDTO' has an invalid value: Variable 'userDTO' has coerced Null value for NonNull type 'UserDTO!'");
                         });
     }
 
@@ -179,8 +176,8 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
         assertThat(responseError.getLocations()).isEqualTo(List.of(new SourceLocation(2, 3)));
     }
 
-    private void assertErrorResponse(ResponseError responseError, graphql.ErrorType errorType, String message) {
-        assertThat(responseError.getErrorType()).isEqualTo(errorType);
+    private void assertValidationErrorResponse(ResponseError responseError, String message) {
+        assertThat(responseError.getErrorType()).isEqualTo(ErrorType.ValidationError);
         assertThat(responseError.getMessage()).isEqualTo(message);
         assertThat(responseError.getPath()).isEqualTo("");
         assertThat(responseError.getLocations()).isEqualTo(List.of(new SourceLocation(1, 24)));

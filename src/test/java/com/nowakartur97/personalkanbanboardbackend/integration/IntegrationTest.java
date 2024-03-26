@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.graphql.ResponseError;
+import org.springframework.graphql.execution.ErrorType;
 import org.springframework.graphql.test.tester.HttpGraphQlTester;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -77,5 +78,10 @@ public class IntegrationTest implements PostgresStarter {
         assertThat(responseError.getMessage()).contains(message);
         assertThat(responseError.getPath()).isEqualTo(path);
         assertThat(responseError.getLocations()).isEqualTo(List.of(sourceLocation));
+    }
+
+    protected void assertErrorResponse(ResponseError responseError, String path, ErrorType errorType, String message) {
+        assertThat(responseError.getErrorType()).isEqualTo(errorType);
+        assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
     }
 }
