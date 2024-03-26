@@ -1,6 +1,6 @@
 scalar Date
 
 type Query {
-    tasks(username: String): [TaskResponse]
+    tasks: [TaskResponse]
     loginUser(authenticationRequest: AuthenticationRequest): AuthenticationResponse
 }

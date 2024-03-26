@@ -3,8 +3,8 @@ package com.nowakartur97.personalkanbanboardbackend.integration;
 public class GraphQLQueries {
 
     public static final String GET_TASKS = """
-            query TASKS_BY_USERNAME($username: String!) {
-              tasks(username: $username) {
+            query TASKS_BY_USERNAME {
+              tasks {
                 taskId
                 title
                 description
