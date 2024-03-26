@@ -1,5 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.auth;
 
+import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.server.WebGraphQlInterceptor;
 import org.springframework.graphql.server.WebGraphQlRequest;
@@ -20,10 +21,12 @@ public class AuthorizationHeaderInterceptor implements WebGraphQlInterceptor {
 
     @Override
     public Mono<WebGraphQlResponse> intercept(WebGraphQlRequest request, Chain chain) {
-        String header = request.getHeaders().getFirst(jwtConfigurationProperties.getAuthorizationHeader());
-        String token = jwtUtil.getJWTFromHeader(header);
-        request.configureExecutionInput((executionInput, builder) ->
-                builder.graphQLContext(Collections.singletonMap(TOKEN_IN_CONTEXT, token)).build());
+        String authHeader = request.getHeaders().getFirst(jwtConfigurationProperties.getAuthorizationHeader());
+        if (StringUtils.isNotBlank(authHeader) && jwtUtil.isBearerTypeAuthorization(authHeader)) {
+            String token = jwtUtil.getJWTFromHeader(authHeader);
+            request.configureExecutionInput((executionInput, builder) ->
+                    builder.graphQLContext(Collections.singletonMap(TOKEN_IN_CONTEXT, token)).build());
+        }
         return chain.next(request);
     }
 }
