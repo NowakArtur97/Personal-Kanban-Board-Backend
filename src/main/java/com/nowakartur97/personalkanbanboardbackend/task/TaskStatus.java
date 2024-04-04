@@ -1,4 +1,4 @@
-package com.nowarkartur97.personalkanbanboardbackend.task;
+package com.nowakartur97.personalkanbanboardbackend.task;
 
 
 public enum TaskStatus {

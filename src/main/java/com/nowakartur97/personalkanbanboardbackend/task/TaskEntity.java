@@ -1,4 +1,4 @@
-package com.nowarkartur97.personalkanbanboardbackend.task;
+package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.common.Auditable;
 import jakarta.persistence.*;

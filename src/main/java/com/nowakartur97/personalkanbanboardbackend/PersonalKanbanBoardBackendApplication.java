@@ -1,11 +1,11 @@
-package com.nowarkartur97.personalkanbanboardbackend;
+package com.nowakartur97.personalkanbanboardbackend;
 
-import com.nowarkartur97.personalkanbanboardbackend.task.TaskEntity;
-import com.nowarkartur97.personalkanbanboardbackend.task.TaskPriority;
-import com.nowarkartur97.personalkanbanboardbackend.task.TaskService;
-import com.nowarkartur97.personalkanbanboardbackend.task.TaskStatus;
-import com.nowarkartur97.personalkanbanboardbackend.user.UserEntity;
-import com.nowarkartur97.personalkanbanboardbackend.user.UserService;
+import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
+import com.nowakartur97.personalkanbanboardbackend.task.TaskService;
+import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
+import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
+import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

@@ -1,4 +1,4 @@
-package com.nowarkartur97.personalkanbanboardbackend;
+package com.nowakartur97.personalkanbanboardbackend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

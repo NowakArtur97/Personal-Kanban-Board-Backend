@@ -1,4 +1,4 @@
-package com.nowarkartur97.personalkanbanboardbackend.user;
+package com.nowakartur97.personalkanbanboardbackend.user;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
