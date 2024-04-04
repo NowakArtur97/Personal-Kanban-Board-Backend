@@ -1,0 +1,26 @@
+type TaskResponse {
+    id: ID!
+    title: String!,
+    description: String,
+    status: TaskStatus!,
+    priority: TaskPriority!,
+    targetEndDate: Date!,
+
+    createdBy: String!,
+    createdOn: Date!,
+    updatedBy: String,
+    updatedOn: Date,
+    assignedTo: String!,
+}
+
+enum TaskStatus {
+    READY_TO_START
+    IN_PROGRESS
+    COMPLETED
+}
+
+enum TaskPriority {
+    LOW
+    MEDIUM
+    HIGH
+}
