@@ -11,7 +11,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @SpringBootApplication
@@ -40,9 +40,9 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
 		task.setDescription("desc1");
 		task.setStatus(TaskStatus.IN_PROGRESS);
 		task.setPriority(TaskPriority.MEDIUM);
-		task.setTargetEndDate(new Date());
+		task.setTargetEndDate(LocalDate.now());
 		task.setAssignedTo(user.getUserId());
-		task.setCreatedOn(new Date());
+		task.setCreatedOn(LocalDate.now());
 		task.setCreatedBy(user.getUserId());
 
 		taskService.saveTask(task).block();

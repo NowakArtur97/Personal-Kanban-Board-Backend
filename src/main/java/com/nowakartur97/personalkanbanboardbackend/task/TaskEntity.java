@@ -7,7 +7,7 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -32,7 +32,7 @@ public class TaskEntity extends Auditable<UUID> {
     private TaskPriority priority;
     @Column(name = "target_end_date", nullable = false)
     @Temporal(TemporalType.DATE)
-    private Date targetEndDate;
+    private LocalDate targetEndDate;
     @Column(name = "assigned_to", nullable = false)
     private UUID assignedTo;
 }
