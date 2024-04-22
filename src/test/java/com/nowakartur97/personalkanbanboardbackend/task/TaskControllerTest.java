@@ -35,7 +35,7 @@ public class TaskControllerTest extends SST {
 
         assertThat(taskResponses.size()).isOne();
         TaskResponse taskResponse = taskResponses.getFirst();
-        assertTask(taskResponse, taskEntity);
+        assertTask(taskResponse, taskEntity, userEntity.getUsername());
     }
 
     @Test
@@ -57,15 +57,17 @@ public class TaskControllerTest extends SST {
                         });
     }
 
-    private void assertTask(TaskResponse taskResponse, TaskEntity taskEntity) {
+    private void assertTask(TaskResponse taskResponse, TaskEntity taskEntity, String username) {
         assertThat(taskResponse.taskId()).isEqualTo(taskEntity.getTaskId());
         assertThat(taskResponse.title()).isEqualTo(taskEntity.getTitle());
         assertThat(taskResponse.status()).isEqualTo(taskEntity.getStatus());
         assertThat(taskResponse.priority()).isEqualTo(taskEntity.getPriority());
         assertThat(taskResponse.targetEndDate()).isEqualTo(taskEntity.getTargetEndDate());
-        assertThat(taskResponse.assignedTo()).isEqualTo(taskEntity.getAssignedTo());
+        assertThat(taskResponse.assignedTo()).isEqualTo(username);
         assertThat(taskResponse.createdOn()).isEqualTo(taskEntity.getCreatedOn());
-        assertThat(taskResponse.createdBy()).isEqualTo(taskEntity.getCreatedBy());
+        assertThat(taskResponse.createdBy()).isEqualTo(username);
+        assertThat(taskResponse.updatedOn()).isEqualTo(taskEntity.getUpdatedOn());
+        assertThat(taskResponse.updatedBy()).isEqualTo(username);
     }
 
     private UserEntity createUser() {
@@ -87,6 +89,8 @@ public class TaskControllerTest extends SST {
         task.setAssignedTo(user.getUserId());
         task.setCreatedOn(LocalDate.now());
         task.setCreatedBy(user.getUserId());
+        task.setUpdatedOn(LocalDate.now());
+        task.setUpdatedBy(user.getUserId());
 
         return taskRepository.save(task).block();
     }
