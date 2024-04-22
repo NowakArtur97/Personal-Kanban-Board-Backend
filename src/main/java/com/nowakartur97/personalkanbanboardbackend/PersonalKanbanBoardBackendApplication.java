@@ -12,6 +12,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.time.LocalDate;
+import java.util.Random;
 import java.util.UUID;
 
 @SpringBootApplication
@@ -38,8 +39,8 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
 		TaskEntity task = new TaskEntity();
 		task.setTitle("task1");
 		task.setDescription("desc1");
-		task.setStatus(TaskStatus.IN_PROGRESS);
-		task.setPriority(TaskPriority.MEDIUM);
+		task.setStatus(TaskStatus.values()[new Random().nextInt(TaskStatus.values().length)]);
+		task.setPriority(TaskPriority.values()[new Random().nextInt(TaskPriority.values().length)]);
 		task.setTargetEndDate(LocalDate.now());
 		task.setAssignedTo(user.getUserId());
 		task.setCreatedOn(LocalDate.now());
