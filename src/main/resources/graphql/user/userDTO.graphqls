@@ -1,5 +1,7 @@
+directive @NotBlank(message : String!) on INPUT_FIELD_DEFINITION
+
 input UserDTO {
-    username: String!
-    password: String!
-    email: String!
+    username: String! @NotBlank(message: "graphql.registerUser.userDTO.username.notBlank")
+    password: String! @NotBlank(message: "graphql.registerUser.userDTO.password.notBlank")
+    email: String! @NotBlank(message: "graphql.registerUser.userDTO.email.notBlank")
 }
