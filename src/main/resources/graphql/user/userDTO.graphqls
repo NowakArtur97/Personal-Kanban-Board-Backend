@@ -1,0 +1,5 @@
+input UserDTO {
+    username: String!
+    password: String!
+    email: String!
+}

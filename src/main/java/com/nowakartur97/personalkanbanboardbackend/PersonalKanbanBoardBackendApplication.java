@@ -12,8 +12,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Random;
-import java.util.UUID;
 
 @SpringBootApplication
 @RequiredArgsConstructor
@@ -30,18 +30,19 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
 	public void run(String... args) {
 
 		UserEntity user = new UserEntity();
-		user.setUsername("user-" + UUID.randomUUID());
+		user.setUsername("user");
 		user.setPassword("pass1");
-		user.setEmail("user" + UUID.randomUUID() + "@domain.com");
+		user.setEmail("user@domain.com");
 
 		userService.saveUser(user).block();
+//        UserEntity user = userService.findByUsername("user").block();
 
 		TaskEntity task = new TaskEntity();
 		task.setTitle("task1");
 		task.setDescription("desc1");
 		task.setStatus(TaskStatus.values()[new Random().nextInt(TaskStatus.values().length)]);
 		task.setPriority(TaskPriority.values()[new Random().nextInt(TaskPriority.values().length)]);
-		task.setTargetEndDate(LocalDate.now());
+		task.setTargetEndDate(LocalDate.now().plus(new Random().nextInt(3), ChronoUnit.DAYS));
 		task.setAssignedTo(user.getUserId());
 		task.setCreatedOn(LocalDate.now());
 		task.setCreatedBy(user.getUserId());
