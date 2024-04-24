@@ -20,29 +20,12 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public Flux<TaskResponse> getAllTasksForUser(String username) {
+    public Flux<TaskEntity> getAllTasksForUser(String username) {
 
-        log.info("Looking up Tasks for User with username: " + username);
+        log.info("Looking up Tasks for User with username: ${}", username);
 
         return userService.findByUsername(username)
                 .map(UserEntity::getUserId)
-                .flatMapMany(taskRepository::findAllByAssignedTo)
-                .map(task -> this.mapToResponse(task, username));
-    }
-
-    private TaskResponse mapToResponse(TaskEntity taskEntity, String username) {
-        return new TaskResponse(
-                taskEntity.getTaskId(),
-                taskEntity.getTitle(),
-                taskEntity.getDescription(),
-                taskEntity.getStatus(),
-                taskEntity.getPriority(),
-                taskEntity.getTargetEndDate(),
-                username,
-                taskEntity.getCreatedOn(),
-                username,
-                taskEntity.getUpdatedOn(),
-                username
-        );
+                .flatMapMany(taskRepository::findAllByAssignedTo);
     }
 }

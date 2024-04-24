@@ -19,34 +19,43 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class PersonalKanbanBoardBackendApplication implements CommandLineRunner {
 
-	public static void main(String[] args) {
-		SpringApplication.run(PersonalKanbanBoardBackendApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(PersonalKanbanBoardBackendApplication.class, args);
+    }
 
-	private final UserService userService;
-	private final TaskService taskService;
+    private final UserService userService;
+    private final TaskService taskService;
 
-	@Override
-	public void run(String... args) {
+    @Override
+    public void run(String... args) {
 
-		UserEntity user = new UserEntity();
-		user.setUsername("user");
-		user.setPassword("pass1");
-		user.setEmail("user@domain.com");
+//        UserEntity user = createUser();
+//
+//        createTask(user);
+    }
 
-		userService.saveUser(user).block();
+    private UserEntity createUser() {
+        UserEntity user = new UserEntity();
+        user.setUsername("user");
+        user.setPassword("pass1");
+        user.setEmail("user@domain.com");
+
+        userService.saveUser(user).block();
 //        UserEntity user = userService.findByUsername("user").block();
+        return user;
+    }
 
-		TaskEntity task = new TaskEntity();
-		task.setTitle("task1");
-		task.setDescription("desc1");
-		task.setStatus(TaskStatus.values()[new Random().nextInt(TaskStatus.values().length)]);
-		task.setPriority(TaskPriority.values()[new Random().nextInt(TaskPriority.values().length)]);
-		task.setTargetEndDate(LocalDate.now().plus(new Random().nextInt(3), ChronoUnit.DAYS));
-		task.setAssignedTo(user.getUserId());
-		task.setCreatedOn(LocalDate.now());
-		task.setCreatedBy(user.getUserId());
+    private void createTask(UserEntity user) {
+        TaskEntity task = new TaskEntity();
+        task.setTitle("task1");
+        task.setDescription("desc1");
+        task.setStatus(TaskStatus.values()[new Random().nextInt(TaskStatus.values().length)]);
+        task.setPriority(TaskPriority.values()[new Random().nextInt(TaskPriority.values().length)]);
+        task.setTargetEndDate(LocalDate.now().plus(new Random().nextInt(3), ChronoUnit.DAYS));
+        task.setAssignedTo(user.getUserId());
+        task.setCreatedOn(LocalDate.now());
+        task.setCreatedBy(user.getUserId());
 
-		taskService.saveTask(task).block();
-	}
+        taskService.saveTask(task).block();
+    }
 }

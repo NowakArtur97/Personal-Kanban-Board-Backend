@@ -1,0 +1,25 @@
+query TASKS_BY_USERNAME {
+  tasks(username: "user-ea4f5e45-ad1e-4e0f-8c0a-f854a8e5a229") {
+    taskId
+    title
+    description
+    status
+    priority
+    targetEndDate
+    assignedTo
+    createdBy
+    createdOn
+    updatedBy
+    updatedOn
+  }
+}
+
+mutation REGISTER_USER {
+  registerUser(userDTO: {username: "user", password: "user123", email: "uesr@domain.com"}) {
+    username
+    email
+    password
+    token
+    expirationTimeInMilliseconds
+  }
+}
