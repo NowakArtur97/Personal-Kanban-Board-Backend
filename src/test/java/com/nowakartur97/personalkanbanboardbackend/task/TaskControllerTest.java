@@ -10,7 +10,7 @@ import org.springframework.graphql.execution.ErrorType;
 import java.time.LocalDate;
 import java.util.List;
 
-import static com.nowakartur97.personalkanbanboardbackend.sst.GraphQLQueries.GET_TASKS_QUERY;
+import static com.nowakartur97.personalkanbanboardbackend.sst.GraphQLQueries.GET_TASKS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class TaskControllerTest extends SST {
@@ -23,9 +23,9 @@ public class TaskControllerTest extends SST {
         UserEntity userEntity = createUser();
         TaskEntity taskEntity = createTask(userEntity);
 
-        String query = GET_TASKS_QUERY.replace("$username", userEntity.getUsername());
         List<TaskResponse> taskResponses = httpGraphQlTester
-                .document(query)
+                .document(GET_TASKS)
+                .variable("username", userEntity.getUsername())
                 .execute()
                 .errors()
                 .verify()
@@ -41,9 +41,9 @@ public class TaskControllerTest extends SST {
     @Test
     public void whenGetTasksByNotExistingUsername_shouldReturnGraphQLErrorResponse() {
 
-        String query = GET_TASKS_QUERY.replace("$username", "notExistingUser");
         httpGraphQlTester
-                .document(query)
+                .document(GET_TASKS)
+                .variable("username", "notExistingUser")
                 .execute()
                 .errors()
                 .satisfy(
