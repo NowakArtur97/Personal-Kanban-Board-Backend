@@ -1,4 +1,4 @@
-package com.nowakartur97.personalkanbanboardbackend.sst;
+package com.nowakartur97.personalkanbanboardbackend.integration;
 
 import com.nowakartur97.personalkanbanboardbackend.task.TaskRepository;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRepository;
@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.graphql.test.tester.HttpGraphQlTester;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class SST implements PostgresStarter {
+public class IntragrationTest implements PostgresStarter {
 
     @Autowired
     protected TaskRepository taskRepository;

@@ -1,4 +1,4 @@
-package com.nowakartur97.personalkanbanboardbackend.sst;
+package com.nowakartur97.personalkanbanboardbackend.integration;
 
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
