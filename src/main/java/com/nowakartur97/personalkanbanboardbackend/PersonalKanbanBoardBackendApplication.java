@@ -1,23 +1,28 @@
 package com.nowakartur97.personalkanbanboardbackend;
 
+import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskService;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
-import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Random;
 
 @SpringBootApplication
+@ConfigurationPropertiesScan
 @RequiredArgsConstructor
+@Slf4j
 public class PersonalKanbanBoardBackendApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
@@ -26,24 +31,25 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
 
     private final UserService userService;
     private final TaskService taskService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final JWTUtil jwtUtil;
 
     @Override
     public void run(String... args) {
 
-//        UserEntity user = createUser();
-//
-//        createTask(user);
+        UserEntity user = createUser();
+
+        createTask(user);
     }
 
     private UserEntity createUser() {
-        UserEntity user = new UserEntity();
-        user.setUsername("user");
-        user.setPassword("pass1");
-        user.setEmail("user@domain.com");
-        user.setRole(UserRole.USER);
+//        UserEntity user = new UserEntity("user", bCryptPasswordEncoder.encode("pass1"),
+//                "user@domain.com", UserRole.USER);
 
-        userService.saveUser(user).block();
-//        UserEntity user = userService.findByUsername("user").block();
+//        userService.saveUser(user).block();
+
+        UserEntity user = userService.findByUsername("user").block();
+        log.info("Token: {}", jwtUtil.generateToken(user.getUsername(), user.getRole().name()));
         return user;
     }
 
