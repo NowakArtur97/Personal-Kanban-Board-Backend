@@ -27,7 +27,9 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
 
     @Override
     protected List<GraphQLError> resolveToMultipleErrors(Throwable ex, DataFetchingEnvironment env) {
-        if (ex instanceof ConstraintViolationException) {
+        if (ex instanceof ResourceNotFoundException) {
+            return List.of(createGraphQLError(ErrorType.NOT_FOUND, ex.getMessage(), env));
+        } else if (ex instanceof ConstraintViolationException) {
             return mapToGraphQLErrors(ErrorType.BAD_REQUEST, ex, env);
         }
         return null;
