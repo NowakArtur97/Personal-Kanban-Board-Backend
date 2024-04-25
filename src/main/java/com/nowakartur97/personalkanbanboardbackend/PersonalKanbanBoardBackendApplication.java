@@ -5,6 +5,7 @@ import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskService;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
+import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -39,6 +40,7 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
         user.setUsername("user");
         user.setPassword("pass1");
         user.setEmail("user@domain.com");
+        user.setRole(UserRole.USER);
 
         userService.saveUser(user).block();
 //        UserEntity user = userService.findByUsername("user").block();
