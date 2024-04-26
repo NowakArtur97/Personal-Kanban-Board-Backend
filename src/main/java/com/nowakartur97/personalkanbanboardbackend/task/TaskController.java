@@ -3,6 +3,7 @@ package com.nowakartur97.personalkanbanboardbackend.task;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Flux;
 
@@ -13,6 +14,7 @@ public class TaskController {
     private final TaskService taskService;
 
     @QueryMapping
+    @PreAuthorize("hasAuthority('USER')")
     public Flux<TaskResponse> tasks(@Argument String username) {
         return taskService.getAllTasksForUser(username)
                 .map(task -> this.mapToResponse(task, username));
