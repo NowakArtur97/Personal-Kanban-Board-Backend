@@ -1,6 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.integration.IntragrationTest;
+import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
@@ -13,7 +13,7 @@ import java.util.List;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.GET_TASKS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class TaskControllerTest extends IntragrationTest {
+public class TaskControllerTest extends IntegrationTest {
 
     private final static String TASKS_PATH = "tasks";
 
@@ -24,6 +24,12 @@ public class TaskControllerTest extends IntragrationTest {
         TaskEntity taskEntity = createTask(userEntity);
 
         List<TaskResponse> taskResponses = httpGraphQlTester
+                .mutate()
+                .headers(headers -> headers.add(jwtConfigurationProperties.getAuthorizationHeader(),
+                        jwtConfigurationProperties.getAuthorizationType()
+                                + " "
+                                + jwtUtil.generateToken(userEntity.getUsername(), userEntity.getRole().name())))
+                .build()
                 .document(GET_TASKS)
                 .variable("username", userEntity.getUsername())
                 .execute()

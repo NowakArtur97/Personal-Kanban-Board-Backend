@@ -1,6 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.user;
 
-import com.nowakartur97.personalkanbanboardbackend.integration.IntragrationTest;
+import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.springframework.graphql.ResponseError;
@@ -10,7 +10,7 @@ import java.util.List;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.REGISTER_USER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class UserRegistrationControllerTest extends IntragrationTest {
+public class UserRegistrationControllerTest extends IntegrationTest {
 
     @Test
     public void whenRegisterUserWithBlankUsername_shouldReturnGraphQLErrorResponse() {

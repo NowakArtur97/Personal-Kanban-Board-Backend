@@ -1,5 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.integration;
 
+import com.nowakartur97.personalkanbanboardbackend.auth.JWTConfigurationProperties;
+import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskRepository;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRepository;
 import org.junit.jupiter.api.AfterAll;
@@ -10,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.graphql.test.tester.HttpGraphQlTester;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class IntragrationTest implements PostgresStarter {
+public class IntegrationTest implements PostgresStarter {
 
     @Autowired
     protected TaskRepository taskRepository;
@@ -18,6 +20,10 @@ public class IntragrationTest implements PostgresStarter {
     protected UserRepository userRepository;
     @Autowired
     protected HttpGraphQlTester httpGraphQlTester;
+    @Autowired
+    protected JWTUtil jwtUtil;
+    @Autowired
+    protected JWTConfigurationProperties jwtConfigurationProperties;
 
     @BeforeAll
     public static void startContainer() {

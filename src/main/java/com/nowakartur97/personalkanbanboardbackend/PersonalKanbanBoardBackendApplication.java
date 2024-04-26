@@ -6,6 +6,7 @@ import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskService;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
+import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,12 +44,12 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
     }
 
     private UserEntity createUser() {
-//        UserEntity user = new UserEntity("user", bCryptPasswordEncoder.encode("pass1"),
-//                "user@domain.com", UserRole.USER);
+        UserEntity user = new UserEntity("user", bCryptPasswordEncoder.encode("pass1"),
+                "user@domain.com", UserRole.USER);
 
-//        userService.saveUser(user).block();
+        userService.saveUser(user).block();
 
-        UserEntity user = userService.findByUsername("user").block();
+//        UserEntity user = userService.findByUsername("user").block();
         log.info("Token: {}", jwtUtil.generateToken(user.getUsername(), user.getRole().name()));
         return user;
     }
