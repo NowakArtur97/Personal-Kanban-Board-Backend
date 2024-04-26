@@ -3,11 +3,14 @@ package com.nowakartur97.personalkanbanboardbackend.exception;
 import graphql.GraphQLError;
 import graphql.GraphqlErrorBuilder;
 import graphql.schema.DataFetchingEnvironment;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter;
 import org.springframework.graphql.execution.ErrorType;
 import org.springframework.stereotype.Component;
 
+import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,10 +30,14 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
 
     @Override
     protected List<GraphQLError> resolveToMultipleErrors(Throwable ex, DataFetchingEnvironment env) {
-        if (ex instanceof ResourceNotFoundException) {
-            return List.of(createGraphQLError(ErrorType.NOT_FOUND, ex.getMessage(), env));
-        } else if (ex instanceof ConstraintViolationException) {
+        if (ex instanceof ConstraintViolationException) {
             return mapToGraphQLErrors(ErrorType.BAD_REQUEST, ex, env);
+        } else if (ex instanceof MalformedJwtException
+                || ex instanceof SignatureException
+                || ex instanceof ExpiredJwtException) {
+            return List.of(createGraphQLError(ErrorType.UNAUTHORIZED, ex.getMessage(), env));
+        } else if (ex instanceof ResourceNotFoundException) {
+            return List.of(createGraphQLError(ErrorType.NOT_FOUND, ex.getMessage(), env));
         }
         return null;
     }
