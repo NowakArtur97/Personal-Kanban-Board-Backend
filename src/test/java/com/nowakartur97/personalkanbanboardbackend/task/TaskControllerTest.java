@@ -2,6 +2,7 @@ package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
+import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.springframework.graphql.ResponseError;
@@ -77,10 +78,7 @@ public class TaskControllerTest extends IntegrationTest {
     }
 
     private UserEntity createUser() {
-        UserEntity user = new UserEntity();
-        user.setUsername("testUser");
-        user.setPassword("pass1");
-        user.setEmail("testUser@domain.com");
+        UserEntity user = new UserEntity("testUser", "pass1", "testUser@domain.com", UserRole.USER);
 
         return userRepository.save(user).block();
     }
