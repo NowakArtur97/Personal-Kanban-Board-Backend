@@ -32,6 +32,8 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
     protected List<GraphQLError> resolveToMultipleErrors(Throwable ex, DataFetchingEnvironment env) {
         if (ex instanceof ConstraintViolationException) {
             return mapToGraphQLErrors(ErrorType.BAD_REQUEST, ex, env);
+        } else if (ex instanceof UserAlreadyExistsException) {
+            return List.of(createGraphQLError(ErrorType.BAD_REQUEST, ex.getMessage(), env));
         } else if (ex instanceof MalformedJwtException
                 || ex instanceof SignatureException
                 || ex instanceof ExpiredJwtException) {

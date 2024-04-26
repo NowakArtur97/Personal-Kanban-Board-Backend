@@ -22,13 +22,12 @@ public class UserRegistrationController {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JWTUtil jwtUtil;
     private final JWTConfigurationProperties jwtConfigurationProperties;
+    private final UserValidator userValidator;
 
     @MutationMapping
     public Mono<UserResponse> registerUser(@Argument @Valid UserDTO userDTO) {
-
-        log.info("Registration of new user: ${}", userDTO);
-
-        return Mono.just(mapToEntity(userDTO))
+        return userValidator.validate(userDTO)
+                .map(__ -> mapToEntity(userDTO))
                 .flatMap(userService::saveUser)
                 .map(this::mapToUserResponse);
     }

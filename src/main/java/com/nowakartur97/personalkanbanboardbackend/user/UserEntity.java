@@ -35,4 +35,13 @@ public class UserEntity {
         this.email = email;
         this.role = role;
     }
+
+    @Override
+    public String toString() {
+        return "UserEntity{" +
+                "username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", role=" + role +
+                '}';
+    }
 }
