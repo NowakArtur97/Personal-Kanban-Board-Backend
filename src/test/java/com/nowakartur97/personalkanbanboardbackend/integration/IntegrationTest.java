@@ -6,13 +6,20 @@ import com.nowakartur97.personalkanbanboardbackend.task.TaskRepository;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRepository;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
+import graphql.language.SourceLocation;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.test.tester.HttpGraphQlTester;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
+
+import java.util.List;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -28,6 +35,8 @@ public class IntegrationTest implements PostgresStarter {
     protected JWTUtil jwtUtil;
     @Autowired
     protected JWTConfigurationProperties jwtConfigurationProperties;
+    @Autowired
+    protected BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @BeforeAll
     public static void startContainer() {
@@ -46,7 +55,13 @@ public class IntegrationTest implements PostgresStarter {
     }
 
     protected UserEntity createUser() {
-        UserEntity user = new UserEntity("testUser", "pass1", "testUser@domain.com", UserRole.USER);
+        UserEntity user = new UserEntity("testUser", bCryptPasswordEncoder.encode("pass1"), "testUser@domain.com", UserRole.USER);
         return userRepository.save(user).block();
+    }
+
+    protected void assertErrorResponse(ResponseError responseError, String message, String path, SourceLocation sourceLocation) {
+        assertThat(responseError.getMessage()).contains(message);
+        assertThat(responseError.getPath()).isEqualTo(path);
+        assertThat(responseError.getLocations()).isEqualTo(List.of(sourceLocation));
     }
 }

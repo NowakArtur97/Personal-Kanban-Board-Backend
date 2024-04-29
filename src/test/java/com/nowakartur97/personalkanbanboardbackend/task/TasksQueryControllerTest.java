@@ -65,7 +65,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
                     assertErrorResponse(responseError, ErrorType.NOT_FOUND,
-                            "User with username: notExistingUser not found.");
+                            "User with username: 'notExistingUser' not found.");
                 });
     }
 
@@ -88,8 +88,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
                     assertErrorResponse(responseError, ValidationError,
-                            "Variable 'username' has an invalid value: Variable 'username' has coerced Null value for NonNull type 'String!'",
-                            "", new SourceLocation(1, 25));
+                            "Variable 'username' has an invalid value: Variable 'username' has coerced Null value for NonNull type 'String!'");
                 });
     }
 
@@ -207,16 +206,9 @@ public class TasksQueryControllerTest extends IntegrationTest {
         assertErrorResponse(responseError, message, "tasks", new SourceLocation(2, 3));
     }
 
-    private void assertErrorResponse(ResponseError responseError, graphql.ErrorType errorType, String message,
-                                     String path, SourceLocation sourceLocation) {
+    private void assertErrorResponse(ResponseError responseError, graphql.ErrorType errorType, String message) {
         assertThat(responseError.getErrorType()).isEqualTo(errorType);
-        assertErrorResponse(responseError, message, path, sourceLocation);
-    }
-
-    private static void assertErrorResponse(ResponseError responseError, String message, String path, SourceLocation sourceLocation) {
-        assertThat(responseError.getMessage()).contains(message);
-        assertThat(responseError.getPath()).isEqualTo(path);
-        assertThat(responseError.getLocations()).isEqualTo(List.of(sourceLocation));
+        assertErrorResponse(responseError, message, "", new SourceLocation(1, 25));
     }
 
     private TaskEntity createTask(UserEntity user) {
