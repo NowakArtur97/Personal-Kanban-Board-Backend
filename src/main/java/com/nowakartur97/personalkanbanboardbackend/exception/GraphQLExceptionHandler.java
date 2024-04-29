@@ -9,6 +9,7 @@ import io.jsonwebtoken.security.SignatureException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter;
 import org.springframework.graphql.execution.ErrorType;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -36,7 +37,8 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
             return List.of(createGraphQLError(ErrorType.BAD_REQUEST, ex.getMessage(), env));
         } else if (ex instanceof MalformedJwtException
                 || ex instanceof SignatureException
-                || ex instanceof ExpiredJwtException) {
+                || ex instanceof ExpiredJwtException
+                || ex instanceof BadCredentialsException) {
             return List.of(createGraphQLError(ErrorType.UNAUTHORIZED, ex.getMessage(), env));
         } else if (ex instanceof ResourceNotFoundException) {
             return List.of(createGraphQLError(ErrorType.NOT_FOUND, ex.getMessage(), env));
