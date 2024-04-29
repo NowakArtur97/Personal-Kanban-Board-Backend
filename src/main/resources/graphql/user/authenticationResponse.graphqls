@@ -1,0 +1,4 @@
+type AuthenticationResponse {
+    token: String!
+    expirationTimeInMilliseconds: Int!
+}
