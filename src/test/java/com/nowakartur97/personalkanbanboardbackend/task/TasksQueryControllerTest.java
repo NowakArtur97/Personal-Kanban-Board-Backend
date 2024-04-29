@@ -2,7 +2,6 @@ package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
-import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.springframework.graphql.ResponseError;
@@ -65,7 +64,8 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, ErrorType.NOT_FOUND, "User with username: notExistingUser not found.");
+                    assertErrorResponse(responseError, ErrorType.NOT_FOUND,
+                            "User with username: notExistingUser not found.");
                 });
     }
 
@@ -87,7 +87,8 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, ValidationError, "Variable 'username' has an invalid value: Variable 'username' has coerced Null value for NonNull type 'String!'",
+                    assertErrorResponse(responseError, ValidationError,
+                            "Variable 'username' has an invalid value: Variable 'username' has coerced Null value for NonNull type 'String!'",
                             "", new SourceLocation(1, 25));
                 });
     }
@@ -216,11 +217,6 @@ public class TasksQueryControllerTest extends IntegrationTest {
         assertThat(responseError.getMessage()).contains(message);
         assertThat(responseError.getPath()).isEqualTo(path);
         assertThat(responseError.getLocations()).isEqualTo(List.of(sourceLocation));
-    }
-
-    private UserEntity createUser() {
-        UserEntity user = new UserEntity("testUser", "pass1", "testUser@domain.com", UserRole.USER);
-        return userRepository.save(user).block();
     }
 
     private TaskEntity createTask(UserEntity user) {
