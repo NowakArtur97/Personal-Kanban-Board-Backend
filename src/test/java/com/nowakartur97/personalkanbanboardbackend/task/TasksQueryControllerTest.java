@@ -116,7 +116,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
 
         UserEntity userEntity = createUser();
 
-        String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidXNlciIsImlhdCI6MTcxMTAzNzU5NiwiZXhwIjoxNzExMDQ4Mzk2fQ.QjDhTiTlnUMPh4repdQuA7wfjKE1MGPVH7ThMIz_Xc4";
+        String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidGVzdFVzZXIiLCJpYXQiOjE3MTEyNzg1ODAsImV4cCI6MTcxMTI3ODU4MH0.nouAgIkDaanTk0LX37HSRjM4SDZxqBqz1gDufnU2fzQ";
 
         httpGraphQlTester
                 .mutate()

@@ -10,6 +10,7 @@ import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -30,6 +31,9 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
         SpringApplication.run(PersonalKanbanBoardBackendApplication.class, args);
     }
 
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
+
     private final UserService userService;
     private final TaskService taskService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -37,18 +41,25 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
 
     @Override
     public void run(String... args) {
-
-//        UserEntity user = createUser();
-//        createTask(user);
+        if (activeProfile.equals("local")) {
+            UserEntity user = createUser();
+            createTask(user);
+        }
     }
 
     private UserEntity createUser() {
-        UserEntity user = new UserEntity("user", bCryptPasswordEncoder.encode("pass1"),
-                "user@domain.com", UserRole.USER);
 
-        userService.saveUser(user).block();
+        UserEntity user;
 
-//        UserEntity user = userService.findByUsername("user").block();
+        if (userService.existsByUsernameOrEmail("user", "user@domain.com").block()) {
+            user = userService.findByUsername("user").block();
+        } else {
+            user = new UserEntity("user", bCryptPasswordEncoder.encode("pass1"),
+                    "user@domain.com", UserRole.USER);
+
+            userService.saveUser(user).block();
+        }
+
         log.info("Token: {}", jwtUtil.generateToken(user.getUsername(), user.getRole().name()));
         return user;
     }
