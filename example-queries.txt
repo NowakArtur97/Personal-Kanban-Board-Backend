@@ -1,5 +1,5 @@
 query TASKS_BY_USERNAME {
-  tasks(username: "user-ea4f5e45-ad1e-4e0f-8c0a-f854a8e5a229") {
+  tasks(username: "user") {
     taskId
     title
     description
@@ -19,6 +19,13 @@ mutation REGISTER_USER {
     username
     email
     password
+    token
+    expirationTimeInMilliseconds
+  }
+}
+
+query LOGIN_USER {
+  loginUser(authenticationRequest: {usernameOrEmail: "user", password: "pass1"}) {
     token
     expirationTimeInMilliseconds
   }
