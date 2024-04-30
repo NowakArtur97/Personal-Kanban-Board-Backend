@@ -52,7 +52,7 @@ public class JWTUtil {
         return authorizationHeader.substring(jwtConfigurationProperties.getAuthorizationHeaderLength());
     }
 
-    String extractUsername(String token) {
+    public String extractUsername(String token) {
         String subject = extractClaim(token, Claims::getSubject);
         return subject != null ? subject : "";
     }
