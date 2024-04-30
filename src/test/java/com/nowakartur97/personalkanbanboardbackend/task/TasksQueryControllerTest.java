@@ -2,6 +2,7 @@ package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
+import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.springframework.graphql.ResponseError;
@@ -11,7 +12,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.GET_TASKS;
-import static graphql.ErrorType.ValidationError;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class TasksQueryControllerTest extends IntegrationTest {
@@ -26,13 +26,9 @@ public class TasksQueryControllerTest extends IntegrationTest {
 
         List<TaskResponse> taskResponses = httpGraphQlTester
                 .mutate()
-                .headers(headers -> headers.add(jwtConfigurationProperties.getAuthorizationHeader(),
-                        jwtConfigurationProperties.getAuthorizationType()
-                                + " "
-                                + jwtUtil.generateToken(userEntity.getUsername(), userEntity.getRole().name())))
+                .headers(headers -> addAuthorizationHeader(headers, userEntity))
                 .build()
                 .document(GET_TASKS)
-                .variable("username", userEntity.getUsername())
                 .execute()
                 .errors()
                 .verify()
@@ -48,17 +44,11 @@ public class TasksQueryControllerTest extends IntegrationTest {
     @Test
     public void whenGetTasksForNotExistingUser_shouldReturnGraphQLErrorResponse() {
 
-        UserEntity userEntity = createUser();
-
         httpGraphQlTester
                 .mutate()
-                .headers(headers -> headers.add(jwtConfigurationProperties.getAuthorizationHeader(),
-                        jwtConfigurationProperties.getAuthorizationType()
-                                + " "
-                                + jwtUtil.generateToken(userEntity.getUsername(), userEntity.getRole().name())))
+                .headers(headers -> addAuthorizationHeader(headers, jwtUtil.generateToken("notExistingUser", UserRole.USER.name())))
                 .build()
                 .document(GET_TASKS)
-                .variable("username", "notExistingUser")
                 .execute()
                 .errors()
                 .satisfy(responseErrors -> {
@@ -70,38 +60,12 @@ public class TasksQueryControllerTest extends IntegrationTest {
     }
 
     @Test
-    public void whenGetTasksWithoutProvidingUsername_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> headers.add(jwtConfigurationProperties.getAuthorizationHeader(),
-                        jwtConfigurationProperties.getAuthorizationType()
-                                + " "
-                                + jwtUtil.generateToken(userEntity.getUsername(), userEntity.getRole().name())))
-                .build()
-                .document(GET_TASKS)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, ValidationError,
-                            "Variable 'username' has an invalid value: Variable 'username' has coerced Null value for NonNull type 'String!'");
-                });
-    }
-
-    @Test
     public void whenGetTasksWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
 
-        UserEntity userEntity = createUser();
-
         httpGraphQlTester
                 .mutate()
                 .build()
                 .document(GET_TASKS)
-                .variable("username", userEntity.getUsername())
                 .execute()
                 .errors()
                 .satisfy(responseErrors -> {
@@ -114,19 +78,13 @@ public class TasksQueryControllerTest extends IntegrationTest {
     @Test
     public void whenGetTasksWithExpiredToken_shouldReturnGraphQLErrorResponse() {
 
-        UserEntity userEntity = createUser();
-
         String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidGVzdFVzZXIiLCJpYXQiOjE3MTEyNzg1ODAsImV4cCI6MTcxMTI3ODU4MH0.nouAgIkDaanTk0LX37HSRjM4SDZxqBqz1gDufnU2fzQ";
 
         httpGraphQlTester
                 .mutate()
-                .headers(headers -> headers.add(jwtConfigurationProperties.getAuthorizationHeader(),
-                        jwtConfigurationProperties.getAuthorizationType()
-                                + " "
-                                + expiredToken))
+                .headers(headers -> addAuthorizationHeader(headers, expiredToken))
                 .build()
                 .document(GET_TASKS)
-                .variable("username", userEntity.getUsername())
                 .execute()
                 .errors()
                 .satisfy(responseErrors -> {
@@ -139,19 +97,13 @@ public class TasksQueryControllerTest extends IntegrationTest {
     @Test
     public void whenGetTasksWithInvalidToken_shouldReturnGraphQLErrorResponse() {
 
-        UserEntity userEntity = createUser();
-
         String invalidToken = "invalid";
 
         httpGraphQlTester
                 .mutate()
-                .headers(headers -> headers.add(jwtConfigurationProperties.getAuthorizationHeader(),
-                        jwtConfigurationProperties.getAuthorizationType()
-                                + " "
-                                + invalidToken))
+                .headers(headers -> addAuthorizationHeader(headers, invalidToken))
                 .build()
                 .document(GET_TASKS)
-                .variable("username", userEntity.getUsername())
                 .execute()
                 .errors()
                 .satisfy(responseErrors -> {
@@ -165,19 +117,13 @@ public class TasksQueryControllerTest extends IntegrationTest {
     @Test
     public void whenGetTasksWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
 
-        UserEntity userEntity = createUser();
-
         String invalidToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidXNlciIsImlhdCI6MTcxMTIwOTEzMiwiZXhwIjoxNzExMjE5OTMyfQ.n-h8vIdov2voZhwNdqbmgiO44XjeCdAMzf7ddqufoXc";
 
         httpGraphQlTester
                 .mutate()
-                .headers(headers -> headers.add(jwtConfigurationProperties.getAuthorizationHeader(),
-                        jwtConfigurationProperties.getAuthorizationType()
-                                + " "
-                                + invalidToken))
+                .headers(headers -> addAuthorizationHeader(headers, invalidToken))
                 .build()
                 .document(GET_TASKS)
-                .variable("username", userEntity.getUsername())
                 .execute()
                 .errors()
                 .satisfy(responseErrors -> {
@@ -204,11 +150,6 @@ public class TasksQueryControllerTest extends IntegrationTest {
     private void assertErrorResponse(ResponseError responseError, ErrorType errorType, String message) {
         assertThat(responseError.getErrorType()).isEqualTo(errorType);
         assertErrorResponse(responseError, message, "tasks", new SourceLocation(2, 3));
-    }
-
-    private void assertErrorResponse(ResponseError responseError, graphql.ErrorType errorType, String message) {
-        assertThat(responseError.getErrorType()).isEqualTo(errorType);
-        assertErrorResponse(responseError, message, "", new SourceLocation(1, 25));
     }
 
     private TaskEntity createTask(UserEntity user) {

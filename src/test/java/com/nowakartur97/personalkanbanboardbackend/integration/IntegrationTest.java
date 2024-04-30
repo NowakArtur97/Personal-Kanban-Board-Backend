@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.test.tester.HttpGraphQlTester;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -59,6 +60,17 @@ public class IntegrationTest implements PostgresStarter {
     protected UserEntity createUser() {
         UserEntity user = new UserEntity("testUser", bCryptPasswordEncoder.encode("pass1"), "testUser@domain.com", UserRole.USER);
         return userRepository.save(user).block();
+    }
+
+    protected void addAuthorizationHeader(HttpHeaders headers, String token) {
+        String authHeader = jwtConfigurationProperties.getAuthorizationType() + " " + token;
+        headers.add(jwtConfigurationProperties.getAuthorizationHeader(), authHeader);
+    }
+
+    protected void addAuthorizationHeader(HttpHeaders headers, UserEntity userEntity) {
+        String token = jwtUtil.generateToken(userEntity.getUsername(), userEntity.getRole().name());
+        String authHeader = jwtConfigurationProperties.getAuthorizationType() + " " + token;
+        headers.add(jwtConfigurationProperties.getAuthorizationHeader(), authHeader);
     }
 
     protected void assertErrorResponse(ResponseError responseError, String message, String path, SourceLocation sourceLocation) {
