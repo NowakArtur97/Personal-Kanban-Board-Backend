@@ -37,6 +37,7 @@ public class WebSecurityConfiguration {
                                 Mono.fromRunnable(() -> swe.getResponse().setStatusCode(HttpStatus.FORBIDDEN))))
                 .authorizeExchange(authorizeExchangeSpec -> authorizeExchangeSpec
                         .pathMatchers(HttpMethod.OPTIONS).permitAll()
+                        .pathMatchers("/api/v1/user-data-validator").permitAll()
                         .pathMatchers("/graphiql").permitAll()
                         .pathMatchers("/graphql").permitAll() // TODO: Remove
                         .anyExchange().authenticated())
