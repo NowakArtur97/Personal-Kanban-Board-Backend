@@ -35,6 +35,8 @@ public class GraphQLQueries {
     public static final String AUTHENTICATE_USER = """
             query AUTHENTICATE_USER($authenticationRequest: AuthenticationRequest!) {
               loginUser(authenticationRequest: $authenticationRequest) {
+                username
+                email
                 token
                 expirationTimeInMilliseconds
               }

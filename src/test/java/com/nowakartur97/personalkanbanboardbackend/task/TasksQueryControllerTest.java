@@ -3,7 +3,6 @@ package com.nowakartur97.personalkanbanboardbackend.task;
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
-import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.execution.ErrorType;
@@ -54,7 +53,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, ErrorType.NOT_FOUND,
+                    assertErrorResponse(responseError, "tasks", ErrorType.NOT_FOUND,
                             "User with username: 'notExistingUser' not found.");
                 });
     }
@@ -71,7 +70,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, ErrorType.UNAUTHORIZED, "Unauthorized");
+                    assertErrorResponse(responseError, "tasks", ErrorType.UNAUTHORIZED, "Unauthorized");
                 });
     }
 
@@ -90,7 +89,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, ErrorType.UNAUTHORIZED, "JWT expired");
+                    assertErrorResponse(responseError, "tasks", ErrorType.UNAUTHORIZED, "JWT expired");
                 });
     }
 
@@ -109,7 +108,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, ErrorType.UNAUTHORIZED,
+                    assertErrorResponse(responseError, "tasks", ErrorType.UNAUTHORIZED,
                             "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 0");
                 });
     }
@@ -129,7 +128,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, ErrorType.UNAUTHORIZED,
+                    assertErrorResponse(responseError, "tasks", ErrorType.UNAUTHORIZED,
                             "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.");
                 });
     }
@@ -145,11 +144,6 @@ public class TasksQueryControllerTest extends IntegrationTest {
         assertThat(taskResponse.createdBy()).isEqualTo(username);
         assertThat(taskResponse.updatedOn()).isEqualTo(taskEntity.getUpdatedOn());
         assertThat(taskResponse.updatedBy()).isEqualTo(username);
-    }
-
-    private void assertErrorResponse(ResponseError responseError, ErrorType errorType, String message) {
-        assertThat(responseError.getErrorType()).isEqualTo(errorType);
-        assertErrorResponse(responseError, message, "tasks", new SourceLocation(2, 3));
     }
 
     private TaskEntity createTask(UserEntity user) {

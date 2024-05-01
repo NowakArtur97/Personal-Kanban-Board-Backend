@@ -14,23 +14,25 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
     private final static String AUTHENTICATE_USER_PATH = "loginUser";
 
     @Test
-    public void whenLoginUser_shouldReturnAuthenticationResponse() {
+    public void whenLoginUser_shouldReturnUserResponse() {
 
         UserEntity user = createUser();
         AuthenticationRequest authenticationRequest = new AuthenticationRequest(user.getUsername(), "pass1");
 
-        AuthenticationResponse authenticationResponse = httpGraphQlTester
+        UserResponse userResponse = httpGraphQlTester
                 .document(AUTHENTICATE_USER)
                 .variable("authenticationRequest", authenticationRequest)
                 .execute()
                 .errors()
                 .verify()
                 .path(AUTHENTICATE_USER_PATH)
-                .entity(AuthenticationResponse.class)
+                .entity(UserResponse.class)
                 .get();
 
-        assertThat(authenticationResponse.token()).isEqualTo(jwtUtil.generateToken(user.getUsername(), user.getRole().name()));
-        assertThat(authenticationResponse.expirationTimeInMilliseconds()).isEqualTo(jwtConfigurationProperties.getExpirationTimeInMilliseconds());
+        assertThat(userResponse.username()).isEqualTo(user.getUsername());
+        assertThat(userResponse.email()).isEqualTo(user.getEmail());
+        assertThat(userResponse.token()).isEqualTo(jwtUtil.generateToken(user.getUsername(), UserRole.USER.name()));
+        assertThat(userResponse.expirationTimeInMilliseconds()).isEqualTo(jwtConfigurationProperties.getExpirationTimeInMilliseconds());
     }
 
     @Test
@@ -62,7 +64,7 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, ErrorType.NOT_FOUND,
+                    assertErrorResponse(responseError, "loginUser", ErrorType.NOT_FOUND,
                             "User with username/email: 'notExistingUser' not found.");
                 });
     }
@@ -81,13 +83,8 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, ErrorType.UNAUTHORIZED, "Invalid login credentials.");
+                    assertErrorResponse(responseError, "loginUser", ErrorType.UNAUTHORIZED, "Invalid login credentials.");
                 });
-    }
-
-    private void assertErrorResponse(ResponseError responseError, ErrorType errorType, String message) {
-        assertThat(responseError.getErrorType()).isEqualTo(errorType);
-        assertErrorResponse(responseError, message, "loginUser", new SourceLocation(2, 3));
     }
 
     private void assertErrorResponse(ResponseError responseError, graphql.ErrorType errorType, String message) {
