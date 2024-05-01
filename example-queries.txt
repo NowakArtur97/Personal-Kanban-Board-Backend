@@ -26,6 +26,8 @@ mutation REGISTER_USER {
 
 query LOGIN_USER {
   loginUser(authenticationRequest: {usernameOrEmail: "user", password: "pass1"}) {
+    username
+    email
     token
     expirationTimeInMilliseconds
   }

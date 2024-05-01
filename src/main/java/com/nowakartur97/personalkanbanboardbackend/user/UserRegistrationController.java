@@ -4,7 +4,6 @@ import com.nowakartur97.personalkanbanboardbackend.auth.JWTConfigurationProperti
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,7 +14,6 @@ import reactor.core.publisher.Mono;
 @Controller
 @Validated
 @RequiredArgsConstructor
-@Slf4j
 public class UserRegistrationController {
 
     private final UserService userService;
@@ -33,13 +31,18 @@ public class UserRegistrationController {
     }
 
     private UserEntity mapToEntity(UserDTO userDTO) {
-        String encodedPassword = bCryptPasswordEncoder.encode(userDTO.getPassword());
-        return new UserEntity(userDTO.getUsername(), encodedPassword, userDTO.getEmail(), UserRole.USER);
+        return new UserEntity(
+                userDTO.getUsername(),
+                bCryptPasswordEncoder.encode(userDTO.getPassword()),
+                userDTO.getEmail(),
+                UserRole.USER);
     }
 
     private UserResponse mapToUserResponse(UserEntity userEntity) {
-        String token = jwtUtil.generateToken(userEntity.getUsername(), userEntity.getRole().name());
-        return new UserResponse(userEntity.getUsername(), userEntity.getPassword(), userEntity.getEmail(),
-                token, jwtConfigurationProperties.getExpirationTimeInMilliseconds());
+        return new UserResponse(
+                userEntity.getUsername(),
+                userEntity.getEmail(),
+                jwtUtil.generateToken(userEntity.getUsername(), userEntity.getRole().name()),
+                jwtConfigurationProperties.getExpirationTimeInMilliseconds());
     }
 }

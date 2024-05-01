@@ -20,13 +20,13 @@ public class AuthenticationController {
     private final JWTConfigurationProperties jwtConfigurationProperties;
 
     @QueryMapping
-    public Mono<AuthenticationResponse> loginUser(@Argument AuthenticationRequest authenticationRequest) {
+    public Mono<UserResponse> loginUser(@Argument AuthenticationRequest authenticationRequest) {
         return userService.findByUsernameOrEmail(authenticationRequest.getUsernameOrEmail())
                 .map(userEntity -> {
                     if (isPasswordIncorrect(authenticationRequest, userEntity)) {
                         throw new BadCredentialsException("Invalid login credentials.");
                     }
-                    return mapToResponse(userEntity);
+                    return mapToUserResponse(userEntity);
                 });
     }
 
@@ -34,8 +34,11 @@ public class AuthenticationController {
         return !bCryptPasswordEncoder.matches(authenticationRequest.getPassword(), userEntity.getPassword());
     }
 
-    private AuthenticationResponse mapToResponse(UserEntity userEntity) {
-        return new AuthenticationResponse(jwtUtil.generateToken(userEntity.getUsername(), userEntity.getRole().name()),
+    private UserResponse mapToUserResponse(UserEntity userEntity) {
+        return new UserResponse(
+                userEntity.getUsername(),
+                userEntity.getEmail(),
+                jwtUtil.generateToken(userEntity.getUsername(), userEntity.getRole().name()),
                 jwtConfigurationProperties.getExpirationTimeInMilliseconds());
     }
 }
