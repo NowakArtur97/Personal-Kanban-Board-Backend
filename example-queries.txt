@@ -15,10 +15,10 @@ query TASKS_BY_USERNAME {
 }
 
 mutation REGISTER_USER {
-  registerUser(userDTO: {username: "user", password: "user123", email: "uesr@domain.com"}) {
+  registerUser(userDTO: {username: "user123", password: "user123", email: "uesr123@domain.com"}) {
+    userId
     username
     email
-    password
     token
     expirationTimeInMilliseconds
   }
@@ -26,6 +26,7 @@ mutation REGISTER_USER {
 
 query LOGIN_USER {
   loginUser(authenticationRequest: {usernameOrEmail: "user", password: "pass1"}) {
+    userId
     username
     email
     token
