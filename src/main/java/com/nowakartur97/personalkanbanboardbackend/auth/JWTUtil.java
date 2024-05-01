@@ -45,11 +45,13 @@ public class JWTUtil {
     }
 
     boolean isBearerTypeAuthorization(String authorizationHeader) {
-        return authorizationHeader != null && authorizationHeader.startsWith(jwtConfigurationProperties.getAuthorizationType());
+        return authorizationHeader != null
+                && authorizationHeader.startsWith(jwtConfigurationProperties.getAuthorizationType())
+                && authorizationHeader.length() > jwtConfigurationProperties.getAuthorizationHeaderStartIndex();
     }
 
     String getJWTFromHeader(String authorizationHeader) {
-        return authorizationHeader.substring(jwtConfigurationProperties.getAuthorizationHeaderLength());
+        return authorizationHeader.substring(jwtConfigurationProperties.getAuthorizationHeaderStartIndex());
     }
 
     public String extractUsername(String token) {

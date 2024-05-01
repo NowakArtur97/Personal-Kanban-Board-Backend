@@ -22,7 +22,7 @@ public class TaskService {
 
     public Flux<TaskEntity> getAllTasksForUser(String username) {
 
-        log.info("Looking up Tasks for User with username: ${}", username);
+        log.info("Looking up tasks for user: {}", username);
 
         return userService.findByUsername(username)
                 .map(UserEntity::getUserId)

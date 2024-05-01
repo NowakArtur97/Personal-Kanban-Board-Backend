@@ -12,15 +12,15 @@ public final class JWTConfigurationProperties {
     private final long expirationTimeInMilliseconds;
     private final String authorizationHeader;
     private final String authorizationType;
-    private final int authorizationHeaderLength;
+    private final int authorizationHeaderStartIndex;
 
     @ConstructorBinding
     public JWTConfigurationProperties(String secretKey, long expirationTimeInMilliseconds,
-                                      String authorizationHeader, String authorizationType, int authorizationHeaderLength) {
+                                      String authorizationHeader, String authorizationType, int authorizationHeaderStartIndex) {
         this.secretKey = secretKey;
         this.expirationTimeInMilliseconds = expirationTimeInMilliseconds;
         this.authorizationHeader = authorizationHeader;
         this.authorizationType = authorizationType;
-        this.authorizationHeaderLength = authorizationHeaderLength;
+        this.authorizationHeaderStartIndex = authorizationHeaderStartIndex;
     }
 }

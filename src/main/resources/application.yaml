@@ -21,4 +21,4 @@ app:
     expiration-time-in-milliseconds: 10800000
     authorization-header: Authorization
     authorization-type: Bearer
-    authorization-header-length: 7
+    authorization-header-start-index: 7
