@@ -16,7 +16,7 @@ type TaskResponse {
 enum TaskStatus {
     READY_TO_START
     IN_PROGRESS
-    COMPLETED
+    DONE
 }
 
 enum TaskPriority {
