@@ -1,0 +1,17 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto21
+  build:
+    commands:
+      - echo Build started
+      - mvn clean install -DskipTests=true
+artifacts:
+  files:
+    - target/*.jar
+    - scripts/*.sh
+    - appspec.yml
+    # - target/personalkanbanboardbackend-0.0.1-SNAPSHOT.jar
+  discard-paths: yes
