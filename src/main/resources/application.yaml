@@ -1,8 +1,6 @@
 spring:
   application:
-    name: Personal Kanban Board Backend
-  profiles:
-    active: local
+    name: personal-kanban-board-backend
   graphql:
     graphiql:
       enabled: true

@@ -4,9 +4,28 @@ spring:
       allow-credentials: true
       allowed-origins:
         - http://localhost:4200
+  r2dbc:
+    username: user
+    password: password
+    url: r2dbc:h2:file:///./data/kanban_board;MODE=PostgreSQL
+    driverClassName: org.h2.Driver
+    initialization-mode: always
+  flyway:
+    user: user
+    password: password
+    url: jdbc:h2:file:./data/kanban_board;MODE=PostgreSQL
   jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQL81Dialect
-        format_sql: true
+    hibernate:
+      dialect: org.hibernate.dialect.H2Dialect
+      format_sql: true
     show-sql: true
+  h2:
+    console:
+      enabled: true
+      path: /h2
+
+app:
+  h2:
+    port:
+      web: 8082
+      tcp: 9092
