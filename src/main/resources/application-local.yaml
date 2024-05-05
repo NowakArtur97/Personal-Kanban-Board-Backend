@@ -14,6 +14,7 @@ spring:
     user: user
     password: password
     url: jdbc:h2:file:./data/kanban_board;MODE=PostgreSQL
+    locations: classpath:db/migration/h2
   jpa:
     hibernate:
       dialect: org.hibernate.dialect.H2Dialect

@@ -24,7 +24,6 @@ public class UserEntity {
     private String password;
     @Column(nullable = false, unique = true, length = 100)
     private String email;
-
     @Column(nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
     private UserRole role;

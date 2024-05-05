@@ -1,0 +1,9 @@
+CREATE TABLE PERSONAL_KANBAN_BOARD.USERS (
+    "USER_ID" UUID DEFAULT RANDOM_UUID() PRIMARY KEY,
+--    "user_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    "USERNAME" VARCHAR(100) NOT NULL UNIQUE,
+    "PASSWORD" VARCHAR(100) NOT NULL,
+    "EMAIL" VARCHAR(100) NOT NULL UNIQUE--    ,
+--
+--    CONSTRAINT "check_users_email" CHECK (email ~* '^[A-Za-z0-9._+%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$')
+);

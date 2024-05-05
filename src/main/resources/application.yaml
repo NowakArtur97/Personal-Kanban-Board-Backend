@@ -12,7 +12,7 @@ spring:
     user: postgres
     password: postgres
     url: jdbc:postgresql://localhost:5432/kanban_board
-
+    locations: classpath:db/migration/postgres
 app:
   jwt:
     secret-key: 8f9879e8-1afd-4a88-81b8-04d68f32fdaf-test
