@@ -25,6 +25,8 @@ spring:
       enabled: true
       path: /h2
 
+logging.file.path: .
+
 app:
   h2:
     port:
