@@ -27,8 +27,8 @@ hooks:
       timeout: 20
 #      runas: ec2-user
       runas: root
-#  ApplicationStop:
-#    - location: server_stop.sh
-#      timeout: 20
-##      runas: ec2-user
-#      runas: root
+  ApplicationStop:
+    - location: server_stop.sh
+      timeout: 20
+#      runas: ec2-user
+      runas: root
