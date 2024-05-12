@@ -26,14 +26,15 @@ public class AuthenticationController extends UserController {
 
         return userService.findByUsernameOrEmail(authenticationRequest.getUsernameOrEmail())
                 .map(userEntity -> {
-                    if (isPasswordIncorrect(authenticationRequest, userEntity)) {
+                    if (isPasswordCorrect(authenticationRequest, userEntity)) {
+                        return mapToUserResponse(userEntity);
+                    } else {
                         throw new BadCredentialsException("Invalid login credentials.");
                     }
-                    return mapToUserResponse(userEntity);
                 });
     }
 
-    private boolean isPasswordIncorrect(AuthenticationRequest authenticationRequest, UserEntity userEntity) {
-        return !bCryptPasswordEncoder.matches(authenticationRequest.getPassword(), userEntity.getPassword());
+    private boolean isPasswordCorrect(AuthenticationRequest authenticationRequest, UserEntity userEntity) {
+        return bCryptPasswordEncoder.matches(authenticationRequest.getPassword(), userEntity.getPassword());
     }
 }
