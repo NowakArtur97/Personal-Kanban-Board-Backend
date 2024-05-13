@@ -1,6 +1,14 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Kanban Backend Board Template
 Parameters:
+  CodeBuildProjectName:
+    Type: String
+    Description: Name of the project in the CodeBuild
+    Default: kanban-board-backend-997
+  BuildArtifactsS3BucketName:
+    Type: String
+    Description: S3 Bucket name for build artifacts
+    Default: artifacts-kanban-board-backend-997
   SshPort:
     Type: Number
     Description: SSH port
@@ -14,6 +22,10 @@ Parameters:
     ConstraintDescription: The value must be valid IPv4 CIDR block.
     Default: 0.0.0.0/32
 Resources:
+  BuildArtifactsS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BuildArtifactsS3BucketName
   VPC:
     Type: AWS::EC2::VPC
     Properties:
