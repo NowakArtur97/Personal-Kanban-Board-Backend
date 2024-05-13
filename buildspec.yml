@@ -11,6 +11,6 @@ phases:
 artifacts:
   files:
     - target/personalkanbanboardbackend-0.0.1-SNAPSHOT.jar
-    - scripts/*.sh
+    - aws/ec2-scripts/*.sh
     - appspec.yml
   discard-paths: yes
