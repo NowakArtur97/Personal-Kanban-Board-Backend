@@ -1,5 +1,18 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Kanban Backend Board Template
+Parameters:
+  SshPort:
+    Type: Number
+    Description: SSH port
+    Default: 22
+    MinValue: 22
+    MaxValue: 65535
+  SourceCidr:
+    Type: String
+    Description: CIDR Block of IPv4 IP addresses allowed to access EC2 instances via SSH
+    AllowedPattern: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/([0-9]|[1-2][0-9]|3[0-2]))?$"
+    ConstraintDescription: The value must be valid IPv4 CIDR block.
+    Default: 0.0.0.0/32
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -50,3 +63,13 @@ Resources:
       Tags:
         - Key: Name
           Value: kanban-board-backend-sn
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: A security group for an EC2 instance
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - CidrIp: !Ref SourceCidr
+          FromPort: !Ref SshPort
+          ToPort: !Ref SshPort
+          IpProtocol: tcp
