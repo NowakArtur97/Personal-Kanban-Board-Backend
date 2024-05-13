@@ -17,10 +17,22 @@ Parameters:
     MaxValue: 65535
   SourceCidr:
     Type: String
-    Description: CIDR Block of IPv4 IP addresses allowed to access EC2 instances via SSH
+    Description: CIDR Block of IPv4 IP addresses allowed to access EC2 instance via SSH
     AllowedPattern: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/([0-9]|[1-2][0-9]|3[0-2]))?$"
-    ConstraintDescription: The value must be valid IPv4 CIDR block.
+    ConstraintDescription: The value must be valid IPv4 CIDR block
     Default: 0.0.0.0/32
+  InstanceType:
+    Type: String
+    Description: EC2 instance size
+    Default: t2.micro
+  ImageId:
+    Type: String
+    Description: EC2 instance image id
+    Default: ami-07caf09b362be10b8
+  KeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Name of an EC2 KeyPair to enable SSH access to the instance
+    Default: kanban-board
 Resources:
   BuildArtifactsS3Bucket:
     Type: AWS::S3::Bucket
@@ -163,3 +175,30 @@ Resources:
                   - elasticloadbalancing:RegisterTargets
                   - elasticloadbalancing:DeregisterTargets"
                 Resource: "*"
+  BackendEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImageId
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref Subnet
+      SecurityGroupIds:
+        - !Ref SecurityGroup
+      IamInstanceProfile: !Ref InstanceProfile
+      KeyName: !Ref KeyPairName
+      Tags:
+        - Key: Name
+          Value: kanban-board-backend-ec2
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update
+          yum install -y ruby
+          yum install wget
+          cd /home/ec2-user
+          # wget https://aws-codedeploy-{region}.s3.{region}.amazonaws.com/latest/install
+          wget https://aws-codedeploy-us-east-1.s3.us-east-1.amazonaws.com/latest/install
+          chmod +x ./install
+          ./install auto
+          yum install -y python-pip
+          pip install awscli
+          dnf install -y java-21-amazon-corretto-devel
