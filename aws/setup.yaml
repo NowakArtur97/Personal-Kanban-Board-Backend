@@ -63,6 +63,27 @@ Parameters:
     Type: String
     Description: S3 Bucket name for build artifacts
     Default: artifacts-kanban-board-backend-997
+  GitHubRepositoryName:
+    Type: String
+    Description: Name of GitHub repository with Kanan Board backend project
+    Default: Personal-Kanban-Board-Backend
+  GitHubRepositoryURL:
+    Type: String
+    Description: URL for GitHub repository with Kanan Board backend project
+    Default: https://github.com/NowakArtur97/Personal-Kanban-Board-Backend.git
+  GitHubBranch:
+    Type: String
+    Description: GitHub branch with code for CodePipeline
+    # TODO: Change
+    Default: aws-cloudformation
+  GitHubOAuthToken:
+    Type: String
+    Description: Thee GitHub Personal Access Token so CodePipeline can get the code
+    Default: token
+  GitHubBranchPattern:
+    Type: String
+    Description: GitHub branch with code for CodeBuild
+    Default: ^refs/heads/aws-cloudformation
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -281,6 +302,116 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref BuildArtifactsS3BucketName
+  CodePipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: CodePipelinePolicies
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                  - iam:PassRole
+                  - sns:Publish
+                  - codebuild:BatchGetBuilds
+                  - codebuild:StartBuild
+                  - codedeploy:CreateDeployment
+                  - codedeploy:GetDeployment
+                  - codedeploy:GetDeploymentConfig
+                  - codedeploy:RegisterApplicationRevision
+                  - codecommit:*
+                  - cloudformation:CreateStack
+                  - cloudformation:DescribeStacks
+                  - cloudformation:DeleteStack
+                  - cloudformation:UpdateStack
+                  - cloudformation:CreateChangeSet
+                  - cloudformation:ExecuteChangeSet
+                  - cloudformation:DeleteChangeSet
+                  - cloudformation:DescribeChangeSet
+                  - cloudformation:SetStackPolicy
+                Resource: "*"
+  CodePipelinePipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Ref CodeBuildProjectName
+      RoleArn: !GetAtt CodePipelineRole.Arn
+      PipelineType: "V2"
+      ArtifactStore:
+        Location: !Ref BuildArtifactsS3Bucket
+        Type: S3
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: Source
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: 1
+              Configuration:
+                Repo: !Ref GitHubRepositoryName
+                Branch: !Ref GitHubBranch
+                Owner: NowakArtur97
+                OAuthToken: !Ref GitHubOAuthToken
+                PollForSourceChanges: false
+              OutputArtifacts:
+                - Name: source-output-artifacts
+              RunOrder: 1
+        - Name: Build
+          Actions:
+            - Name: Build
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: 1
+              InputArtifacts:
+                - Name: source-output-artifacts
+              OutputArtifacts:
+                - Name: build-output-artifacts
+              Configuration:
+                ProjectName: !Ref CodeBuildProject
+              RunOrder: 1
+        - Name: Deploy
+          Actions:
+            - Name: Deploy
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CodeDeploy
+                Version: 1
+              InputArtifacts:
+                - Name: build-output-artifacts
+              Configuration:
+                ApplicationName: !Ref CodeDeployApplication
+                DeploymentGroupName: !Ref CodeDeployGroup
+              RunOrder: 1
+  GithubWebhook:
+    Type: AWS::CodePipeline::Webhook
+    Properties:
+      Name: KanbanBoardBackendGithubWebhook
+      Authentication: GITHUB_HMAC
+      AuthenticationConfiguration:
+        SecretToken: !Ref GitHubOAuthToken
+      RegisterWithThirdParty: true
+      TargetAction: Source
+      TargetPipeline: !Ref CodePipelinePipeline
+      TargetPipelineVersion: !GetAtt CodePipelinePipeline.Version
+      Filters:
+        - JsonPath: "$.ref"
+          MatchEquals: "refs/heads/{Branch}"
   S3BucketCleanerLambdaRole:
     Type: AWS::IAM::Role
     Properties:
