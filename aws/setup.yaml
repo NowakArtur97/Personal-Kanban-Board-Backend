@@ -324,7 +324,6 @@ Resources:
                 Action:
                   - s3:*
                   - iam:PassRole
-                  - sns:Publish
                   - codebuild:BatchGetBuilds
                   - codebuild:StartBuild
                   - codedeploy:CreateDeployment
@@ -332,15 +331,6 @@ Resources:
                   - codedeploy:GetDeploymentConfig
                   - codedeploy:RegisterApplicationRevision
                   - codecommit:*
-                  - cloudformation:CreateStack
-                  - cloudformation:DescribeStacks
-                  - cloudformation:DeleteStack
-                  - cloudformation:UpdateStack
-                  - cloudformation:CreateChangeSet
-                  - cloudformation:ExecuteChangeSet
-                  - cloudformation:DeleteChangeSet
-                  - cloudformation:DescribeChangeSet
-                  - cloudformation:SetStackPolicy
                 Resource: "*"
   CodePipelinePipeline:
     Type: AWS::CodePipeline::Pipeline
