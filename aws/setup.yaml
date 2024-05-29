@@ -1,14 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Kanban Backend Board Template
 Parameters:
-  CodeBuildProjectName:
-    Type: String
-    Description: Name of the project in the CodeBuild
-    Default: kanban-board-backend-997
-  BuildArtifactsS3BucketName:
-    Type: String
-    Description: S3 Bucket name for build artifacts
-    Default: artifacts-kanban-board-backend-997
   SshPort:
     Type: Number
     Description: SSH port
@@ -33,11 +25,45 @@ Parameters:
     Type: AWS::EC2::KeyPair::KeyName
     Description: Name of an EC2 KeyPair to enable SSH access to the instance
     Default: kanban-board
+  CodeBuildProjectName:
+    Type: String
+    Description: Name of the project in the CodeBuild
+    Default: kanban-board-backend-997
+  BuildSpecPath:
+    Type: String
+    Description: Path to buildspec.yml file for CodeBuild
+    Default: buildspec.yml
+  CodeBuildImage:
+    Type: String
+    Description: Image for CodeBuild
+    Default: aws/codebuild/amazonlinux2-x86_64-standard:5.0
+    AllowedValues:
+      - aws/codebuild/amazonlinux2-x86_64-standard:2.0
+      - aws/codebuild/amazonlinux2-aarch64-standard:3.0
+      - aws/codebuild/amazonlinux2-x86_64-standard:4.0
+      - aws/codebuild/amazonlinux2-x86_64-standard:5.0
+      - aws/codebuild/amazonlinux2-x86_64-standard:corretto11
+      - aws/codebuild/amazonlinux2-x86_64-standard:corretto8
+  CodeBuildComputeType:
+    Type: String
+    Description: Type of compute environment for CodeBuild
+    Default: BUILD_GENERAL1_SMALL
+    AllowedValues:
+      - BUILD_GENERAL1_SMALL
+      - BUILD_GENERAL1_MEDIUM
+      - BUILD_GENERAL1_LARGE
+      - BUILD_GENERAL1_XLARGE
+      - BUILD_GENERAL1_2XLARGE
+      - BUILD_LAMBDA_1GB
+      - BUILD_LAMBDA_2GB
+      - BUILD_LAMBDA_4GB
+      - BUILD_LAMBDA_8GB
+      - BUILD_LAMBDA_10GB
+  BuildArtifactsS3BucketName:
+    Type: String
+    Description: S3 Bucket name for build artifacts
+    Default: artifacts-kanban-board-backend-997
 Resources:
-  BuildArtifactsS3Bucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Ref BuildArtifactsS3BucketName
   VPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -97,6 +123,10 @@ Resources:
           FromPort: !Ref SshPort
           ToPort: !Ref SshPort
           IpProtocol: tcp
+        - CidrIp: 0.0.0.0/0
+          FromPort: 8080
+          ToPort: 8080
+          IpProtocol: tcp
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
@@ -128,53 +158,6 @@ Resources:
                   - s3:GetObjectVersion
                   - s3:ListBucket
                 Resource: !Sub "arn:aws:s3:::${BuildArtifactsS3Bucket}/*"
-        - PolicyName: CodeDeployPolicies
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - autoscaling:CompleteLifecycleAction
-                  - autoscaling:DeleteLifecycleHook
-                  - autoscaling:DescribeAutoScalingGroups
-                  - autoscaling:DescribeLifecycleHooks
-                  - autoscaling:PutLifecycleHook
-                  - autoscaling:RecordLifecycleActionHeartbeat
-                  - autoscaling:CreateAutoScalingGroup
-                  - autoscaling:CreateOrUpdateTags
-                  - autoscaling:UpdateAutoScalingGroup
-                  - autoscaling:EnableMetricsCollection
-                  - autoscaling:DescribePolicies
-                  - autoscaling:DescribeScheduledActions
-                  - autoscaling:DescribeNotificationConfigurations
-                  - autoscaling:SuspendProcesses
-                  - autoscaling:ResumeProcesses
-                  - autoscaling:AttachLoadBalancers
-                  - autoscaling:AttachLoadBalancerTargetGroups
-                  - autoscaling:PutScalingPolicy
-                  - autoscaling:PutScheduledUpdateGroupAction
-                  - autoscaling:PutNotificationConfiguration
-                  - autoscaling:PutWarmPool
-                  - autoscaling:DescribeScalingActivities
-                  - autoscaling:DeleteAutoScalingGroup
-                  - ec2:DescribeInstances
-                  - ec2:DescribeInstanceStatus
-                  - ec2:TerminateInstances
-                  - tag:GetResources
-                  - sns:Publish
-                  - cloudwatch:DescribeAlarms
-                  - cloudwatch:PutMetricAlarm
-                  - elasticloadbalancing:DescribeLoadBalancerAttributes
-                  - elasticloadbalancing:DescribeTargetGroupAttributes
-                  - elasticloadbalancing:DescribeLoadBalancers
-                  - elasticloadbalancing:DescribeInstanceHealth
-                  - elasticloadbalancing:RegisterInstancesWithLoadBalancer
-                  - elasticloadbalancing:DeregisterInstancesFromLoadBalancer
-                  - elasticloadbalancing:DescribeTargetGroups
-                  - elasticloadbalancing:DescribeTargetHealth
-                  - elasticloadbalancing:RegisterTargets
-                  - elasticloadbalancing:DeregisterTargets"
-                Resource: "*"
   BackendEC2Instance:
     Type: AWS::EC2::Instance
     Properties:
@@ -202,6 +185,71 @@ Resources:
           yum install -y python-pip
           pip install awscli
           dnf install -y java-21-amazon-corretto-devel
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: CodeBuildPolicies
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketAcl
+                  - s3:GetBucketLocation
+                Resource: !Sub "arn:aws:s3:::${BuildArtifactsS3Bucket}/*"
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${CodeBuildProjectName}"
+                  - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${CodeBuildProjectName}:*"
+              - Effect: Allow
+                Action:
+                  - codebuild:CreateReportGroup
+                  - codebuild:CreateReport
+                  - codebuild:UpdateReport
+                  - codebuild:BatchPutTestCases
+                  - codebuild:BatchPutCodeCoverages
+                Resource: !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${CodeBuildProjectName}-*"
+  KanbanBoardBackendProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Ref CodeBuildProjectName
+      Source:
+        Type: CODEPIPELINE
+        GitCloneDepth: 1
+        BuildSpec: !Ref BuildSpecPath
+      Environment:
+        Type: LINUX_CONTAINER
+        Image: !Ref CodeBuildImage
+        ComputeType: !Ref CodeBuildComputeType
+      ServiceRole: !Ref CodeBuildRole
+      Artifacts:
+        Type: CODEPIPELINE
+      LogsConfig:
+        CloudWatchLogs:
+          Status: ENABLED
+          GroupName: !Sub "/aws/codebuild/${CodeBuildProjectName}"
+  BuildArtifactsS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BuildArtifactsS3BucketName
   S3BucketCleanerLambdaRole:
     Type: AWS::IAM::Role
     Properties:
