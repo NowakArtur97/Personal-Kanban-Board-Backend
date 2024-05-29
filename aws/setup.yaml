@@ -227,7 +227,7 @@ Resources:
                   - codebuild:BatchPutTestCases
                   - codebuild:BatchPutCodeCoverages
                 Resource: !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:report-group/${CodeBuildProjectName}-*"
-  KanbanBoardBackendProject:
+  CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: !Ref CodeBuildProjectName
@@ -246,6 +246,37 @@ Resources:
         CloudWatchLogs:
           Status: ENABLED
           GroupName: !Sub "/aws/codebuild/${CodeBuildProjectName}"
+  CodeDeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codedeploy.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole
+  CodeDeployApplication:
+    Type: AWS::CodeDeploy::Application
+    DependsOn: BackendEC2Instance
+    Properties:
+      ApplicationName: kanban-board-backend-codedeploy-application
+  CodeDeployGroup:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    Properties:
+      ApplicationName: !Ref CodeDeployApplication
+      Ec2TagFilters:
+        - Key: "Name"
+          Value: "kanban-board-backend-ec2"
+          Type: KEY_AND_VALUE
+      ServiceRoleArn: !GetAtt CodeDeployRole.Arn
+      DeploymentGroupName: prod
+      DeploymentConfigName: CodeDeployDefault.OneAtATime
   BuildArtifactsS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
