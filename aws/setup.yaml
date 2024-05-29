@@ -469,3 +469,7 @@ Resources:
                           cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
               else:
                   cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+Outputs:
+  GrapqhQLPlayground:
+    Description: EC2 instance public IP
+    Value: !Sub ${BackendEC2Instance.PublicIp}:8080/graphiql?path=/graphql
