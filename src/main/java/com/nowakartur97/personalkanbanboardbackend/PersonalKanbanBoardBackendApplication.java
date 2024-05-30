@@ -31,7 +31,7 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
         SpringApplication.run(PersonalKanbanBoardBackendApplication.class, args);
     }
 
-    @Value("${spring.profiles.active}")
+    @Value("${spring.profiles.active:default}")
     private String activeProfile;
 
     private final UserService userService;
@@ -41,10 +41,10 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
 
     @Override
     public void run(String... args) {
-        if (activeProfile.equals("local")) {
-            UserEntity user = createUser();
-            createTask(user);
-        }
+        // if (activeProfile.equals("local")) {
+        UserEntity user = createUser();
+        createTask(user);
+        // }
     }
 
     private UserEntity createUser() {
