@@ -5,14 +5,17 @@ spring:
     graphiql:
       enabled: true
   r2dbc:
-    username: postgres
-    password: postgres
-    url: r2dbc:postgresql://localhost:5432/kanban_board
+    username: ${DB_USERNAME:postgress}
+    password: ${DB_PASSWORD:postgress}
+    url: r2dbc:postgresql://${DB_HOST:localhost}:5432/${DB_NAME:kanban_board}
   flyway:
-    user: postgres
-    password: postgres
-    url: jdbc:postgresql://localhost:5432/kanban_board
+    user: ${DB_USERNAME:postgress}
+    password: ${DB_PASSWORD:postgress}
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/${DB_NAME:kanban_board}
     locations: classpath:db/migration/postgres
+
+logging.file.path: .
+
 app:
   jwt:
     secret-key: 8f9879e8-1afd-4a88-81b8-04d68f32fdaf-test
