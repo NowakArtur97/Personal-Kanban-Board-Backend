@@ -1,5 +1,4 @@
 #!/bin/bash
-#sudo pkill -f 'java -jar'
 isExistApp=$(pgrep java)
 if [[ -n  $isExistApp ]]; then
   echo "Stopping the application."

@@ -1,2 +1,17 @@
 #!/usr/bin/env bash
-nohup java -jar -Dserver.port=8080 -Dspring.r2dbc.username="${DB_USERNAME}" -Dspring.r2dbc.password="${DB_PASSWORD}" -Dspring.r2dbc.url="r2dbc:postgresql://${DB_HOST:localhost}:5432/${DB_NAME:kanban_board}" -Dspring.flyway.user="${DB_USERNAME}" -Dspring.flyway.password="${DB_PASSWORD}" -Dspring.flyway.url="jdbc:postgresql://${DB_HOST:localhost}:5432/${DB_NAME:kanban_board}" /home/ec2-user/server/personalkanbanboardbackend-0.0.1-SNAPSHOT.jar > /dev/null 2>&1 &
+cd /home/ec2-user/server
+
+nohup java -jar -Dserver.port=8080 /home/ec2-user/server/personalkanbanboardbackend-0.0.1-SNAPSHOT.jar > /dev/null 2>&1 &
+
+sleep 10
+
+isExistApp=$(pgrep java)
+if [[ -n  $isExistApp ]]; then
+  echo "Stopping the application."
+  sudo kill -9 $isExistApp
+  echo "The application is stopped."
+else
+  echo "The application is not running."
+fi
+
+nohup java -jar -Dserver.port=8080 /home/ec2-user/server/personalkanbanboardbackend-0.0.1-SNAPSHOT.jar > /dev/null 2>&1 &
