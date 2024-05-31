@@ -1,6 +1,2 @@
 #!/usr/bin/env bash
-cd /home/ec2-user/server
-#sudo java -jar -Dserver.port=8080 -Dspring.profiles.active=local \
-#    *.jar > /dev/null 2> /dev/null < /dev/null &
-
-nohup java -jar -Dserver.port=8080 /home/ec2-user/server/personalkanbanboardbackend-0.0.1-SNAPSHOT.jar > /dev/null 2>&1 &
+nohup java -jar -Dserver.port=8080 -Dspring.r2dbc.username="${DB_USERNAME}" -Dspring.r2dbc.password="${DB_PASSWORD}" -Dspring.r2dbc.url="r2dbc:postgresql://${DB_HOST:localhost}:5432/${DB_NAME:kanban_board}" -Dspring.flyway.user="${DB_USERNAME}" -Dspring.flyway.password="${DB_PASSWORD}" -Dspring.flyway.url="jdbc:postgresql://${DB_HOST:localhost}:5432/${DB_NAME:kanban_board}" /home/ec2-user/server/personalkanbanboardbackend-0.0.1-SNAPSHOT.jar > /dev/null 2>&1 &
