@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Kanban Backend Board Template
+Description: Kanban Board Backend Template
 Parameters:
   SshPort:
     Type: Number
@@ -122,9 +122,53 @@ Resources:
   RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref Subnet
+      SubnetId: !Ref SubnetBackend
       RouteTableId: !Ref RouteTable
-  Subnet:
+  SubnetDatabaseA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      CidrBlock: 10.16.0.32/27
+      Tags:
+        - Key: Name
+          Value: kanban-board-backend-database-sn-a
+  SubnetDatabaseB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      CidrBlock: 10.16.0.64/27
+      Tags:
+        - Key: Name
+          Value: kanban-board-backend-database-sn-b
+  DatabaseSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: kanban-board-backend-database-sn-group
+      DBSubnetGroupDescription: Database Subnet Group
+      SubnetIds:
+        - !Ref SubnetDatabaseA
+        - !Ref SubnetDatabaseB
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Open database for application access
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          DestinationSecurityGroupId: !Ref SecurityGroupBackend
+  InstanceSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref DatabaseSecurityGroup
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      SourceSecurityGroupId: !Ref SecurityGroupBackend
+  SubnetBackend:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
@@ -134,7 +178,7 @@ Resources:
       Tags:
         - Key: Name
           Value: kanban-board-backend-sn
-  SecurityGroup:
+  SecurityGroupBackend:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: A security group for an EC2 instance
@@ -144,7 +188,8 @@ Resources:
           FromPort: !Ref SshPort
           ToPort: !Ref SshPort
           IpProtocol: tcp
-        - CidrIp: 0.0.0.0/0
+          # TODO: Add frontend to security group (?)
+        - CidrIp: !Ref SourceCidr
           FromPort: 8080
           ToPort: 8080
           IpProtocol: tcp
@@ -184,9 +229,9 @@ Resources:
     Properties:
       ImageId: !Ref ImageId
       InstanceType: !Ref InstanceType
-      SubnetId: !Ref Subnet
+      SubnetId: !Ref SubnetBackend
       SecurityGroupIds:
-        - !Ref SecurityGroup
+        - !Ref SecurityGroupBackend
       IamInstanceProfile: !Ref InstanceProfile
       KeyName: !Ref KeyPairName
       Tags:
@@ -472,4 +517,4 @@ Resources:
 Outputs:
   GrapqhQLPlayground:
     Description: EC2 instance public IP
-    Value: !Sub ${BackendEC2Instance.PublicIp}:8080/graphiql?path=/graphql
+    Value: !Sub http://${BackendEC2Instance.PublicIp}:8080/graphiql?path=/graphql
