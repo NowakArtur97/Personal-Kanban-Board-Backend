@@ -93,6 +93,10 @@ Parameters:
     Type: String
     Description: GitHub branch with code for CodeBuild
     Default: ^refs/heads/aws-cloudformation
+  ParameterStoreBackendURLParameterName:
+    Type: String
+    Description: Name of the parameter for backend URL
+    Default: BACKEND_URL
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -247,6 +251,14 @@ Resources:
                   - s3:GetObjectVersion
                   - s3:ListBucket
                 Resource: !Sub "arn:aws:s3:::${BuildArtifactsS3Bucket}/*"
+        - PolicyName: ParameterStoreAccessPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:PutParameter
+                Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ParameterStoreBackendURLParameterName}"
   BackendEC2Instance:
     Type: AWS::EC2::Instance
     Properties:
@@ -274,6 +286,13 @@ Resources:
           yum install -y python-pip
           pip install awscli
           dnf install -y java-21-amazon-corretto-devel
+          mkdir server
+          cd /home/ec2-user/server
+          touch application.properties
+          printf -v lines "spring.r2dbc.username=${DBUsername}\nspring.r2dbc.password=${DBPassword}\nspring.r2dbc.url=r2dbc:postgresql://${Database.Endpoint.Address}:5432/${DBName}\nspring.flyway.user=${DBUsername}\nspring.flyway.password=${DBPassword}\nspring.flyway.url=jdbc:postgresql://${Database.Endpoint.Address}:5432/${DBName}"
+          echo -e "$lines" >> application.properties
+          export BACKEND_URL="$(curl http://checkip.amazonaws.com):8080" >> /etc/profile
+          aws ssm put-parameter --name "BACKEND_URL" --type "String" --value "$BACKEND_URL" --overwrite
   CodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
