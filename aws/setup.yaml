@@ -13,6 +13,15 @@ Parameters:
     AllowedPattern: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/([0-9]|[1-2][0-9]|3[0-2]))?$"
     ConstraintDescription: The value must be valid IPv4 CIDR block
     Default: 0.0.0.0/32
+  DBName:
+    Type: String
+    Default: kanban_board
+  DBUsername:
+    Type: String
+    Default: postgres
+  DBPassword:
+    Type: String
+    Default: postgres
   InstanceType:
     Type: String
     Description: EC2 instance size
@@ -25,14 +34,14 @@ Parameters:
     Type: AWS::EC2::KeyPair::KeyName
     Description: Name of an EC2 KeyPair to enable SSH access to the instance
     Default: kanban-board
-  CodeBuildProjectName:
-    Type: String
-    Description: Name of the project in the CodeBuild
-    Default: kanban-board-backend-997
   BuildSpecPath:
     Type: String
     Description: Path to buildspec.yml file for CodeBuild
     Default: buildspec.yml
+  CodeBuildProjectName:
+    Type: String
+    Description: Name of the project in the CodeBuild
+    Default: kanban-board-backend-997
   CodeBuildImage:
     Type: String
     Description: Image for CodeBuild
@@ -168,6 +177,19 @@ Resources:
       FromPort: 0
       ToPort: 65535
       SourceSecurityGroupId: !Ref SecurityGroupBackend
+  Database:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBSubnetGroupName: !Ref DatabaseSubnetGroup
+      VPCSecurityGroups:
+        - !Ref DatabaseSecurityGroup
+      AllocatedStorage: 20
+      DBInstanceClass: db.t3.micro
+      Engine: postgres
+      EngineVersion: 14.9
+      DBName: !Ref DBName
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
   SubnetBackend:
     Type: AWS::EC2::Subnet
     Properties:
@@ -189,7 +211,8 @@ Resources:
           ToPort: !Ref SshPort
           IpProtocol: tcp
           # TODO: Add frontend to security group (?)
-        - CidrIp: !Ref SourceCidr
+        # - CidrIp: !Ref SourceCidr
+        - CidrIp: 0.0.0.0/0
           FromPort: 8080
           ToPort: 8080
           IpProtocol: tcp
@@ -515,6 +538,9 @@ Resources:
               else:
                   cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
 Outputs:
+  BackendURL:
+    Description: URL to backend server
+    Value: !Sub http://${BackendEC2Instance.PublicIp}:8080
   GrapqhQLPlayground:
-    Description: EC2 instance public IP
+    Description: URL to GrapqhQL Playground
     Value: !Sub http://${BackendEC2Instance.PublicIp}:8080/graphiql?path=/graphql
