@@ -83,8 +83,7 @@ Parameters:
   GitHubBranch:
     Type: String
     Description: GitHub branch with code for CodePipeline
-    # TODO: Change
-    Default: aws-cloudformation
+    Default: main
   GitHubOAuthToken:
     Type: String
     Description: Thee GitHub Personal Access Token so CodePipeline can get the code
@@ -92,7 +91,7 @@ Parameters:
   GitHubBranchPattern:
     Type: String
     Description: GitHub branch with code for CodeBuild
-    Default: ^refs/heads/aws-cloudformation
+    Default: ^refs/heads/main
   ParameterStoreBackendURLParameterName:
     Type: String
     Description: Name of the parameter for backend URL
@@ -214,7 +213,7 @@ Resources:
           FromPort: !Ref SshPort
           ToPort: !Ref SshPort
           IpProtocol: tcp
-          # TODO: Add frontend to security group (?)
+          # TODO: Add frontend to security group (vpc endpoint?)
         # - CidrIp: !Ref SourceCidr
         - CidrIp: 0.0.0.0/0
           FromPort: 8080
