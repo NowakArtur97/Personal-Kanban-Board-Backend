@@ -1,3 +1,5 @@
 type Mutation {
     registerUser(userDTO: UserDTO): UserResponse
+
+    createTask(taskDTO: TaskDTO): TaskResponse
 }
