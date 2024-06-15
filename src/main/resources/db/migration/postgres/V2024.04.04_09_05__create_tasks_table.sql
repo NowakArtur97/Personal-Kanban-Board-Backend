@@ -4,7 +4,7 @@ CREATE TABLE personal_kanban_board.tasks (
     "description" VARCHAR(100),
     "status" VARCHAR(50) NOT NULL,
     "priority" VARCHAR(20) NOT NULL,
-    "target_end_date" DATE NOT NULL,
+    "target_end_date" DATE,
     "assigned_to" UUID NOT NULL,
     "created_by" UUID NOT NULL,
     "created_on" DATE NOT NULL,

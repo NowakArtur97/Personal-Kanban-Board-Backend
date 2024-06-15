@@ -4,7 +4,7 @@ type TaskResponse {
     description: String,
     status: TaskStatus!,
     priority: TaskPriority!,
-    targetEndDate: Date!,
+    targetEndDate: Date,
 
     createdBy: String!,
     createdOn: Date!,
