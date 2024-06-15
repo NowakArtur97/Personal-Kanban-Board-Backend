@@ -1,6 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.user;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -12,6 +13,7 @@ import java.util.UUID;
 @Table(name = "users", schema = "personal_kanban_board")
 @Getter
 @Setter
+@Builder
 public class UserEntity {
 
     @Id
@@ -27,13 +29,6 @@ public class UserEntity {
     @Column(nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
     private UserRole role;
-
-    public UserEntity(String username, String password, String email, UserRole role) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.role = role;
-    }
 
     @Override
     public String toString() {

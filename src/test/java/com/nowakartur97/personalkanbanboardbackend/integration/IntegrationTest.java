@@ -57,7 +57,12 @@ public class IntegrationTest implements PostgresStarter {
     }
 
     protected UserEntity createUser() {
-        UserEntity user = new UserEntity("testUser", bCryptPasswordEncoder.encode("pass1"), "testUser@domain.com", UserRole.USER);
+        UserEntity user = UserEntity.builder()
+                .username("testUser")
+                .password(bCryptPasswordEncoder.encode("pass1"))
+                .email("testUser@domain.com")
+                .role(UserRole.USER)
+                .build();
         return userRepository.save(user).block();
     }
 

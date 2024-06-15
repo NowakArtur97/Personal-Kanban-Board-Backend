@@ -147,17 +147,18 @@ public class TasksQueryControllerTest extends IntegrationTest {
     }
 
     private TaskEntity createTask(UserEntity user) {
-        TaskEntity task = new TaskEntity();
-        task.setTitle("task1");
-        task.setDescription("desc1");
-        task.setStatus(TaskStatus.IN_PROGRESS);
-        task.setPriority(TaskPriority.MEDIUM);
-        task.setTargetEndDate(LocalDate.now());
-        task.setAssignedTo(user.getUserId());
-        task.setCreatedOn(LocalDate.now());
-        task.setCreatedBy(user.getUserId());
-        task.setUpdatedOn(LocalDate.now());
-        task.setUpdatedBy(user.getUserId());
+        TaskEntity task = TaskEntity.builder()
+                .title("task1")
+                .description("desc1")
+                .assignedTo(user.getUserId())
+                .status(TaskStatus.READY_TO_START)
+                .priority(TaskPriority.MEDIUM)
+                .targetEndDate(LocalDate.now())
+                .createdBy(user.getUserId())
+                .createdOn(LocalDate.now())
+                .updatedOn(LocalDate.now())
+                .updatedBy(user.getUserId())
+                .build();
         return taskRepository.save(task).block();
     }
 }

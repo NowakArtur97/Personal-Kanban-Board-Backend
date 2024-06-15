@@ -18,7 +18,6 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Random;
 
 @SpringBootApplication
@@ -54,8 +53,12 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
         if (userService.existsByUsernameOrEmail("user", "user@domain.com").block()) {
             user = userService.findByUsername("user").block();
         } else {
-            user = new UserEntity("user", bCryptPasswordEncoder.encode("pass1"),
-                    "user@domain.com", UserRole.USER);
+            user = UserEntity.builder()
+                    .username("user")
+                    .password(bCryptPasswordEncoder.encode("pass1"))
+                    .email("user@domain.com")
+                    .role(UserRole.USER)
+                    .build();
 
             userService.saveUser(user).block();
         }
@@ -65,16 +68,17 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
     }
 
     private void createTask(UserEntity user) {
-        TaskEntity task = new TaskEntity();
-        task.setTitle("task1");
-        task.setDescription("desc1");
-        task.setStatus(TaskStatus.values()[new Random().nextInt(TaskStatus.values().length)]);
-        task.setPriority(TaskPriority.values()[new Random().nextInt(TaskPriority.values().length)]);
-        task.setTargetEndDate(LocalDate.now().plus(new Random().nextInt(3), ChronoUnit.DAYS));
-        task.setAssignedTo(user.getUserId());
-        task.setCreatedOn(LocalDate.now());
-        task.setCreatedBy(user.getUserId());
-
-        taskService.saveTask(task).block();
+        taskService.saveTask(TaskEntity.builder()
+                        .title("task1")
+                        .description("desc1")
+                        .assignedTo(user.getUserId())
+                        .status(TaskStatus.values()[new Random().nextInt(TaskStatus.values().length)])
+                        .priority(TaskPriority.values()[new Random().nextInt(TaskPriority.values().length)])
+                        .targetEndDate(LocalDate.now().plusDays(new Random().nextInt(3)))
+                        // TODO: Check in Postgres to see if the date is auto-populated
+                        .createdOn(LocalDate.now())
+                        .createdBy(user.getUserId())
+                        .build())
+                .block();
     }
 }

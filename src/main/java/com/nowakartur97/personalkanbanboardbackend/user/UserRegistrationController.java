@@ -38,10 +38,11 @@ public class UserRegistrationController extends UserController {
     }
 
     private UserEntity mapToEntity(UserDTO userDTO) {
-        return new UserEntity(
-                userDTO.getUsername(),
-                bCryptPasswordEncoder.encode(userDTO.getPassword()),
-                userDTO.getEmail(),
-                UserRole.USER);
+        return UserEntity.builder()
+                .username(userDTO.getUsername())
+                .password(bCryptPasswordEncoder.encode(userDTO.getPassword()))
+                .email(userDTO.getEmail())
+                .role(UserRole.USER)
+                .build();
     }
 }
