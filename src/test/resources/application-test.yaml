@@ -1,3 +1,29 @@
+spring:
+  r2dbc:
+    username: user
+    password: password
+    url: r2dbc:h2:file:///./data/kanban_board;MODE=PostgreSQL
+    driverClassName: org.h2.Driver
+    initialization-mode: always
+  flyway:
+    user: user
+    password: password
+    url: jdbc:h2:file:./data/kanban_board;MODE=PostgreSQL
+    locations: classpath:db/migration/h2
+  jpa:
+    hibernate:
+      dialect: org.hibernate.dialect.H2Dialect
+      format_sql: true
+    show-sql: true
+  h2:
+    console:
+      enabled: true
+      path: /h2
+
 app:
+  h2:
+    port:
+      web: 8082
+      tcp: 9092
   jwt:
     secret-key: 8f9879e8-1afd-4a88-81b8-04d68f32fdaf-test

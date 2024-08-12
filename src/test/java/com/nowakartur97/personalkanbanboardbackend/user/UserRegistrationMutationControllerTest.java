@@ -30,6 +30,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
                 .entity(UserResponse.class)
                 .get();
 
+        assertThat(userResponse).isNotNull();
         assertThat(userResponse.userId()).isNotNull();
         assertThat(userResponse.username()).isEqualTo(userDTO.getUsername());
         assertThat(userResponse.email()).isEqualTo(userDTO.getEmail());

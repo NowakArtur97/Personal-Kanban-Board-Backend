@@ -7,9 +7,7 @@ import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRepository;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.graphql.ResponseError;
@@ -25,7 +23,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {"spring.profiles.active=test"})
 @ActiveProfiles("test")
-public class IntegrationTest implements PostgresStarter {
+public class IntegrationTest {//} implements PostgresStarter {
 
     @Autowired
     protected TaskRepository taskRepository;
@@ -40,27 +38,31 @@ public class IntegrationTest implements PostgresStarter {
     @Autowired
     protected BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    @BeforeAll
-    public static void startContainer() {
-        postgresContainer.start();
-    }
+//    @BeforeAll
+//    public static void startContainer() {
+//        postgresContainer.start();
+//    }
 
     @AfterEach
     public void cleanUpTables() {
-        userRepository.deleteAll().block();
         taskRepository.deleteAll().block();
+        userRepository.deleteAll().block();
     }
 
-    @AfterAll
-    public static void stopContainer() {
-        postgresContainer.stop();
-    }
+//    @AfterAll
+//    public static void stopContainer() {
+//        postgresContainer.stop();
+//    }
 
     protected UserEntity createUser() {
+        return userRepository.save(createUser("testUser", "testUser@domain.com")).block();
+    }
+
+    protected UserEntity createUser(String username, String email) {
         UserEntity user = UserEntity.builder()
-                .username("testUser")
+                .username(username)
                 .password(bCryptPasswordEncoder.encode("pass1"))
-                .email("testUser@domain.com")
+                .email(email)
                 .role(UserRole.USER)
                 .build();
         return userRepository.save(user).block();

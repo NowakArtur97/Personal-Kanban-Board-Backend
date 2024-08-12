@@ -40,10 +40,10 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
 
     @Override
     public void run(String... args) {
-        // if (activeProfile.equals("local")) {
-        UserEntity user = createUser();
-        createTask(user);
-        // }
+        if (activeProfile.equals("local")) {
+            UserEntity user = createUser();
+            createTask(user);
+        }
     }
 
     private UserEntity createUser() {

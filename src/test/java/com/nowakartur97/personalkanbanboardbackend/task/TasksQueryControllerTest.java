@@ -134,6 +134,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
     }
 
     private void assertTask(TaskResponse taskResponse, TaskEntity taskEntity, String username) {
+        assertThat(taskResponse).isNotNull();
         assertThat(taskResponse.taskId()).isEqualTo(taskEntity.getTaskId());
         assertThat(taskResponse.title()).isEqualTo(taskEntity.getTitle());
         assertThat(taskResponse.status()).isEqualTo(taskEntity.getStatus());
