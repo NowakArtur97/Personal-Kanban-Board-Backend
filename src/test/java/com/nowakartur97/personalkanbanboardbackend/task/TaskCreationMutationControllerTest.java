@@ -2,7 +2,10 @@ package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
+import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
+import org.springframework.graphql.ResponseError;
+import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -40,6 +43,75 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
         assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername());
     }
 
+    @Test
+    public void whenCreateTaskWithoutTaskData_shouldReturnGraphQLErrorResponse() {
+
+        UserEntity userEntity = createUser();
+
+        httpGraphQlTester
+                .mutate()
+                .headers(headers -> addAuthorizationHeader(headers, userEntity))
+                .build()
+                .document(CREATE_TASK)
+                .execute()
+                .errors()
+                .satisfy(
+                        responseErrors -> {
+                            assertThat(responseErrors.size()).isOne();
+                            ResponseError responseError = responseErrors.getFirst();
+                            assertValidationErrorResponse(responseError, new SourceLocation(1, 22),
+                                    "Variable 'taskDTO' has an invalid value: Variable 'taskDTO' has coerced Null value for NonNull type 'TaskDTO!'"
+                            );
+                        });
+    }
+
+    @Test
+    public void whenCreateTaskWithoutTitle_shouldReturnGraphQLErrorResponse() {
+
+        UserEntity userEntity = createUser();
+        TaskDTO taskDTO = new TaskDTO(null, null, null, null, null);
+
+        makeCreateTaskRequestWithErrors(userEntity, taskDTO)
+                .satisfy(
+                        responseErrors -> {
+                            assertThat(responseErrors.size()).isOne();
+                            ResponseError responseError = responseErrors.getFirst();
+                            assertValidationErrorResponse(responseError, "Variable 'taskDTO' has an invalid value: Field 'title' has coerced Null value for NonNull type 'String!'");
+                        });
+    }
+
+    @Test
+    public void whenCreateTaskWitBlankTitle_shouldReturnGraphQLErrorResponse() {
+
+        UserEntity userEntity = createUser();
+        TaskDTO taskDTO = new TaskDTO("", null, null, null, null);
+
+        makeCreateTaskRequestWithErrors(userEntity, taskDTO)
+                .satisfy(
+                        responseErrors -> {
+                            assertThat(responseErrors.size()).isEqualTo(2);
+                            ResponseError firstResponseError = responseErrors.getFirst();
+                            assertErrorResponse(firstResponseError, "Title cannot be empty.");
+                            ResponseError secondResponseError = responseErrors.getLast();
+                            assertErrorResponse(secondResponseError, "Title must be between 4 and 100 characters.");
+                        });
+    }
+
+    @Test
+    public void whenCreateTaskWitTooShortTitle_shouldReturnGraphQLErrorResponse() {
+
+        UserEntity userEntity = createUser();
+        TaskDTO taskDTO = new TaskDTO("ti", null, null, null, null);
+
+        makeCreateTaskRequestWithErrors(userEntity, taskDTO)
+                .satisfy(
+                        responseErrors -> {
+                            assertThat(responseErrors.size()).isOne();
+                            ResponseError responseError = responseErrors.getLast();
+                            assertErrorResponse(responseError, "Title must be between 4 and 100 characters.");
+                        });
+    }
+
     private TaskResponse makeCreateTaskRequest(UserEntity userEntity, TaskDTO taskDTO) {
         return httpGraphQlTester
                 .mutate()
@@ -53,6 +125,17 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
                 .path(CREATE_TASK_PATH)
                 .entity(TaskResponse.class)
                 .get();
+    }
+
+    private GraphQlTester.Errors makeCreateTaskRequestWithErrors(UserEntity userEntity, TaskDTO taskDTO) {
+        return httpGraphQlTester
+                .mutate()
+                .headers(headers -> addAuthorizationHeader(headers, userEntity))
+                .build()
+                .document(CREATE_TASK)
+                .variable("taskDTO", taskDTO)
+                .execute()
+                .errors();
     }
 
     private void assertTaskResponse(TaskResponse taskResponse, TaskDTO taskDTO, String createdBy) {
@@ -89,5 +172,13 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
         assertThat(taskEntity.getCreatedBy()).isEqualTo(createdBy);
         assertThat(taskEntity.getUpdatedOn()).isNull();
         assertThat(taskEntity.getUpdatedBy()).isNull();
+    }
+
+    private void assertErrorResponse(ResponseError responseError, String message) {
+        assertErrorResponse(responseError, message, "createTask", new SourceLocation(2, 3));
+    }
+
+    private void assertValidationErrorResponse(ResponseError responseError, String message) {
+        assertValidationErrorResponse(responseError, new SourceLocation(1, 22), message);
     }
 }

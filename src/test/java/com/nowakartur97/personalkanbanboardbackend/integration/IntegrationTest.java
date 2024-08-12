@@ -91,4 +91,9 @@ public class IntegrationTest {
         assertThat(responseError.getErrorType()).isEqualTo(errorType);
         assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
     }
+
+    protected void assertValidationErrorResponse(ResponseError responseError, SourceLocation sourceLocation, String message) {
+        assertThat(responseError.getErrorType()).isEqualTo(graphql.ErrorType.ValidationError);
+        assertErrorResponse(responseError, message, "", sourceLocation);
+    }
 }
