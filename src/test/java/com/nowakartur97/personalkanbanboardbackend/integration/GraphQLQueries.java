@@ -2,8 +2,26 @@ package com.nowakartur97.personalkanbanboardbackend.integration;
 
 public class GraphQLQueries {
 
+    public static final String CREATE_TASK = """
+            mutation CREATE_TASK($taskDTO: TaskDTO!) {
+              createTask(taskDTO: $taskDTO) {
+                taskId
+                title
+                description
+                priority
+                status
+                targetEndDate
+                assignedTo
+                createdOn
+                createdBy
+                updatedOn
+                updatedBy
+              }
+            }
+            """;
+
     public static final String GET_TASKS = """
-            query TASKS_BY_USERNAME {
+            query TASKS {
               tasks {
                 taskId
                 title

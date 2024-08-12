@@ -83,7 +83,7 @@ public class TaskController {
                 taskEntity.getTargetEndDate(),
                 createdBy,
                 taskEntity.getCreatedOn(),
-                createdBy,
+                null,
                 taskEntity.getUpdatedOn(),
                 assignedTo
         );
