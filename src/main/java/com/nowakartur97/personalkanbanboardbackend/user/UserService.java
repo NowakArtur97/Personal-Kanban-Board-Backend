@@ -6,12 +6,30 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
+
+    public Mono<Boolean> existsById(UUID id) {
+
+        log.info("Checking whether user with user id: '{}' exists", id);
+
+        return userRepository.existsById(id);
+    }
+
+    public Mono<UserEntity> findById(UUID userId) {
+
+        log.info("Looking up user by user id: '{}'", userId);
+
+        return userRepository.findById(userId)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("User", "userId", userId.toString())));
+    }
+
 
     public Mono<UserEntity> findByUsername(String username) {
 

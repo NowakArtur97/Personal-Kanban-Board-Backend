@@ -1,5 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
+import com.nowakartur97.personalkanbanboardbackend.exception.ResourceNotFoundException;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,20 @@ public class TaskService {
 
     public Mono<TaskEntity> saveTask(TaskEntity task) {
         return taskRepository.save(task);
+    }
+
+    public Mono<TaskEntity> createTask(TaskEntity task, String username) {
+
+        log.info("Creating new task: {}", task);
+
+        return userService.existsById(task.getAssignedTo())
+                .map(exists -> {
+                    if (exists) {
+                        throw new ResourceNotFoundException("User", "id", task.getAssignedTo().toString());
+                    }
+                    return true;
+                })
+                .flatMap(__ -> taskRepository.save(task));
     }
 
     public Flux<TaskEntity> getAllTasksForUser(String username) {

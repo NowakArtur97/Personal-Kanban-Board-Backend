@@ -1,4 +1,28 @@
-query TASKS_BY_USERNAME {
+mutation CREATE_TASK {
+  createTask(
+    taskDTO: {
+      title: "Example task",
+      description: "Example description",
+      priority: MEDIUM,
+      assignedTo: "14698c1e-1ef5-45ac-b8e1-e2ee121e9f75	",
+      targetEndDate: "2024-08-12"
+    }
+  ) {
+    taskId
+    title
+    description
+    priority
+    status
+    targetEndDate
+    assignedTo
+    createdOn
+    createdBy
+    updatedOn
+    updatedBy
+  }
+}
+
+query TASKS {
   tasks(username: "user") {
     taskId
     title
