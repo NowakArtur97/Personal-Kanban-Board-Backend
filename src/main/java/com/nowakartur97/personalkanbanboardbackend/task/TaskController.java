@@ -37,12 +37,21 @@ public class TaskController {
     @MutationMapping
     public Mono<TaskResponse> createTask(@Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
-
+        if (taskDTO.getAssignedTo() == null) {
+            return userService.findByUsername(username)
+                    .flatMap(user -> Mono.just(mapToEntity(taskDTO, user.getUserId()))
+                            .flatMap(taskService::saveTask)
+                            .map(task -> mapToResponse(task, user.getUsername())));
+        }
         return userService.findByUsername(username)
                 .zipWith(userService.findById(taskDTO.getAssignedTo()))
                 .flatMap(tuple -> Mono.just(mapToEntity(taskDTO, tuple.getT1().getUserId(), tuple.getT2().getUserId()))
                         .flatMap(taskService::saveTask)
                         .map(task -> mapToResponse(task, tuple.getT1().getUsername(), tuple.getT2().getUsername())));
+    }
+
+    private TaskEntity mapToEntity(TaskDTO taskDTO, UUID createdBy) {
+        return mapToEntity(taskDTO, createdBy, createdBy);
     }
 
     private TaskEntity mapToEntity(TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
