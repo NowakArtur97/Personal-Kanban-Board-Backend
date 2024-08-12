@@ -21,9 +21,11 @@ import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {"spring.profiles.active=test"})
-@ActiveProfiles("test")
-public class IntegrationTest {//} implements PostgresStarter {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("h2")
+// TODO: test with Postgres test container
+//@ActiveProfiles("test-container")
+public class IntegrationTest {
 
     @Autowired
     protected TaskRepository taskRepository;

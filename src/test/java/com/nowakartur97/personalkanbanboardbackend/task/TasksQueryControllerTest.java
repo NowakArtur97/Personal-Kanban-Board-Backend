@@ -37,7 +37,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
 
         assertThat(taskResponses.size()).isOne();
         TaskResponse taskResponse = taskResponses.getFirst();
-        assertTask(taskResponse, taskEntity, userEntity.getUsername());
+        assertTaskResponse(taskResponse, taskEntity, userEntity.getUsername());
     }
 
     @Test
@@ -133,7 +133,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 });
     }
 
-    private void assertTask(TaskResponse taskResponse, TaskEntity taskEntity, String username) {
+    private void assertTaskResponse(TaskResponse taskResponse, TaskEntity taskEntity, String username) {
         assertThat(taskResponse).isNotNull();
         assertThat(taskResponse.taskId()).isEqualTo(taskEntity.getTaskId());
         assertThat(taskResponse.title()).isEqualTo(taskEntity.getTitle());
@@ -144,7 +144,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
         assertThat(taskResponse.createdOn()).isEqualTo(taskEntity.getCreatedOn());
         assertThat(taskResponse.createdBy()).isEqualTo(username);
         assertThat(taskResponse.updatedOn()).isEqualTo(taskEntity.getUpdatedOn());
-        assertThat(taskResponse.updatedBy()).isEqualTo(username);
+        assertThat(taskResponse.updatedBy()).isEqualTo(null);
     }
 
     private TaskEntity createTask(UserEntity user) {

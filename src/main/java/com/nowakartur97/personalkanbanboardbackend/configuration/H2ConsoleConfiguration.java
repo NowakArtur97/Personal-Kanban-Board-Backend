@@ -7,9 +7,11 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
+// Without this configuration it is not possible to enter the H2 console using Webflux
+
 @Configuration
 @Profile("local")
-public class H2Configuration {
+public class H2ConsoleConfiguration {
 
     @Value("${app.h2.port.web}")
     private String h2ConsoleWebPort;
@@ -22,13 +24,13 @@ public class H2Configuration {
 
     @EventListener(ContextRefreshedEvent.class)
     public void start() throws java.sql.SQLException {
-        this.webServer = org.h2.tools.Server.createWebServer("-webPort", h2ConsoleWebPort, "-tcpAllowOthers").start();
-        this.tcpServer = org.h2.tools.Server.createTcpServer("-tcpPort", h2ConsoleTcpPort, "-tcpAllowOthers").start();
+        webServer = org.h2.tools.Server.createWebServer("-webPort", h2ConsoleWebPort, "-tcpAllowOthers").start();
+        tcpServer = org.h2.tools.Server.createTcpServer("-tcpPort", h2ConsoleTcpPort, "-tcpAllowOthers").start();
     }
 
     @EventListener(ContextClosedEvent.class)
     public void stop() {
-        this.tcpServer.stop();
-        this.webServer.stop();
+        tcpServer.stop();
+        webServer.stop();
     }
 }
