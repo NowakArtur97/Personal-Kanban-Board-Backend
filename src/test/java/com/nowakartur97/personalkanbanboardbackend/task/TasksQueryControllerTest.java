@@ -13,6 +13,8 @@ import java.util.List;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.GET_TASKS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+// TODO: Refactor assertErrorResponse
+
 public class TasksQueryControllerTest extends IntegrationTest {
 
     private final static String TASKS_PATH = "tasks";
@@ -70,7 +72,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, "tasks", ErrorType.UNAUTHORIZED, "Unauthorized");
+                    assertUnauthorizedErrorResponse(responseError, "tasks", "Unauthorized");
                 });
     }
 
@@ -89,7 +91,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, "tasks", ErrorType.UNAUTHORIZED, "JWT expired");
+                    assertUnauthorizedErrorResponse(responseError, "tasks", "JWT expired");
                 });
     }
 
@@ -108,8 +110,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, "tasks", ErrorType.UNAUTHORIZED,
-                            "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 0");
+                    assertUnauthorizedErrorResponse(responseError, "tasks", "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 0");
                 });
     }
 
@@ -128,7 +129,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, "tasks", ErrorType.UNAUTHORIZED,
+                    assertUnauthorizedErrorResponse(responseError, "tasks",
                             "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.");
                 });
     }

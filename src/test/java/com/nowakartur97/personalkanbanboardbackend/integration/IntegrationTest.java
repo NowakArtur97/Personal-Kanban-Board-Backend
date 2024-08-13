@@ -96,4 +96,9 @@ public class IntegrationTest {
         assertThat(responseError.getErrorType()).isEqualTo(graphql.ErrorType.ValidationError);
         assertErrorResponse(responseError, message, "", sourceLocation);
     }
+
+    protected void assertUnauthorizedErrorResponse(ResponseError responseError, String path, String message) {
+        assertThat(responseError.getErrorType()).isEqualTo(ErrorType.UNAUTHORIZED);
+        assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
+    }
 }

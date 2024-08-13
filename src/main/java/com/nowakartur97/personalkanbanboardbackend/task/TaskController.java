@@ -35,6 +35,7 @@ public class TaskController {
     }
 
     @MutationMapping
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public Mono<TaskResponse> createTask(@Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
         if (taskDTO.getAssignedTo() == null) {
