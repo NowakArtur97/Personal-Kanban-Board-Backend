@@ -45,6 +45,22 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     }
 
     @Test
+    public void whenCreateTaskForNotExistingUserAssignedTo_shouldReturnGraphQLErrorResponse() {
+
+        UserEntity userEntity = createUser();
+        UUID assignedTo = UUID.randomUUID();
+        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, assignedTo);
+
+        makeCreateTaskRequestWithErrors(userEntity, taskDTO)
+                .satisfy(
+                        responseErrors -> {
+                            assertThat(responseErrors.size()).isOne();
+                            ResponseError responseError = responseErrors.getFirst();
+                            assertNotFoundErrorResponse(responseError, "createTask", "User with userId: '" + assignedTo + "' not found.");
+                        });
+    }
+
+    @Test
     public void whenCreateTaskWithoutTaskData_shouldReturnGraphQLErrorResponse() {
 
         UserEntity userEntity = createUser();

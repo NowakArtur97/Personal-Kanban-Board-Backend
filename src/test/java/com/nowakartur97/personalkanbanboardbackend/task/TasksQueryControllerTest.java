@@ -5,15 +5,12 @@ import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.graphql.ResponseError;
-import org.springframework.graphql.execution.ErrorType;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.GET_TASKS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
-// TODO: Refactor assertErrorResponse
 
 public class TasksQueryControllerTest extends IntegrationTest {
 
@@ -55,8 +52,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, "tasks", ErrorType.NOT_FOUND,
-                            "User with username: 'notExistingUser' not found.");
+                    assertNotFoundErrorResponse(responseError, "tasks", "User with username: 'notExistingUser' not found.");
                 });
     }
 

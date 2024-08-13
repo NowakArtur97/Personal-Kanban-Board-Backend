@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.graphql.ResponseError;
-import org.springframework.graphql.execution.ErrorType;
 
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.AUTHENTICATE_USER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -68,8 +67,7 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, "loginUser", ErrorType.NOT_FOUND,
-                            "User with username/email: 'notExistingUser' not found.");
+                    assertNotFoundErrorResponse(responseError, "loginUser", "User with username/email: 'notExistingUser' not found.");
                 });
     }
 

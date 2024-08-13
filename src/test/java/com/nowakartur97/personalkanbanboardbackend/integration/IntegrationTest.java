@@ -101,4 +101,9 @@ public class IntegrationTest {
         assertThat(responseError.getErrorType()).isEqualTo(ErrorType.UNAUTHORIZED);
         assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
     }
+
+    protected void assertNotFoundErrorResponse(ResponseError responseError, String path, String message) {
+        assertThat(responseError.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
+        assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
+    }
 }
