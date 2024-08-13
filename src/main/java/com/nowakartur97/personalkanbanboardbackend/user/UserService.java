@@ -42,7 +42,7 @@ public class UserService {
 
     public Mono<Boolean> existsByUsernameOrEmail(String username, String email) {
 
-        log.info("Checking if user exists by username: {} or email: {}", username, email);
+        log.info("Checking if user exists by username: '{}' or email: '{}'", username, email);
 
         return userRepository.existsByUsernameOrEmail(username, email);
     }
