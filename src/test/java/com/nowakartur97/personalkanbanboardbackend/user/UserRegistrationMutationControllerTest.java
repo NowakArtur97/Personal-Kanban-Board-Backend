@@ -5,11 +5,11 @@ import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.test.tester.GraphQlTester;
+import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.REGISTER_USER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-// TODO: Add more tests: null or too long values
 public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
     private final static String REGISTER_USER_PATH = "registerUser";
@@ -71,6 +71,21 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
     }
 
     @Test
+    public void whenRegisterUserWithNullValues_shouldReturnGraphQLErrorResponse() {
+
+        UserDTO userDTO = new UserDTO(null, null, null);
+
+        makeRegisterUserRequestWithErrors(userDTO)
+                .satisfy(
+                        responseErrors -> {
+                            assertThat(responseErrors.size()).isOne();
+                            ResponseError responseError = responseErrors.getFirst();
+                            assertValidationErrorResponse(responseError, new SourceLocation(1, 24),
+                                    "Variable 'userDTO' has an invalid value: Field 'username' has coerced Null value for NonNull type 'String!'");
+                        });
+    }
+
+    @Test
     public void whenRegisterUserWithBlankUsername_shouldReturnGraphQLErrorResponse() {
 
         UserDTO userDTO = new UserDTO("", "pass123", "email@domain.com");
@@ -90,6 +105,20 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
     public void whenRegisterUserWithTooShortUsername_shouldReturnGraphQLErrorResponse() {
 
         UserDTO userDTO = new UserDTO("u", "pass123", "email@domain.com");
+
+        makeRegisterUserRequestWithErrors(userDTO)
+                .satisfy(
+                        responseErrors -> {
+                            assertThat(responseErrors.size()).isOne();
+                            ResponseError responseError = responseErrors.getFirst();
+                            assertErrorResponse(responseError, "Username must be between 4 and 100 characters.");
+                        });
+    }
+
+    @Test
+    public void whenRegisterUserWithTooLongUsername_shouldReturnGraphQLErrorResponse() {
+
+        UserDTO userDTO = new UserDTO(StringUtils.repeat("u", 101), "pass123", "email@domain.com");
 
         makeRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
