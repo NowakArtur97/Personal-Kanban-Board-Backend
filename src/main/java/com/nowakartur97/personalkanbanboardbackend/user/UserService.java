@@ -15,13 +15,6 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public Mono<Boolean> existsById(UUID id) {
-
-        log.info("Checking whether user with user id: '{}' exists", id);
-
-        return userRepository.existsById(id);
-    }
-
     public Mono<UserEntity> findById(UUID userId) {
 
         log.info("Looking up user by user id: '{}'", userId);
