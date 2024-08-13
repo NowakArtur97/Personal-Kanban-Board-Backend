@@ -6,6 +6,7 @@ import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.test.tester.GraphQlTester;
+import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -76,7 +77,8 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
                             ResponseError responseError = responseErrors.getFirst();
-                            assertValidationErrorResponse(responseError, "Variable 'taskDTO' has an invalid value: Field 'title' has coerced Null value for NonNull type 'String!'");
+                            assertValidationErrorResponse(responseError, new SourceLocation(1, 22),
+                                    "Variable 'taskDTO' has an invalid value: Field 'title' has coerced Null value for NonNull type 'String!'");
                         });
     }
 
@@ -109,6 +111,36 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
                             assertThat(responseErrors.size()).isOne();
                             ResponseError responseError = responseErrors.getLast();
                             assertErrorResponse(responseError, "Title must be between 4 and 100 characters.");
+                        });
+    }
+
+    @Test
+    public void whenCreateTaskWitTooLongTitle_shouldReturnGraphQLErrorResponse() {
+
+        UserEntity userEntity = createUser();
+        TaskDTO taskDTO = new TaskDTO(StringUtils.repeat("t", 101), null, null, null, null);
+
+        makeCreateTaskRequestWithErrors(userEntity, taskDTO)
+                .satisfy(
+                        responseErrors -> {
+                            assertThat(responseErrors.size()).isOne();
+                            ResponseError responseError = responseErrors.getLast();
+                            assertErrorResponse(responseError, "Title must be between 4 and 100 characters.");
+                        });
+    }
+
+    @Test
+    public void whenCreateTaskWitTooLongDescription_shouldReturnGraphQLErrorResponse() {
+
+        UserEntity userEntity = createUser();
+        TaskDTO taskDTO = new TaskDTO("title", StringUtils.repeat("d", 101), null, null, null);
+
+        makeCreateTaskRequestWithErrors(userEntity, taskDTO)
+                .satisfy(
+                        responseErrors -> {
+                            assertThat(responseErrors.size()).isOne();
+                            ResponseError responseError = responseErrors.getLast();
+                            assertErrorResponse(responseError, "Description must be between 0 and 100 characters.");
                         });
     }
 
@@ -259,9 +291,5 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
 
     private void assertErrorResponse(ResponseError responseError, String message) {
         assertErrorResponse(responseError, message, "createTask", new SourceLocation(2, 3));
-    }
-
-    private void assertValidationErrorResponse(ResponseError responseError, String message) {
-        assertValidationErrorResponse(responseError, new SourceLocation(1, 22), message);
     }
 }

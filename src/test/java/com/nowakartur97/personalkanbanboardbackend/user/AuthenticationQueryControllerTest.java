@@ -47,8 +47,9 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
                             ResponseError responseError = responseErrors.getFirst();
-                            assertErrorResponse(responseError, graphql.ErrorType.ValidationError,
-                                    "Variable 'authenticationRequest' has an invalid value: Variable 'authenticationRequest' has coerced Null value for NonNull type 'AuthenticationRequest!'");
+                            assertValidationErrorResponse(responseError, new SourceLocation(1, 25),
+                                    "Variable 'authenticationRequest' has an invalid value: Variable 'authenticationRequest' has coerced Null value for NonNull type 'AuthenticationRequest!'"
+                            );
                         });
     }
 
@@ -84,12 +85,7 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertErrorResponse(responseError, "loginUser", ErrorType.UNAUTHORIZED, "Invalid login credentials.");
+                    assertUnauthorizedErrorResponse(responseError, "loginUser", "Invalid login credentials.");
                 });
-    }
-
-    private void assertErrorResponse(ResponseError responseError, graphql.ErrorType errorType, String message) {
-        assertThat(responseError.getErrorType()).isEqualTo(errorType);
-        assertErrorResponse(responseError, message, "", new SourceLocation(1, 25));
     }
 }

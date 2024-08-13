@@ -1,16 +1,15 @@
 package com.nowakartur97.personalkanbanboardbackend.user;
 
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
-import graphql.ErrorType;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.springframework.graphql.ResponseError;
-
-import java.util.List;
+import org.springframework.graphql.test.tester.GraphQlTester;
 
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.REGISTER_USER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+// TODO: Add more tests: null or too long values
 public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
     private final static String REGISTER_USER_PATH = "registerUser";
@@ -50,7 +49,9 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
                             ResponseError responseError = responseErrors.getFirst();
-                            assertValidationErrorResponse(responseError, "Variable 'userDTO' has an invalid value: Variable 'userDTO' has coerced Null value for NonNull type 'UserDTO!'");
+                            assertValidationErrorResponse(responseError, new SourceLocation(1, 24),
+                                    "Variable 'userDTO' has an invalid value: Variable 'userDTO' has coerced Null value for NonNull type 'UserDTO!'"
+                            );
                         });
     }
 
@@ -58,12 +59,9 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
     public void whenRegisterUserWithUsernameAlreadyTaken_shouldReturnGraphQLErrorResponse() {
 
         UserEntity userEntity = createUser();
+        UserDTO userDTO = new UserDTO(userEntity.getUsername(), "pass123", "email@domain.com");
 
-        httpGraphQlTester
-                .document(REGISTER_USER)
-                .variable("userDTO", new UserDTO(userEntity.getUsername(), "pass123", "email@domain.com"))
-                .execute()
-                .errors()
+        makeRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -75,11 +73,9 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
     @Test
     public void whenRegisterUserWithBlankUsername_shouldReturnGraphQLErrorResponse() {
 
-        httpGraphQlTester
-                .document(REGISTER_USER)
-                .variable("userDTO", new UserDTO("", "pass123", "email@domain.com"))
-                .execute()
-                .errors()
+        UserDTO userDTO = new UserDTO("", "pass123", "email@domain.com");
+
+        makeRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isEqualTo(2);
@@ -93,11 +89,9 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
     @Test
     public void whenRegisterUserWithTooShortUsername_shouldReturnGraphQLErrorResponse() {
 
-        httpGraphQlTester
-                .document(REGISTER_USER)
-                .variable("userDTO", new UserDTO("u", "pass123", "email@domain.com"))
-                .execute()
-                .errors()
+        UserDTO userDTO = new UserDTO("u", "pass123", "email@domain.com");
+
+        makeRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -109,11 +103,9 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
     @Test
     public void whenRegisterUserWithBlankPassword_shouldReturnGraphQLErrorResponse() {
 
-        httpGraphQlTester
-                .document(REGISTER_USER)
-                .variable("userDTO", new UserDTO("user", "", "email@domain.com"))
-                .execute()
-                .errors()
+        UserDTO userDTO = new UserDTO("user", "", "email@domain.com");
+
+        makeRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -126,12 +118,9 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
     public void whenRegisterUserWithEmailAlreadyTaken_shouldReturnGraphQLErrorResponse() {
 
         UserEntity userEntity = createUser();
+        UserDTO userDTO = new UserDTO("user", "pass123", userEntity.getEmail());
 
-        httpGraphQlTester
-                .document(REGISTER_USER)
-                .variable("userDTO", new UserDTO("user", "pass123", userEntity.getEmail()))
-                .execute()
-                .errors()
+        makeRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -143,11 +132,9 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
     @Test
     public void whenRegisterUserWithBlankEmail_shouldReturnGraphQLErrorResponse() {
 
-        httpGraphQlTester
-                .document(REGISTER_USER)
-                .variable("userDTO", new UserDTO("user", "pass123", ""))
-                .execute()
-                .errors()
+        UserDTO userDTO = new UserDTO("user", "pass123", "");
+
+        makeRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -159,11 +146,9 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
     @Test
     public void whenRegisterUserWithInvalidEmail_shouldReturnGraphQLErrorResponse() {
 
-        httpGraphQlTester
-                .document(REGISTER_USER)
-                .variable("userDTO", new UserDTO("user", "pass123", "invalid.com"))
-                .execute()
-                .errors()
+        UserDTO userDTO = new UserDTO("user", "pass123", "invalid.com");
+
+        makeRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -172,16 +157,15 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
                         });
     }
 
-    private void assertErrorResponse(ResponseError responseError, String message) {
-        assertThat(responseError.getMessage()).isEqualTo(message);
-        assertThat(responseError.getPath()).isEqualTo("registerUser");
-        assertThat(responseError.getLocations()).isEqualTo(List.of(new SourceLocation(2, 3)));
+    private GraphQlTester.Errors makeRegisterUserRequestWithErrors(UserDTO userDTO) {
+        return httpGraphQlTester
+                .document(REGISTER_USER)
+                .variable("userDTO", userDTO)
+                .execute()
+                .errors();
     }
 
-    private void assertValidationErrorResponse(ResponseError responseError, String message) {
-        assertThat(responseError.getErrorType()).isEqualTo(ErrorType.ValidationError);
-        assertThat(responseError.getMessage()).isEqualTo(message);
-        assertThat(responseError.getPath()).isEqualTo("");
-        assertThat(responseError.getLocations()).isEqualTo(List.of(new SourceLocation(1, 24)));
+    private void assertErrorResponse(ResponseError responseError, String message) {
+        assertErrorResponse(responseError, message, "registerUser", new SourceLocation(2, 3));
     }
 }
