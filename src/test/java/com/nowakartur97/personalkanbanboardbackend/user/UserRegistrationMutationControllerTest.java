@@ -3,6 +3,8 @@ package com.nowakartur97.personalkanbanboardbackend.user;
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
@@ -70,10 +72,12 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
                         });
     }
 
-    @Test
-    public void whenRegisterUserWithNullValues_shouldReturnGraphQLErrorResponse() {
+    @ParameterizedTest
+    @CsvSource({",password,email,username", "username,,email,password", "username,password,,email"})
+    public void whenRegisterUserWithNullValues_shouldReturnGraphQLErrorResponse(
+            String username, String password, String email, String field) {
 
-        UserDTO userDTO = new UserDTO(null, null, null);
+        UserDTO userDTO = new UserDTO(username, password, email);
 
         makeRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
@@ -81,7 +85,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
                             assertThat(responseErrors.size()).isOne();
                             ResponseError responseError = responseErrors.getFirst();
                             assertValidationErrorResponse(responseError, new SourceLocation(1, 24),
-                                    "Variable 'userDTO' has an invalid value: Field 'username' has coerced Null value for NonNull type 'String!'");
+                                    "Variable 'userDTO' has an invalid value: Field '" + field + "' has coerced Null value for NonNull type 'String!'");
                         });
     }
 

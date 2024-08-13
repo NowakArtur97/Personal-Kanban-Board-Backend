@@ -3,6 +3,8 @@ package com.nowakartur97.personalkanbanboardbackend.user;
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.execution.ErrorType;
 
@@ -86,6 +88,26 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
                     assertUnauthorizedErrorResponse(responseError, "loginUser", "Invalid login credentials.");
+                });
+    }
+
+    @ParameterizedTest
+    @CsvSource({",password,usernameOrEmail", "username,,password"})
+    public void whenLoginWithNullValues_shouldReturnGraphQLErrorResponse(String username, String password, String field) {
+
+        AuthenticationRequest authenticationRequest = new AuthenticationRequest(username, password);
+
+        httpGraphQlTester
+                .document(AUTHENTICATE_USER)
+                .variable("authenticationRequest", authenticationRequest)
+                .execute()
+                .errors()
+                .satisfy(responseErrors -> {
+                    assertThat(responseErrors.size()).isOne();
+                    ResponseError responseError = responseErrors.getFirst();
+                    assertValidationErrorResponse(responseError, new SourceLocation(1, 25),
+                            "Variable 'authenticationRequest' has an invalid value: Field '" + field + "' has coerced Null value for NonNull type 'String!'"
+                    );
                 });
     }
 }
