@@ -19,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
+import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.FIND_ALL_USERS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -87,11 +88,6 @@ public class IntegrationTest {
         assertThat(responseError.getLocations()).isEqualTo(List.of(sourceLocation));
     }
 
-    protected void assertErrorResponse(ResponseError responseError, String path, ErrorType errorType, String message) {
-        assertThat(responseError.getErrorType()).isEqualTo(errorType);
-        assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
-    }
-
     protected void assertValidationErrorResponse(ResponseError responseError, SourceLocation sourceLocation, String message) {
         assertThat(responseError.getErrorType()).isEqualTo(graphql.ErrorType.ValidationError);
         assertErrorResponse(responseError, message, "", sourceLocation);
@@ -105,5 +101,56 @@ public class IntegrationTest {
     protected void assertNotFoundErrorResponse(ResponseError responseError, String path, String message) {
         assertThat(responseError.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
         assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
+    }
+
+    protected void runTestForSendingRequestWithoutProvidingAuthorizationHeader(String document, String path) {
+
+        httpGraphQlTester
+                .mutate()
+                .build()
+                .document(FIND_ALL_USERS)
+                .execute()
+                .errors()
+                .satisfy(responseErrors -> {
+                    assertThat(responseErrors.size()).isOne();
+                    ResponseError responseError = responseErrors.getFirst();
+                    assertUnauthorizedErrorResponse(responseError, "users", "Unauthorized");
+                });
+    }
+
+    protected void runTestForSendingRequestWithExpiredToken(String document, String path) {
+
+        String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidGVzdFVzZXIiLCJpYXQiOjE3MTEyNzg1ODAsImV4cCI6MTcxMTI3ODU4MH0.nouAgIkDaanTk0LX37HSRjM4SDZxqBqz1gDufnU2fzQ";
+
+        sendRequestWithJWTErrors(expiredToken, document, path, "JWT expired");
+    }
+
+    protected void runTestForSendingRequestWithInvalidToken(String document, String path) {
+
+        String invalidToken = "invalid";
+
+        sendRequestWithJWTErrors(invalidToken, document, path, "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 0");
+    }
+
+    protected void runTestForSendingRequestWithDifferentTokenSignature(String document, String path) {
+
+        String invalidToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidXNlciIsImlhdCI6MTcxMTIwOTEzMiwiZXhwIjoxNzExMjE5OTMyfQ.n-h8vIdov2voZhwNdqbmgiO44XjeCdAMzf7ddqufoXc";
+
+        sendRequestWithJWTErrors(invalidToken, document, path, "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.");
+    }
+
+    private void sendRequestWithJWTErrors(String token, String document, String path, String message) {
+        httpGraphQlTester
+                .mutate()
+                .headers(headers -> addAuthorizationHeader(headers, token))
+                .build()
+                .document(document)
+                .execute()
+                .errors()
+                .satisfy(responseErrors -> {
+                    assertThat(responseErrors.size()).isOne();
+                    ResponseError responseError = responseErrors.getFirst();
+                    assertUnauthorizedErrorResponse(responseError, path, message);
+                });
     }
 }

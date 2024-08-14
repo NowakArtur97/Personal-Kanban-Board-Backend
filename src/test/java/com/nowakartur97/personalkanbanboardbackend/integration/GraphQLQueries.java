@@ -61,4 +61,16 @@ public class GraphQLQueries {
               }
             }
             """;
+
+    public static final String FIND_ALL_USERS = """
+            query USERS {
+              users {
+                userId
+                username
+                email
+                token
+                expirationTimeInMilliseconds
+              }
+            }
+            """;
 }
