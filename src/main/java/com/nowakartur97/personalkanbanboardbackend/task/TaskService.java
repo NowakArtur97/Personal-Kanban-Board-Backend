@@ -20,7 +20,7 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public Flux<TaskEntity> getAllTasksForUser(String username) {
+    public Flux<TaskEntity> findAllTasksForUser(String username) {
 
         log.info("Looking up tasks for user: {}", username);
 

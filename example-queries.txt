@@ -22,8 +22,8 @@ mutation CREATE_TASK {
   }
 }
 
-query TASKS {
-  tasks(username: "user") {
+query FIND_ALL_USER_TASKS {
+  tasks {
     taskId
     title
     description
@@ -50,6 +50,16 @@ mutation REGISTER_USER {
 
 query LOGIN_USER {
   loginUser(authenticationRequest: {usernameOrEmail: "user", password: "pass1"}) {
+    userId
+    username
+    email
+    token
+    expirationTimeInMilliseconds
+  }
+}
+
+query FIND_ALL_USERS {
+  users {
     userId
     username
     email

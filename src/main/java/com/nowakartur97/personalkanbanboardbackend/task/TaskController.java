@@ -30,7 +30,7 @@ public class TaskController {
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public Flux<TaskResponse> tasks(DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
-        return taskService.getAllTasksForUser(username)
+        return taskService.findAllTasksForUser(username)
                 .map(task -> mapToResponse(task, username));
     }
 

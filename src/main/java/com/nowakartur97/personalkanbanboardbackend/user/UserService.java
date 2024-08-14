@@ -4,6 +4,7 @@ import com.nowakartur97.personalkanbanboardbackend.exception.ResourceNotFoundExc
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -38,6 +39,13 @@ public class UserService {
 
         return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("User", "username/email", usernameOrEmail)));
+    }
+
+    public Flux<UserEntity> findAllUsers() {
+
+        log.info("Looking up all users");
+
+        return userRepository.findAll();
     }
 
     public Mono<Boolean> existsByUsernameOrEmail(String username, String email) {

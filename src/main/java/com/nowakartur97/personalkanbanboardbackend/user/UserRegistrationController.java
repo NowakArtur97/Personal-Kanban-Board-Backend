@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 @Controller
 @Validated
 @Slf4j
-public class UserRegistrationController extends UserController {
+public class UserRegistrationController extends UserBasicController {
 
     private final UserValidator userValidator;
 
@@ -34,7 +34,7 @@ public class UserRegistrationController extends UserController {
         return userValidator.validate(userDTO)
                 .map(__ -> mapToEntity(userDTO))
                 .flatMap(userService::saveUser)
-                .map(this::mapToUserResponse);
+                .map(this::mapToResponse);
     }
 
     private UserEntity mapToEntity(UserDTO userDTO) {

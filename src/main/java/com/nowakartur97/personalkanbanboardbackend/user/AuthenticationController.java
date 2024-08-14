@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 
 @Controller
 @Slf4j
-public class AuthenticationController extends UserController {
+public class AuthenticationController extends UserBasicController {
 
     public AuthenticationController(UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder,
                                     JWTUtil jwtUtil, JWTConfigurationProperties jwtConfigurationProperties) {
@@ -27,7 +27,7 @@ public class AuthenticationController extends UserController {
         return userService.findByUsernameOrEmail(authenticationRequest.getUsernameOrEmail())
                 .map(userEntity -> {
                     if (isPasswordCorrect(authenticationRequest, userEntity)) {
-                        return mapToUserResponse(userEntity);
+                        return mapToResponse(userEntity);
                     } else {
                         throw new BadCredentialsException("Invalid login credentials.");
                     }
