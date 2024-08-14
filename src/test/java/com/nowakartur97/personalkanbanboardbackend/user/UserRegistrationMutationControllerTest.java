@@ -63,7 +63,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
         UserEntity userEntity = createUser();
         UserDTO userDTO = new UserDTO(userEntity.getUsername(), "pass123", "email@domain.com");
 
-        makeRegisterUserRequestWithErrors(userDTO)
+        sendRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -79,7 +79,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
         UserDTO userDTO = new UserDTO(username, password, email);
 
-        makeRegisterUserRequestWithErrors(userDTO)
+        sendRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -94,7 +94,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
         UserDTO userDTO = new UserDTO("", "pass123", "email@domain.com");
 
-        makeRegisterUserRequestWithErrors(userDTO)
+        sendRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isEqualTo(2);
@@ -110,7 +110,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
         UserDTO userDTO = new UserDTO("u", "pass123", "email@domain.com");
 
-        makeRegisterUserRequestWithErrors(userDTO)
+        sendRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -124,7 +124,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
         UserDTO userDTO = new UserDTO(StringUtils.repeat("u", 101), "pass123", "email@domain.com");
 
-        makeRegisterUserRequestWithErrors(userDTO)
+        sendRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -138,7 +138,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
         UserDTO userDTO = new UserDTO("user", "", "email@domain.com");
 
-        makeRegisterUserRequestWithErrors(userDTO)
+        sendRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -153,7 +153,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
         UserEntity userEntity = createUser();
         UserDTO userDTO = new UserDTO("user", "pass123", userEntity.getEmail());
 
-        makeRegisterUserRequestWithErrors(userDTO)
+        sendRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -167,7 +167,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
         UserDTO userDTO = new UserDTO("user", "pass123", "");
 
-        makeRegisterUserRequestWithErrors(userDTO)
+        sendRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -181,7 +181,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
         UserDTO userDTO = new UserDTO("user", "pass123", "invalid.com");
 
-        makeRegisterUserRequestWithErrors(userDTO)
+        sendRegisterUserRequestWithErrors(userDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -190,7 +190,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
                         });
     }
 
-    private GraphQlTester.Errors makeRegisterUserRequestWithErrors(UserDTO userDTO) {
+    private GraphQlTester.Errors sendRegisterUserRequestWithErrors(UserDTO userDTO) {
         return httpGraphQlTester
                 .document(REGISTER_USER)
                 .variable("userDTO", userDTO)

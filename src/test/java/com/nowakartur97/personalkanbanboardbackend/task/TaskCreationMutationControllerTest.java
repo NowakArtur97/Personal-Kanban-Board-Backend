@@ -25,7 +25,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
         UserEntity taskAssignedToUserEntity = createUser("developer", "developer@domain.com");
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskPriority.MEDIUM, LocalDate.of(2024, 8, 12), taskAssignedToUserEntity.getUserId());
 
-        TaskResponse taskResponse = makeCreateTaskRequest(userEntity, taskDTO);
+        TaskResponse taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
 
         assertTaskEntity(taskRepository.findAll().blockLast(), taskDTO, userEntity.getUserId(),
                 taskAssignedToUserEntity.getUserId(), TaskPriority.MEDIUM);
@@ -38,7 +38,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null);
 
-        TaskResponse taskResponse = makeCreateTaskRequest(userEntity, taskDTO);
+        TaskResponse taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
 
         assertTaskEntity(taskRepository.findAll().blockLast(), taskDTO, userEntity.getUserId());
         assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername());
@@ -51,7 +51,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
         UUID assignedTo = UUID.randomUUID();
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, assignedTo);
 
-        makeCreateTaskRequestWithErrors(userEntity, taskDTO)
+        sendCreateTaskRequestWithErrors(userEntity, taskDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -88,7 +88,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO(null, null, null, null, null);
 
-        makeCreateTaskRequestWithErrors(userEntity, taskDTO)
+        sendCreateTaskRequestWithErrors(userEntity, taskDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -104,7 +104,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO("", null, null, null, null);
 
-        makeCreateTaskRequestWithErrors(userEntity, taskDTO)
+        sendCreateTaskRequestWithErrors(userEntity, taskDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isEqualTo(2);
@@ -121,7 +121,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO("ti", null, null, null, null);
 
-        makeCreateTaskRequestWithErrors(userEntity, taskDTO)
+        sendCreateTaskRequestWithErrors(userEntity, taskDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -136,7 +136,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO(StringUtils.repeat("t", 101), null, null, null, null);
 
-        makeCreateTaskRequestWithErrors(userEntity, taskDTO)
+        sendCreateTaskRequestWithErrors(userEntity, taskDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -151,7 +151,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO("title", StringUtils.repeat("d", 101), null, null, null);
 
-        makeCreateTaskRequestWithErrors(userEntity, taskDTO)
+        sendCreateTaskRequestWithErrors(userEntity, taskDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
@@ -165,85 +165,34 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
 
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskPriority.MEDIUM, LocalDate.of(2024, 8, 12), null);
 
-        httpGraphQlTester
-                .mutate()
-                .build()
-                .document(CREATE_TASK)
-                .variable("taskDTO", taskDTO)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, "createTask", "Unauthorized");
-                });
+        runTestForSendingRequestWithoutProvidingAuthorizationHeader(CREATE_TASK, "createTask", "taskDTO", taskDTO);
     }
 
     @Test
     public void whenCreateTaskWithExpiredToken_shouldReturnGraphQLErrorResponse() {
 
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskPriority.MEDIUM, LocalDate.of(2024, 8, 12), null);
-        String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidGVzdFVzZXIiLCJpYXQiOjE3MTEyNzg1ODAsImV4cCI6MTcxMTI3ODU4MH0.nouAgIkDaanTk0LX37HSRjM4SDZxqBqz1gDufnU2fzQ";
 
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, expiredToken))
-                .build()
-                .document(CREATE_TASK)
-                .variable("taskDTO", taskDTO)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, "createTask", "JWT expired");
-                });
+        runTestForSendingRequestWithExpiredToken(CREATE_TASK, "createTask", "taskDTO", taskDTO);
     }
 
     @Test
     public void whenCreateTaskWithInvalidToken_shouldReturnGraphQLErrorResponse() {
 
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskPriority.MEDIUM, LocalDate.of(2024, 8, 12), null);
-        String invalidToken = "invalid";
 
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, invalidToken))
-                .build()
-                .document(CREATE_TASK)
-                .variable("taskDTO", taskDTO)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, "createTask", "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 0");
-                });
+        runTestForSendingRequestWithInvalidToken(CREATE_TASK, "createTask", "taskDTO", taskDTO);
     }
 
     @Test
     public void whenCreateTaskWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
 
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskPriority.MEDIUM, LocalDate.of(2024, 8, 12), null);
-        String invalidToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidXNlciIsImlhdCI6MTcxMTIwOTEzMiwiZXhwIjoxNzExMjE5OTMyfQ.n-h8vIdov2voZhwNdqbmgiO44XjeCdAMzf7ddqufoXc";
 
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, invalidToken))
-                .build()
-                .document(CREATE_TASK)
-                .variable("taskDTO", taskDTO)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, "createTask",
-                            "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.");
-                });
+        runTestForSendingRequestWithDifferentTokenSignature(CREATE_TASK, "createTask", "taskDTO", taskDTO);
     }
 
-    private TaskResponse makeCreateTaskRequest(UserEntity userEntity, TaskDTO taskDTO) {
+    private TaskResponse sendCreateTaskRequest(UserEntity userEntity, TaskDTO taskDTO) {
         return httpGraphQlTester
                 .mutate()
                 .headers(headers -> addAuthorizationHeader(headers, userEntity))
@@ -258,7 +207,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
                 .get();
     }
 
-    private GraphQlTester.Errors makeCreateTaskRequestWithErrors(UserEntity userEntity, TaskDTO taskDTO) {
+    private GraphQlTester.Errors sendCreateTaskRequestWithErrors(UserEntity userEntity, TaskDTO taskDTO) {
         return httpGraphQlTester
                 .mutate()
                 .headers(headers -> addAuthorizationHeader(headers, userEntity))

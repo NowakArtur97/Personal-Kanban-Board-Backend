@@ -118,6 +118,22 @@ public class IntegrationTest {
                 });
     }
 
+    protected void runTestForSendingRequestWithoutProvidingAuthorizationHeader(String document, String path,
+                                                                               String variableName, Object object) {
+        httpGraphQlTester
+                .mutate()
+                .build()
+                .document(document)
+                .variable(variableName, object)
+                .execute()
+                .errors()
+                .satisfy(responseErrors -> {
+                    assertThat(responseErrors.size()).isOne();
+                    ResponseError responseError = responseErrors.getFirst();
+                    assertUnauthorizedErrorResponse(responseError, path, "Unauthorized");
+                });
+    }
+
     protected void runTestForSendingRequestWithExpiredToken(String document, String path) {
 
         String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidGVzdFVzZXIiLCJpYXQiOjE3MTEyNzg1ODAsImV4cCI6MTcxMTI3ODU4MH0.nouAgIkDaanTk0LX37HSRjM4SDZxqBqz1gDufnU2fzQ";
@@ -125,18 +141,43 @@ public class IntegrationTest {
         sendRequestWithJWTErrors(expiredToken, document, path, "JWT expired");
     }
 
+    protected void runTestForSendingRequestWithExpiredToken(String document, String path, String variableName, Object object) {
+
+        String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidGVzdFVzZXIiLCJpYXQiOjE3MTEyNzg1ODAsImV4cCI6MTcxMTI3ODU4MH0.nouAgIkDaanTk0LX37HSRjM4SDZxqBqz1gDufnU2fzQ";
+
+        sendRequestWithJWTErrors(expiredToken, document, path, variableName, object, "JWT expired");
+    }
+
     protected void runTestForSendingRequestWithInvalidToken(String document, String path) {
 
         String invalidToken = "invalid";
 
-        sendRequestWithJWTErrors(invalidToken, document, path, "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 0");
+        sendRequestWithJWTErrors(invalidToken, document, path,
+                "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 0");
+    }
+
+    protected void runTestForSendingRequestWithInvalidToken(String document, String path, String variableName, Object object) {
+
+        String invalidToken = "invalid";
+
+        sendRequestWithJWTErrors(invalidToken, document, path, variableName, object,
+                "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 0");
     }
 
     protected void runTestForSendingRequestWithDifferentTokenSignature(String document, String path) {
 
         String invalidToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidXNlciIsImlhdCI6MTcxMTIwOTEzMiwiZXhwIjoxNzExMjE5OTMyfQ.n-h8vIdov2voZhwNdqbmgiO44XjeCdAMzf7ddqufoXc";
 
-        sendRequestWithJWTErrors(invalidToken, document, path, "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.");
+        sendRequestWithJWTErrors(invalidToken, document, path,
+                "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.");
+    }
+
+    protected void runTestForSendingRequestWithDifferentTokenSignature(String document, String path, String variableName, Object object) {
+
+        String invalidToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidXNlciIsImlhdCI6MTcxMTIwOTEzMiwiZXhwIjoxNzExMjE5OTMyfQ.n-h8vIdov2voZhwNdqbmgiO44XjeCdAMzf7ddqufoXc";
+
+        sendRequestWithJWTErrors(invalidToken, document, path, variableName, object,
+                "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.");
     }
 
     private void sendRequestWithJWTErrors(String token, String document, String path, String message) {
@@ -145,6 +186,24 @@ public class IntegrationTest {
                 .headers(headers -> addAuthorizationHeader(headers, token))
                 .build()
                 .document(document)
+                .execute()
+                .errors()
+                .satisfy(responseErrors -> {
+                    assertThat(responseErrors.size()).isOne();
+                    ResponseError responseError = responseErrors.getFirst();
+                    assertUnauthorizedErrorResponse(responseError, path, message);
+                });
+    }
+
+    private void sendRequestWithJWTErrors(String token, String document, String path,
+                                          String variableName, Object object,
+                                          String message) {
+        httpGraphQlTester
+                .mutate()
+                .headers(headers -> addAuthorizationHeader(headers, token))
+                .build()
+                .document(document)
+                .variable(variableName, object)
                 .execute()
                 .errors()
                 .satisfy(responseErrors -> {

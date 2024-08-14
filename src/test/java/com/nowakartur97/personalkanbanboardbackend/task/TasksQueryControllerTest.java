@@ -58,76 +58,22 @@ public class TasksQueryControllerTest extends IntegrationTest {
 
     @Test
     public void whenGetTasksWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
-
-        httpGraphQlTester
-                .mutate()
-                .build()
-                .document(GET_TASKS)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, "tasks", "Unauthorized");
-                });
+        runTestForSendingRequestWithoutProvidingAuthorizationHeader(GET_TASKS, "tasks");
     }
 
     @Test
     public void whenGetTasksWithExpiredToken_shouldReturnGraphQLErrorResponse() {
-
-        String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidGVzdFVzZXIiLCJpYXQiOjE3MTEyNzg1ODAsImV4cCI6MTcxMTI3ODU4MH0.nouAgIkDaanTk0LX37HSRjM4SDZxqBqz1gDufnU2fzQ";
-
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, expiredToken))
-                .build()
-                .document(GET_TASKS)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, "tasks", "JWT expired");
-                });
+        runTestForSendingRequestWithExpiredToken(GET_TASKS, "tasks");
     }
 
     @Test
     public void whenGetTasksWithInvalidToken_shouldReturnGraphQLErrorResponse() {
-
-        String invalidToken = "invalid";
-
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, invalidToken))
-                .build()
-                .document(GET_TASKS)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, "tasks", "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 0");
-                });
+        runTestForSendingRequestWithInvalidToken(GET_TASKS, "tasks");
     }
 
     @Test
     public void whenGetTasksWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
-
-        String invalidToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidXNlciIsImlhdCI6MTcxMTIwOTEzMiwiZXhwIjoxNzExMjE5OTMyfQ.n-h8vIdov2voZhwNdqbmgiO44XjeCdAMzf7ddqufoXc";
-
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, invalidToken))
-                .build()
-                .document(GET_TASKS)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, "tasks",
-                            "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.");
-                });
+        runTestForSendingRequestWithDifferentTokenSignature(GET_TASKS, "tasks");
     }
 
     private void assertTaskResponse(TaskResponse taskResponse, TaskEntity taskEntity, String username) {
