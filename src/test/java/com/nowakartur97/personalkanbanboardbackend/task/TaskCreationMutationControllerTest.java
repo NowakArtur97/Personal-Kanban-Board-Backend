@@ -149,14 +149,14 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     public void whenCreateTaskWitTooLongDescription_shouldReturnGraphQLErrorResponse() {
 
         UserEntity userEntity = createUser();
-        TaskDTO taskDTO = new TaskDTO("title", StringUtils.repeat("d", 101), null, null, null);
+        TaskDTO taskDTO = new TaskDTO("title", StringUtils.repeat("d", 1001), null, null, null);
 
         sendCreateTaskRequestWithErrors(userEntity, taskDTO)
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
                             ResponseError responseError = responseErrors.getLast();
-                            assertErrorResponse(responseError, "Description must be between 0 and 100 characters.");
+                            assertErrorResponse(responseError, "Description must be between 0 and 1000 characters.");
                         });
     }
 

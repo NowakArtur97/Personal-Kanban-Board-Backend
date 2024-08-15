@@ -1,7 +1,7 @@
 CREATE TABLE personal_kanban_board.tasks (
 "task_id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     "title" VARCHAR(100) NOT NULL,
-    "description" VARCHAR(100),
+    "description" VARCHAR(1000),
     "status" VARCHAR(50) NOT NULL,
     "priority" VARCHAR(20) NOT NULL,
     "target_end_date" DATE,

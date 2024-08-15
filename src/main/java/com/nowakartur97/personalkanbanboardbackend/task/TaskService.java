@@ -17,12 +17,15 @@ public class TaskService {
     private final UserService userService;
 
     public Mono<TaskEntity> saveTask(TaskEntity task) {
+
+        log.info("Creation of new task: {}", task);
+
         return taskRepository.save(task);
     }
 
     public Flux<TaskEntity> findAllTasksForUser(String username) {
 
-        log.info("Looking up tasks for user: {}", username);
+        log.info("Looking up tasks for user: '{}'", username);
 
         return userService.findByUsername(username)
                 .map(UserEntity::getUserId)
