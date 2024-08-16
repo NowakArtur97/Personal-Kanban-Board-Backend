@@ -1,5 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
+import jakarta.validation.constraints.FutureOrPresent;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +17,7 @@ public class TaskDTO {
     private String title;
     private String description;
     private TaskPriority priority;
+    @FutureOrPresent(message = "{createTask.taskDTO.targetEndDate.futureOrPresent}")
     private LocalDate targetEndDate;
     @Setter
     private UUID assignedTo;
