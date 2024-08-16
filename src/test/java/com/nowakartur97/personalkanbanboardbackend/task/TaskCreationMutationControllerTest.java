@@ -23,7 +23,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
 
         UserEntity userEntity = createUser();
         UserEntity taskAssignedToUserEntity = createUser("developer", "developer@domain.com");
-        TaskDTO taskDTO = new TaskDTO("title", "description", TaskPriority.MEDIUM, LocalDate.of(2024, 8, 12), taskAssignedToUserEntity.getUserId());
+        TaskDTO taskDTO = new TaskDTO("title", "description", TaskPriority.MEDIUM, LocalDate.now(), taskAssignedToUserEntity.getUserId());
 
         TaskResponse taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
 
@@ -161,9 +161,24 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     }
 
     @Test
+    public void whenCreateTaskWitTargetEndDateInThePast_shouldReturnGraphQLErrorResponse() {
+
+        UserEntity userEntity = createUser();
+        TaskDTO taskDTO = new TaskDTO("title", "description", null, LocalDate.of(2024, 1, 1), null);
+
+        sendCreateTaskRequestWithErrors(userEntity, taskDTO)
+                .satisfy(
+                        responseErrors -> {
+                            assertThat(responseErrors.size()).isOne();
+                            ResponseError responseError = responseErrors.getLast();
+                            assertErrorResponse(responseError, "Target end date cannot be in the past.");
+                        });
+    }
+
+    @Test
     public void whenCreateTaskWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
 
-        TaskDTO taskDTO = new TaskDTO("title", "description", TaskPriority.MEDIUM, LocalDate.of(2024, 8, 12), null);
+        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null);
 
         runTestForSendingRequestWithoutProvidingAuthorizationHeader(CREATE_TASK, "createTask", "taskDTO", taskDTO);
     }
@@ -171,7 +186,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     @Test
     public void whenCreateTaskWithExpiredToken_shouldReturnGraphQLErrorResponse() {
 
-        TaskDTO taskDTO = new TaskDTO("title", "description", TaskPriority.MEDIUM, LocalDate.of(2024, 8, 12), null);
+        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null);
 
         runTestForSendingRequestWithExpiredToken(CREATE_TASK, "createTask", "taskDTO", taskDTO);
     }
@@ -179,7 +194,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     @Test
     public void whenCreateTaskWithInvalidToken_shouldReturnGraphQLErrorResponse() {
 
-        TaskDTO taskDTO = new TaskDTO("title", "description", TaskPriority.MEDIUM, LocalDate.of(2024, 8, 12), null);
+        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null);
 
         runTestForSendingRequestWithInvalidToken(CREATE_TASK, "createTask", "taskDTO", taskDTO);
     }
@@ -187,7 +202,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     @Test
     public void whenCreateTaskWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
 
-        TaskDTO taskDTO = new TaskDTO("title", "description", TaskPriority.MEDIUM, LocalDate.of(2024, 8, 12), null);
+        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null);
 
         runTestForSendingRequestWithDifferentTokenSignature(CREATE_TASK, "createTask", "taskDTO", taskDTO);
     }
