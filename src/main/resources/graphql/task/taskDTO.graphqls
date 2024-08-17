@@ -5,6 +5,7 @@ input TaskDTO {
     @Size(min : 4, max : 100, message: "graphql.createTask.taskDTO.title.size")
     description: String
     @Size(max : 1000, message: "graphql.createTask.taskDTO.description.size")
+    status: TaskStatus
     priority: TaskPriority
     targetEndDate: Date
     assignedTo: String

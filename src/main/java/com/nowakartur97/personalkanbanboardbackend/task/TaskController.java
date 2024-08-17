@@ -60,7 +60,7 @@ public class TaskController {
                 .title(taskDTO.getTitle())
                 .description(taskDTO.getDescription())
                 .assignedTo(taskDTO.getAssignedTo())
-                .status(TaskStatus.READY_TO_START)
+                .status(taskDTO.getStatus() != null ? taskDTO.getStatus() : TaskStatus.READY_TO_START)
                 .priority(taskDTO.getPriority() != null ? taskDTO.getPriority() : TaskPriority.LOW)
                 .targetEndDate(taskDTO.getTargetEndDate())
                 .assignedTo(assignedTo)
