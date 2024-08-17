@@ -87,6 +87,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
         assertThat(taskResponse.createdOn()).isEqualTo(taskEntity.getCreatedOn());
         assertThat(taskResponse.createdBy()).isEqualTo(username);
         assertThat(taskResponse.updatedOn()).isEqualTo(taskEntity.getUpdatedOn());
+        // TODO: Change
         assertThat(taskResponse.updatedBy()).isEqualTo(null);
     }
 

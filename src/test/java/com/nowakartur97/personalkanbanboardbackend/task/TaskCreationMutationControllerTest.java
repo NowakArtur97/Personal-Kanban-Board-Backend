@@ -23,20 +23,20 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
 
         UserEntity userEntity = createUser();
         UserEntity taskAssignedToUserEntity = createUser("developer", "developer@domain.com");
-        TaskDTO taskDTO = new TaskDTO("title", "description", TaskPriority.MEDIUM, LocalDate.now(), taskAssignedToUserEntity.getUserId());
+        TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), taskAssignedToUserEntity.getUserId());
 
         TaskResponse taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
 
-        assertTaskEntity(taskRepository.findAll().blockLast(), taskDTO, userEntity.getUserId(),
-                taskAssignedToUserEntity.getUserId(), TaskPriority.MEDIUM);
-        assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), taskAssignedToUserEntity.getUsername(), taskDTO.getPriority());
+        assertTaskEntity(taskRepository.findAll().blockLast(), taskDTO, userEntity.getUserId(), taskAssignedToUserEntity.getUserId());
+        assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), taskAssignedToUserEntity.getUsername(),
+                taskDTO.getStatus(), taskDTO.getPriority());
     }
 
     @Test
     public void whenCreateTask_shouldCreateTaskWithDefaultValuesAndReturnTaskResponse() {
 
         UserEntity userEntity = createUser();
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null);
+        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
 
         TaskResponse taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
 
@@ -49,7 +49,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
 
         UserEntity userEntity = createUser();
         UUID assignedTo = UUID.randomUUID();
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, assignedTo);
+        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, assignedTo);
 
         sendCreateTaskRequestWithErrors(userEntity, taskDTO)
                 .satisfy(
@@ -86,7 +86,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     public void whenCreateTaskWithoutTitle_shouldReturnGraphQLErrorResponse() {
 
         UserEntity userEntity = createUser();
-        TaskDTO taskDTO = new TaskDTO(null, null, null, null, null);
+        TaskDTO taskDTO = new TaskDTO(null, null, null, null, null, null);
 
         sendCreateTaskRequestWithErrors(userEntity, taskDTO)
                 .satisfy(
@@ -102,7 +102,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     public void whenCreateTaskWitBlankTitle_shouldReturnGraphQLErrorResponse() {
 
         UserEntity userEntity = createUser();
-        TaskDTO taskDTO = new TaskDTO("", null, null, null, null);
+        TaskDTO taskDTO = new TaskDTO("", null, null, null, null, null);
 
         sendCreateTaskRequestWithErrors(userEntity, taskDTO)
                 .satisfy(
@@ -119,7 +119,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     public void whenCreateTaskWitTooShortTitle_shouldReturnGraphQLErrorResponse() {
 
         UserEntity userEntity = createUser();
-        TaskDTO taskDTO = new TaskDTO("ti", null, null, null, null);
+        TaskDTO taskDTO = new TaskDTO("ti", null, null, null, null, null);
 
         sendCreateTaskRequestWithErrors(userEntity, taskDTO)
                 .satisfy(
@@ -134,7 +134,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     public void whenCreateTaskWitTooLongTitle_shouldReturnGraphQLErrorResponse() {
 
         UserEntity userEntity = createUser();
-        TaskDTO taskDTO = new TaskDTO(StringUtils.repeat("t", 101), null, null, null, null);
+        TaskDTO taskDTO = new TaskDTO(StringUtils.repeat("t", 101), null, null, null, null, null);
 
         sendCreateTaskRequestWithErrors(userEntity, taskDTO)
                 .satisfy(
@@ -149,7 +149,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     public void whenCreateTaskWitTooLongDescription_shouldReturnGraphQLErrorResponse() {
 
         UserEntity userEntity = createUser();
-        TaskDTO taskDTO = new TaskDTO("title", StringUtils.repeat("d", 1001), null, null, null);
+        TaskDTO taskDTO = new TaskDTO("title", StringUtils.repeat("d", 1001), null, null, null, null);
 
         sendCreateTaskRequestWithErrors(userEntity, taskDTO)
                 .satisfy(
@@ -164,7 +164,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     public void whenCreateTaskWitTargetEndDateInThePast_shouldReturnGraphQLErrorResponse() {
 
         UserEntity userEntity = createUser();
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, LocalDate.of(2024, 1, 1), null);
+        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, LocalDate.of(2024, 1, 1), null);
 
         sendCreateTaskRequestWithErrors(userEntity, taskDTO)
                 .satisfy(
@@ -178,7 +178,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     @Test
     public void whenCreateTaskWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
 
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null);
+        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
 
         runTestForSendingRequestWithoutProvidingAuthorizationHeader(CREATE_TASK, "createTask", "taskDTO", taskDTO);
     }
@@ -186,7 +186,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     @Test
     public void whenCreateTaskWithExpiredToken_shouldReturnGraphQLErrorResponse() {
 
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null);
+        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
 
         runTestForSendingRequestWithExpiredToken(CREATE_TASK, "createTask", "taskDTO", taskDTO);
     }
@@ -194,7 +194,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     @Test
     public void whenCreateTaskWithInvalidToken_shouldReturnGraphQLErrorResponse() {
 
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null);
+        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
 
         runTestForSendingRequestWithInvalidToken(CREATE_TASK, "createTask", "taskDTO", taskDTO);
     }
@@ -202,7 +202,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     @Test
     public void whenCreateTaskWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
 
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null);
+        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
 
         runTestForSendingRequestWithDifferentTokenSignature(CREATE_TASK, "createTask", "taskDTO", taskDTO);
     }
@@ -234,14 +234,15 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     }
 
     private void assertTaskResponse(TaskResponse taskResponse, TaskDTO taskDTO, String createdBy) {
-        assertTaskResponse(taskResponse, taskDTO, createdBy, createdBy, TaskPriority.LOW);
+        assertTaskResponse(taskResponse, taskDTO, createdBy, createdBy, TaskStatus.READY_TO_START, TaskPriority.LOW);
     }
 
-    private void assertTaskResponse(TaskResponse taskResponse, TaskDTO taskDTO, String createdBy, String assignedTo, TaskPriority priority) {
+    private void assertTaskResponse(TaskResponse taskResponse, TaskDTO taskDTO, String createdBy, String assignedTo,
+                                    TaskStatus status, TaskPriority priority) {
         assertThat(taskResponse).isNotNull();
         assertThat(taskResponse.taskId()).isNotNull();
         assertThat(taskResponse.title()).isEqualTo(taskDTO.getTitle());
-        assertThat(taskResponse.status()).isEqualTo(TaskStatus.READY_TO_START);
+        assertThat(taskResponse.status()).isEqualTo(status);
         assertThat(taskResponse.priority()).isEqualTo(priority);
         assertThat(taskResponse.targetEndDate()).isEqualTo(taskDTO.getTargetEndDate());
         assertThat(taskResponse.assignedTo()).isEqualTo(assignedTo);
@@ -252,14 +253,19 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     }
 
     private void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy) {
-        assertTaskEntity(taskEntity, taskDTO, createdBy, createdBy, TaskPriority.LOW);
+        assertTaskEntity(taskEntity, taskDTO, createdBy, createdBy, TaskStatus.READY_TO_START, TaskPriority.LOW);
     }
 
-    private void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo, TaskPriority taskPriority) {
+    private void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
+        assertTaskEntity(taskEntity, taskDTO, createdBy, assignedTo, taskDTO.getStatus(), taskDTO.getPriority());
+    }
+
+    private void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo,
+                                  TaskStatus taskStatus, TaskPriority taskPriority) {
         assertThat(taskEntity).isNotNull();
         assertThat(taskEntity.getTaskId()).isNotNull();
         assertThat(taskEntity.getTitle()).isEqualTo(taskDTO.getTitle());
-        assertThat(taskEntity.getStatus()).isEqualTo(TaskStatus.READY_TO_START);
+        assertThat(taskEntity.getStatus()).isEqualTo(taskStatus);
         assertThat(taskEntity.getPriority()).isEqualTo(taskPriority);
         assertThat(taskEntity.getTargetEndDate()).isEqualTo(taskDTO.getTargetEndDate());
         assertThat(taskEntity.getAssignedTo()).isEqualTo(assignedTo);
