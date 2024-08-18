@@ -18,7 +18,7 @@ public class TaskDTO {
     private String description;
     private TaskStatus status;
     private TaskPriority priority;
-    @FutureOrPresent(message = "{createTask.taskDTO.targetEndDate.futureOrPresent}")
+    @FutureOrPresent(message = "{taskMutation.taskDTO.targetEndDate.futureOrPresent}")
     private LocalDate targetEndDate;
     @Setter
     private UUID assignedTo;

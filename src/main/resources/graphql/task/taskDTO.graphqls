@@ -1,10 +1,10 @@
 input TaskDTO {
 
     title: String!
-    @NotBlank(message: "graphql.createTask.taskDTO.title.notBlank")
-    @Size(min : 4, max : 100, message: "graphql.createTask.taskDTO.title.size")
+    @NotBlank(message: "graphql.taskMutation.taskDTO.title.notBlank")
+    @Size(min : 4, max : 100, message: "graphql.taskMutation.taskDTO.title.size")
     description: String
-    @Size(max : 1000, message: "graphql.createTask.taskDTO.description.size")
+    @Size(max : 1000, message: "graphql.taskMutation.taskDTO.description.size")
     status: TaskStatus
     priority: TaskPriority
     targetEndDate: Date
