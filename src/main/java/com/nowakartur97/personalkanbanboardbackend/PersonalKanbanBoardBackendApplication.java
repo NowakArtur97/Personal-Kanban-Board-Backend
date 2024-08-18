@@ -41,12 +41,12 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
     @Override
     public void run(String... args) {
         if (activeProfile.equals("local")) {
-            UserEntity user = createUser();
-            createTask(user);
+            UserEntity user = createTestUser();
+            createTestTask(user);
         }
     }
 
-    private UserEntity createUser() {
+    private UserEntity createTestUser() {
 
         UserEntity user;
 
@@ -67,7 +67,7 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
         return user;
     }
 
-    private void createTask(UserEntity user) {
+    private void createTestTask(UserEntity user) {
         taskService.saveTask(TaskEntity.builder()
                         .title("task1")
                         .description("desc1")

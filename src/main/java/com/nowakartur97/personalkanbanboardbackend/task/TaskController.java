@@ -1,6 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
+import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import graphql.schema.DataFetchingEnvironment;
 import jakarta.validation.Valid;
@@ -38,17 +39,37 @@ public class TaskController {
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public Mono<TaskResponse> createTask(@Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
+        Mono<UserEntity> author = userService.findByUsername(username);
         if (taskDTO.getAssignedTo() == null) {
-            return userService.findByUsername(username)
+            return author
                     .flatMap(user -> Mono.just(mapToEntity(taskDTO, user.getUserId()))
                             .flatMap(taskService::saveTask)
                             .map(task -> mapToResponse(task, user.getUsername())));
         }
-        return userService.findByUsername(username)
-                .zipWith(userService.findById(taskDTO.getAssignedTo()))
+        Mono<UserEntity> assignedTo = userService.findById(taskDTO.getAssignedTo());
+        return Mono.zip(author, assignedTo)
                 .flatMap(tuple -> Mono.just(mapToEntity(taskDTO, tuple.getT1().getUserId(), tuple.getT2().getUserId()))
                         .flatMap(taskService::saveTask)
                         .map(task -> mapToResponse(task, tuple.getT1().getUsername(), tuple.getT2().getUsername())));
+    }
+
+    @MutationMapping
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    public Mono<TaskResponse> updateTask(@Argument UUID taskId, @Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
+        String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
+        Mono<TaskEntity> taskById = taskService.findTaskById(taskId);
+        Mono<UserEntity> author = userService.findByUsername(username);
+        if (taskDTO.getAssignedTo() == null) {
+            return Mono.zip(taskById, author)
+                    .flatMap(tuple -> Mono.just(updateEntity(tuple.getT1(), taskDTO, tuple.getT2().getUserId()))
+                            .flatMap(taskService::updateTask)
+                            .map(task -> mapToResponse(task, tuple.getT2().getUsername())));
+        }
+        Mono<UserEntity> assignedTo = userService.findById(taskDTO.getAssignedTo());
+        return Mono.zip(taskById, author, assignedTo)
+                .flatMap(tuple -> Mono.just(updateEntity(tuple.getT1(), taskDTO, tuple.getT2().getUserId(), tuple.getT3().getUserId()))
+                        .flatMap(taskService::updateTask)
+                        .map(task -> mapToResponse(task, tuple.getT2().getUsername(), tuple.getT3().getUsername())));
     }
 
     private TaskEntity mapToEntity(TaskDTO taskDTO, UUID createdBy) {
@@ -59,7 +80,6 @@ public class TaskController {
         return TaskEntity.builder()
                 .title(taskDTO.getTitle())
                 .description(taskDTO.getDescription())
-                .assignedTo(taskDTO.getAssignedTo())
                 .status(taskDTO.getStatus() != null ? taskDTO.getStatus() : TaskStatus.READY_TO_START)
                 .priority(taskDTO.getPriority() != null ? taskDTO.getPriority() : TaskPriority.LOW)
                 .targetEndDate(taskDTO.getTargetEndDate())
@@ -68,6 +88,23 @@ public class TaskController {
                 // TODO: Check in Postgres to see if the date is auto-populated
                 .createdOn(LocalDate.now())
                 .build();
+    }
+
+    private TaskEntity updateEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID updatedBy) {
+        return updateEntity(taskEntity, taskDTO, updatedBy, updatedBy);
+    }
+
+    private TaskEntity updateEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID updatedBy, UUID assignedTo) {
+        taskEntity.setTitle(taskDTO.getTitle());
+        taskEntity.setDescription(taskDTO.getDescription());
+        taskEntity.setStatus(taskDTO.getStatus());
+        taskEntity.setPriority(taskDTO.getPriority());
+        taskEntity.setTargetEndDate(taskDTO.getTargetEndDate());
+        taskEntity.setAssignedTo(assignedTo);
+        taskEntity.setUpdatedBy(updatedBy);
+        // TODO: Check in Postgres to see if the date is auto-populated
+        taskEntity.setUpdatedOn(LocalDate.now());
+        return taskEntity;
     }
 
     private TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy) {

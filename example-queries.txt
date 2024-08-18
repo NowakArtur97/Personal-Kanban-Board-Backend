@@ -1,11 +1,38 @@
 mutation CREATE_TASK {
   createTask(
     taskDTO: {
-      title: "Example task",
-      description: "Example description",
-      priority: MEDIUM,
-      assignedTo: "14698c1e-1ef5-45ac-b8e1-e2ee121e9f75	",
+      title: "Example task"
+      description: "Example description"
+      status: READY_TO_START
+      priority: MEDIUM
       targetEndDate: "2024-08-12"
+      assignedTo: "14698c1e-1ef5-45ac-b8e1-e2ee121e9f75"
+    }
+  ) {
+    taskId
+    title
+    description
+    priority
+    status
+    targetEndDate
+    assignedTo
+    createdOn
+    createdBy
+    updatedOn
+    updatedBy
+  }
+}
+
+mutation UPDATE_TASK {
+  updateTask(
+    taskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af"
+    taskDTO: {
+      title: "Updated task"
+      description: "Updated description"
+      status: IN_PROGRESS
+      priority: HIGH
+      targetEndDate: "2024-08-20"
+      assignedTo: "7394e566-ad90-419b-916e-572f8ba66ac5"
     }
   ) {
     taskId
