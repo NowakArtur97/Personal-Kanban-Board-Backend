@@ -33,7 +33,7 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public Mono<TaskEntity> findTaskById(UUID taskId) {
+    public Mono<TaskEntity> findById(UUID taskId) {
 
         log.info("Looking up task by id: '{}'", taskId);
 
@@ -41,7 +41,7 @@ public class TaskService {
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("Task", "taskId", taskId.toString())));
     }
 
-    public Flux<TaskEntity> findAllTasksForUser(String username) {
+    public Flux<TaskEntity> findAllByAssignedTo(String username) {
 
         log.info("Looking up tasks for user: '{}'", username);
 

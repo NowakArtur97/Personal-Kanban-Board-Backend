@@ -31,7 +31,7 @@ public class TaskController {
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public Flux<TaskResponse> tasks(DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
-        return taskService.findAllTasksForUser(username)
+        return taskService.findAllByAssignedTo(username)
                 .map(task -> mapToResponse(task, username));
     }
 
@@ -57,19 +57,19 @@ public class TaskController {
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public Mono<TaskResponse> updateTask(@Argument UUID taskId, @Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
-        Mono<TaskEntity> taskById = taskService.findTaskById(taskId);
+        Mono<TaskEntity> taskById = taskService.findById(taskId);
         Mono<UserEntity> author = userService.findByUsername(username);
         if (taskDTO.getAssignedTo() == null) {
             return Mono.zip(taskById, author)
                     .flatMap(tuple -> Mono.just(updateEntity(tuple.getT1(), taskDTO, tuple.getT2().getUserId()))
                             .flatMap(taskService::updateTask)
-                            .map(task -> mapToResponse(task, tuple.getT2().getUsername())));
+                            .map(task -> mapToResponse(task, username, username, tuple.getT2().getUsername())));
         }
         Mono<UserEntity> assignedTo = userService.findById(taskDTO.getAssignedTo());
         return Mono.zip(taskById, author, assignedTo)
                 .flatMap(tuple -> Mono.just(updateEntity(tuple.getT1(), taskDTO, tuple.getT2().getUserId(), tuple.getT3().getUserId()))
                         .flatMap(taskService::updateTask)
-                        .map(task -> mapToResponse(task, tuple.getT2().getUsername(), tuple.getT3().getUsername())));
+                        .map(task -> mapToResponse(task, tuple.getT2().getUsername(), username, tuple.getT3().getUsername())));
     }
 
     private TaskEntity mapToEntity(TaskDTO taskDTO, UUID createdBy) {
@@ -97,8 +97,8 @@ public class TaskController {
     private TaskEntity updateEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID updatedBy, UUID assignedTo) {
         taskEntity.setTitle(taskDTO.getTitle());
         taskEntity.setDescription(taskDTO.getDescription());
-        taskEntity.setStatus(taskDTO.getStatus());
-        taskEntity.setPriority(taskDTO.getPriority());
+        taskEntity.setStatus(taskDTO.getStatus() != null ? taskDTO.getStatus() : TaskStatus.READY_TO_START);
+        taskEntity.setPriority(taskDTO.getPriority() != null ? taskDTO.getPriority() : TaskPriority.LOW);
         taskEntity.setTargetEndDate(taskDTO.getTargetEndDate());
         taskEntity.setAssignedTo(assignedTo);
         taskEntity.setUpdatedBy(updatedBy);
@@ -122,6 +122,22 @@ public class TaskController {
                 createdBy,
                 taskEntity.getCreatedOn(),
                 null,
+                taskEntity.getUpdatedOn(),
+                assignedTo
+        );
+    }
+
+    private TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String updatedBy, String assignedTo) {
+        return new TaskResponse(
+                taskEntity.getTaskId(),
+                taskEntity.getTitle(),
+                taskEntity.getDescription(),
+                taskEntity.getStatus(),
+                taskEntity.getPriority(),
+                taskEntity.getTargetEndDate(),
+                createdBy,
+                taskEntity.getCreatedOn(),
+                updatedBy,
                 taskEntity.getUpdatedOn(),
                 assignedTo
         );
