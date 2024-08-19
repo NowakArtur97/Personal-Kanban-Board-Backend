@@ -56,7 +56,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
                             ResponseError responseError = responseErrors.getFirst();
-                            assertNotFoundErrorResponse(responseError, "createTask", "User with userId: '" + assignedTo + "' not found.");
+                            assertNotFoundErrorResponse(responseError, CREATE_TASK_PATH, "User with userId: '" + assignedTo + "' not found.");
                         });
     }
 
@@ -180,7 +180,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
 
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
 
-        runTestForSendingRequestWithoutProvidingAuthorizationHeader(CREATE_TASK, "createTask", "taskDTO", taskDTO);
+        runTestForSendingRequestWithoutProvidingAuthorizationHeader(CREATE_TASK, CREATE_TASK_PATH, "taskDTO", taskDTO);
     }
 
     @Test
@@ -188,7 +188,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
 
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
 
-        runTestForSendingRequestWithExpiredToken(CREATE_TASK, "createTask", "taskDTO", taskDTO);
+        runTestForSendingRequestWithExpiredToken(CREATE_TASK, CREATE_TASK_PATH, "taskDTO", taskDTO);
     }
 
     @Test
@@ -196,7 +196,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
 
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
 
-        runTestForSendingRequestWithInvalidToken(CREATE_TASK, "createTask", "taskDTO", taskDTO);
+        runTestForSendingRequestWithInvalidToken(CREATE_TASK, CREATE_TASK_PATH, "taskDTO", taskDTO);
     }
 
     @Test
@@ -204,7 +204,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
 
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
 
-        runTestForSendingRequestWithDifferentTokenSignature(CREATE_TASK, "createTask", "taskDTO", taskDTO);
+        runTestForSendingRequestWithDifferentTokenSignature(CREATE_TASK, CREATE_TASK_PATH, "taskDTO", taskDTO);
     }
 
     private TaskResponse sendCreateTaskRequest(UserEntity userEntity, TaskDTO taskDTO) {
@@ -276,6 +276,6 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     }
 
     private void assertErrorResponse(ResponseError responseError, String message) {
-        assertErrorResponse(responseError, message, "createTask", new SourceLocation(2, 3));
+        assertErrorResponse(responseError, message, CREATE_TASK_PATH, new SourceLocation(2, 3));
     }
 }

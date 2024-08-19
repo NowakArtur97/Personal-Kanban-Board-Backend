@@ -199,6 +199,6 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
     }
 
     private void assertErrorResponse(ResponseError responseError, String message) {
-        assertErrorResponse(responseError, message, "registerUser", new SourceLocation(2, 3));
+        assertErrorResponse(responseError, message, REGISTER_USER_PATH, new SourceLocation(2, 3));
     }
 }

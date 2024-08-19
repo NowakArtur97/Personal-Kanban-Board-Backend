@@ -67,7 +67,7 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertNotFoundErrorResponse(responseError, "loginUser", "User with username/email: 'notExistingUser' not found.");
+                    assertNotFoundErrorResponse(responseError, AUTHENTICATE_USER_PATH, "User with username/email: 'notExistingUser' not found.");
                 });
     }
 
@@ -85,7 +85,7 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, "loginUser", "Invalid login credentials.");
+                    assertUnauthorizedErrorResponse(responseError, AUTHENTICATE_USER_PATH, "Invalid login credentials.");
                 });
     }
 

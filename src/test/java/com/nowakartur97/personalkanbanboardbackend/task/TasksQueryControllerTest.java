@@ -52,28 +52,28 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertNotFoundErrorResponse(responseError, "tasks", "User with username: 'notExistingUser' not found.");
+                    assertNotFoundErrorResponse(responseError, TASKS_PATH, "User with username: 'notExistingUser' not found.");
                 });
     }
 
     @Test
     public void whenGetTasksWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
-        runTestForSendingRequestWithoutProvidingAuthorizationHeader(GET_TASKS, "tasks");
+        runTestForSendingRequestWithoutProvidingAuthorizationHeader(GET_TASKS, TASKS_PATH);
     }
 
     @Test
     public void whenGetTasksWithExpiredToken_shouldReturnGraphQLErrorResponse() {
-        runTestForSendingRequestWithExpiredToken(GET_TASKS, "tasks");
+        runTestForSendingRequestWithExpiredToken(GET_TASKS, TASKS_PATH);
     }
 
     @Test
     public void whenGetTasksWithInvalidToken_shouldReturnGraphQLErrorResponse() {
-        runTestForSendingRequestWithInvalidToken(GET_TASKS, "tasks");
+        runTestForSendingRequestWithInvalidToken(GET_TASKS, TASKS_PATH);
     }
 
     @Test
     public void whenGetTasksWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
-        runTestForSendingRequestWithDifferentTokenSignature(GET_TASKS, "tasks");
+        runTestForSendingRequestWithDifferentTokenSignature(GET_TASKS, TASKS_PATH);
     }
 
     private void assertTaskResponse(TaskResponse taskResponse, TaskEntity taskEntity, String username) {

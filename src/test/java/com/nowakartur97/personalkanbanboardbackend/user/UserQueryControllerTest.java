@@ -39,22 +39,22 @@ public class UserQueryControllerTest extends IntegrationTest {
 
     @Test
     public void whenFindAllUsersWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
-        runTestForSendingRequestWithoutProvidingAuthorizationHeader(FIND_ALL_USERS, "users");
+        runTestForSendingRequestWithoutProvidingAuthorizationHeader(FIND_ALL_USERS, FIND_ALL_USERS_PATH);
     }
 
     @Test
     public void whenFindAllUsersWithExpiredToken_shouldReturnGraphQLErrorResponse() {
-        runTestForSendingRequestWithExpiredToken(FIND_ALL_USERS, "users");
+        runTestForSendingRequestWithExpiredToken(FIND_ALL_USERS, FIND_ALL_USERS_PATH);
     }
 
     @Test
     public void whenFindAllUsersWithInvalidToken_shouldReturnGraphQLErrorResponse() {
-        runTestForSendingRequestWithInvalidToken(FIND_ALL_USERS, "users");
+        runTestForSendingRequestWithInvalidToken(FIND_ALL_USERS, FIND_ALL_USERS_PATH);
     }
 
     @Test
     public void whenFindAllUsersWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
-        runTestForSendingRequestWithDifferentTokenSignature(FIND_ALL_USERS, "users");
+        runTestForSendingRequestWithDifferentTokenSignature(FIND_ALL_USERS, FIND_ALL_USERS_PATH);
     }
 
     private void assertUserResponse(UserResponse userResponse, UserEntity userEntity) {
