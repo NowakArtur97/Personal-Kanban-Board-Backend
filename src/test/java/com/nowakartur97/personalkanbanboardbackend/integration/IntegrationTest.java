@@ -2,7 +2,10 @@ package com.nowakartur97.personalkanbanboardbackend.integration;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTConfigurationProperties;
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
+import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskRepository;
+import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRepository;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
@@ -17,9 +20,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.FIND_ALL_USERS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -71,6 +76,20 @@ public class IntegrationTest {
         return userRepository.save(user).block();
     }
 
+    protected TaskEntity createTask(UUID authorId) {
+        return taskRepository.save(TaskEntity.builder()
+                        .title("testTask")
+                        .description("test")
+                        .assignedTo(authorId)
+                        .status(TaskStatus.READY_TO_START)
+                        .priority(TaskPriority.LOW)
+                        .targetEndDate(LocalDate.now().plusDays(new Random().nextInt(3)))
+                        .createdOn(LocalDate.now())
+                        .createdBy(authorId)
+                        .build())
+                .block();
+    }
+
     protected void addAuthorizationHeader(HttpHeaders headers, String token) {
         String authHeader = jwtConfigurationProperties.getAuthorizationType() + " " + token;
         headers.add(jwtConfigurationProperties.getAuthorizationHeader(), authHeader);
@@ -108,13 +127,13 @@ public class IntegrationTest {
         httpGraphQlTester
                 .mutate()
                 .build()
-                .document(FIND_ALL_USERS)
+                .document(document)
                 .execute()
                 .errors()
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, "users", "Unauthorized");
+                    assertUnauthorizedErrorResponse(responseError, path, "Unauthorized");
                 });
     }
 
@@ -125,6 +144,24 @@ public class IntegrationTest {
                 .build()
                 .document(document)
                 .variable(variableName, object)
+                .execute()
+                .errors()
+                .satisfy(responseErrors -> {
+                    assertThat(responseErrors.size()).isOne();
+                    ResponseError responseError = responseErrors.getFirst();
+                    assertUnauthorizedErrorResponse(responseError, path, "Unauthorized");
+                });
+    }
+
+    protected void runTestForSendingRequestWithoutProvidingAuthorizationHeader(String document, String path,
+                                                                               String variableName, Object object,
+                                                                               String variableName2, Object object2) {
+        httpGraphQlTester
+                .mutate()
+                .build()
+                .document(document)
+                .variable(variableName, object)
+                .variable(variableName2, object2)
                 .execute()
                 .errors()
                 .satisfy(responseErrors -> {
@@ -148,6 +185,13 @@ public class IntegrationTest {
         sendRequestWithJWTErrors(expiredToken, document, path, variableName, object, "JWT expired");
     }
 
+    protected void runTestForSendingRequestWithExpiredToken(String document, String path, String variableName, Object object, String variableName2, Object object2) {
+
+        String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidGVzdFVzZXIiLCJpYXQiOjE3MTEyNzg1ODAsImV4cCI6MTcxMTI3ODU4MH0.nouAgIkDaanTk0LX37HSRjM4SDZxqBqz1gDufnU2fzQ";
+
+        sendRequestWithJWTErrors(expiredToken, document, path, variableName, object, variableName2, object2, "JWT expired");
+    }
+
     protected void runTestForSendingRequestWithInvalidToken(String document, String path) {
 
         String invalidToken = "invalid";
@@ -164,6 +208,14 @@ public class IntegrationTest {
                 "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 0");
     }
 
+    protected void runTestForSendingRequestWithInvalidToken(String document, String path, String variableName, Object object, String variableName2, Object object2) {
+
+        String invalidToken = "invalid";
+
+        sendRequestWithJWTErrors(invalidToken, document, path, variableName, object, variableName2, object2,
+                "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 0");
+    }
+
     protected void runTestForSendingRequestWithDifferentTokenSignature(String document, String path) {
 
         String invalidToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidXNlciIsImlhdCI6MTcxMTIwOTEzMiwiZXhwIjoxNzExMjE5OTMyfQ.n-h8vIdov2voZhwNdqbmgiO44XjeCdAMzf7ddqufoXc";
@@ -177,6 +229,14 @@ public class IntegrationTest {
         String invalidToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidXNlciIsImlhdCI6MTcxMTIwOTEzMiwiZXhwIjoxNzExMjE5OTMyfQ.n-h8vIdov2voZhwNdqbmgiO44XjeCdAMzf7ddqufoXc";
 
         sendRequestWithJWTErrors(invalidToken, document, path, variableName, object,
+                "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.");
+    }
+
+    protected void runTestForSendingRequestWithDifferentTokenSignature(String document, String path, String variableName, Object object, String variableName2, Object object2) {
+
+        String invalidToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidXNlciIsImlhdCI6MTcxMTIwOTEzMiwiZXhwIjoxNzExMjE5OTMyfQ.n-h8vIdov2voZhwNdqbmgiO44XjeCdAMzf7ddqufoXc";
+
+        sendRequestWithJWTErrors(invalidToken, document, path, variableName, object, variableName2, object2,
                 "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.");
     }
 
@@ -204,6 +264,26 @@ public class IntegrationTest {
                 .build()
                 .document(document)
                 .variable(variableName, object)
+                .execute()
+                .errors()
+                .satisfy(responseErrors -> {
+                    assertThat(responseErrors.size()).isOne();
+                    ResponseError responseError = responseErrors.getFirst();
+                    assertUnauthorizedErrorResponse(responseError, path, message);
+                });
+    }
+
+    private void sendRequestWithJWTErrors(String token, String document, String path,
+                                          String variableName, Object object,
+                                          String variableName2, Object object2,
+                                          String message) {
+        httpGraphQlTester
+                .mutate()
+                .headers(headers -> addAuthorizationHeader(headers, token))
+                .build()
+                .document(document)
+                .variable(variableName, object)
+                .variable(variableName2, object2)
                 .execute()
                 .errors()
                 .satisfy(responseErrors -> {

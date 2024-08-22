@@ -112,19 +112,7 @@ public class TaskController {
     }
 
     private TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String assignedTo) {
-        return new TaskResponse(
-                taskEntity.getTaskId(),
-                taskEntity.getTitle(),
-                taskEntity.getDescription(),
-                taskEntity.getStatus(),
-                taskEntity.getPriority(),
-                taskEntity.getTargetEndDate(),
-                createdBy,
-                taskEntity.getCreatedOn(),
-                null,
-                taskEntity.getUpdatedOn(),
-                assignedTo
-        );
+        return mapToResponse(taskEntity, createdBy, null, assignedTo);
     }
 
     private TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String updatedBy, String assignedTo) {

@@ -20,6 +20,24 @@ public class GraphQLQueries {
             }
             """;
 
+    public static final String UPDATE_TASK = """
+            mutation UPDATE_TASK($taskId: ID!, $taskDTO: TaskDTO!) {
+              updateTask(taskId: $taskId, taskDTO: $taskDTO) {
+                taskId
+                title
+                description
+                priority
+                status
+                targetEndDate
+                assignedTo
+                createdOn
+                createdBy
+                updatedOn
+                updatedBy
+              }
+            }
+            """;
+
     public static final String GET_TASKS = """
             query TASKS {
               tasks {
