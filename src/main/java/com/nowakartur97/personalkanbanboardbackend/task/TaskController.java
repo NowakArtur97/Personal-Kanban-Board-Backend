@@ -14,7 +14,7 @@ import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.UUID;
 
 import static com.nowakartur97.personalkanbanboardbackend.auth.AuthorizationHeaderInterceptor.TOKEN_IN_CONTEXT;
@@ -86,7 +86,7 @@ public class TaskController {
                 .assignedTo(assignedTo)
                 .createdBy(createdBy)
                 // TODO: Check in Postgres to see if the date is auto-populated
-                .createdOn(LocalDate.now())
+                .createdOn(Instant.now())
                 .build();
     }
 
@@ -103,7 +103,7 @@ public class TaskController {
         taskEntity.setAssignedTo(assignedTo);
         taskEntity.setUpdatedBy(updatedBy);
         // TODO: Check in Postgres to see if the date is auto-populated
-        taskEntity.setUpdatedOn(LocalDate.now());
+        taskEntity.setUpdatedOn(Instant.now());
         return taskEntity;
     }
 
@@ -124,9 +124,9 @@ public class TaskController {
                 taskEntity.getPriority(),
                 taskEntity.getTargetEndDate(),
                 createdBy,
-                taskEntity.getCreatedOn(),
+                taskEntity.getCreatedOn().toString(),
                 updatedBy,
-                taskEntity.getUpdatedOn(),
+                taskEntity.getUpdatedOn() != null ? taskEntity.getUpdatedOn().toString() : null,
                 assignedTo
         );
     }

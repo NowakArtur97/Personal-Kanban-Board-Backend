@@ -7,9 +7,9 @@ type TaskResponse {
     targetEndDate: Date,
 
     createdBy: String!,
-    createdOn: Date!,
+    createdOn: String!,
     updatedBy: String,
-    updatedOn: Date,
+    updatedOn: String,
     assignedTo: String!,
 }
 

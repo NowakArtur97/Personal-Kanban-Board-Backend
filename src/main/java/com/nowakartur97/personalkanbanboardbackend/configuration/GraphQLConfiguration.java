@@ -20,6 +20,7 @@ public class GraphQLConfiguration {
 
         return wiringBuilder -> wiringBuilder
                 .scalar(ExtendedScalars.Date)
+                .scalar(ExtendedScalars.DateTime)
                 .directiveWiring(validationSchemaWiring);
     }
 }

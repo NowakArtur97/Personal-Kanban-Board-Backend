@@ -24,7 +24,6 @@ public class UserService {
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("User", "userId", userId.toString())));
     }
 
-
     public Mono<UserEntity> findByUsername(String username) {
 
         log.info("Looking up user by username: '{}'", username);

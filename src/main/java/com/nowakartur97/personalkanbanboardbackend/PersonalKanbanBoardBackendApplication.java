@@ -17,6 +17,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Random;
 
@@ -76,7 +77,7 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
                         .priority(TaskPriority.values()[new Random().nextInt(TaskPriority.values().length)])
                         .targetEndDate(LocalDate.now().plusDays(new Random().nextInt(3)))
                         // TODO: Check in Postgres to see if the date is auto-populated
-                        .createdOn(LocalDate.now())
+                        .createdOn(Instant.now())
                         .createdBy(user.getUserId())
                         .build())
                 .block();

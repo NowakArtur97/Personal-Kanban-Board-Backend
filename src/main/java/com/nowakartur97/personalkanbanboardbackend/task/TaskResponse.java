@@ -10,9 +10,9 @@ public record TaskResponse(UUID taskId,
                            TaskPriority priority,
                            LocalDate targetEndDate,
                            String createdBy,
-                           LocalDate createdOn,
+                           String createdOn,
                            String updatedBy,
-                           LocalDate updatedOn,
+                           String updatedOn,
                            String assignedTo
 ) {
 }
