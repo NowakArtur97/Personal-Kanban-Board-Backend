@@ -21,7 +21,7 @@ public class GraphQLQueries {
             """;
 
     public static final String UPDATE_TASK = """
-            mutation UPDATE_TASK($taskId: ID!, $taskDTO: TaskDTO!) {
+            mutation UPDATE_TASK($taskId: UUID!, $taskDTO: TaskDTO!) {
               updateTask(taskId: $taskId, taskDTO: $taskDTO) {
                 taskId
                 title

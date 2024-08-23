@@ -19,6 +19,7 @@ public class GraphQLConfiguration {
         ValidationSchemaWiring validationSchemaWiring = new ValidationSchemaWiring(validationRules);
 
         return wiringBuilder -> wiringBuilder
+                .scalar(ExtendedScalars.UUID)
                 .scalar(ExtendedScalars.Date)
                 .scalar(ExtendedScalars.DateTime)
                 .directiveWiring(validationSchemaWiring);

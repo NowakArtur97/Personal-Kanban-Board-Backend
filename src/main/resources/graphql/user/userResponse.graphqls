@@ -1,5 +1,5 @@
 type UserResponse {
-    userId: ID!
+    userId: UUID!
     username: String!
     email: String!
     token: String!

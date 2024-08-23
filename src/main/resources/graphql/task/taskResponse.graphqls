@@ -1,5 +1,5 @@
 type TaskResponse {
-    taskId: ID!
+    taskId: UUID!
     title: String!,
     description: String,
     status: TaskStatus!,
