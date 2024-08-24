@@ -21,7 +21,7 @@ public class UserController extends UserBasicController {
     @QueryMapping
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public Flux<UserResponse> users() {
-        return userService.findAllUsers()
+        return userService.findAll()
                 .map(this::mapToResponse);
     }
 }

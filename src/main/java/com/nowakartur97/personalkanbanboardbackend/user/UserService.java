@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -40,11 +41,18 @@ public class UserService {
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("User", "username/email", usernameOrEmail)));
     }
 
-    public Flux<UserEntity> findAllUsers() {
+    public Flux<UserEntity> findAll() {
 
         log.info("Looking up all users");
 
         return userRepository.findAll();
+    }
+
+    public Flux<UserEntity> findAllByIds(List<UUID> ids) {
+
+        log.info("Looking up all users by ids: '{}'", ids);
+
+        return userRepository.findAllById(ids);
     }
 
     public Mono<Boolean> existsByUsernameOrEmail(String username, String email) {

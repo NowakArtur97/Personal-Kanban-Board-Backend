@@ -1,6 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
+import com.nowakartur97.personalkanbanboardbackend.exception.ResourceNotFoundException;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import graphql.schema.DataFetchingEnvironment;
@@ -15,7 +16,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.nowakartur97.personalkanbanboardbackend.auth.AuthorizationHeaderInterceptor.TOKEN_IN_CONTEXT;
 
@@ -30,9 +37,17 @@ public class TaskController {
     @QueryMapping
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public Flux<TaskResponse> tasks(DataFetchingEnvironment env) {
-        String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
-        return taskService.findAllByAssignedTo(username)
-                .map(task -> mapToResponse(task, username));
+        return taskService.findAll()
+                .zipWith(taskService.findAll().collectList()
+                        .map(tasks -> Stream.of(
+                                        getUuidsFromTasksByProperty(tasks, TaskEntity::getCreatedBy),
+                                        getUuidsFromTasksByProperty(tasks, TaskEntity::getUpdatedBy),
+                                        getUuidsFromTasksByProperty(tasks, TaskEntity::getAssignedTo))
+                                .flatMap(Collection::stream)
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toSet()))
+                        .flatMap(userIds -> userService.findAllByIds(userIds.stream().toList()).collectList()))
+                .map(tuple -> mapToResponse(tuple.getT1(), tuple.getT2()));
     }
 
     @MutationMapping
@@ -115,6 +130,13 @@ public class TaskController {
         return mapToResponse(taskEntity, createdBy, null, assignedTo);
     }
 
+    private TaskResponse mapToResponse(TaskEntity taskEntity, List<UserEntity> users) {
+        String createdBy = getUsernameByUserId(taskEntity.getCreatedBy(), users);
+        String updatedBy = getUsernameByUserId(taskEntity.getUpdatedBy(), users);
+        String assignedTo = getUsernameByUserId(taskEntity.getAssignedTo(), users);
+        return mapToResponse(taskEntity, createdBy, updatedBy, assignedTo);
+    }
+
     private TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String updatedBy, String assignedTo) {
         return new TaskResponse(
                 taskEntity.getTaskId(),
@@ -129,5 +151,21 @@ public class TaskController {
                 taskEntity.getUpdatedOn() != null ? taskEntity.getUpdatedOn().toString() : null,
                 assignedTo
         );
+    }
+
+    private List<UUID> getUuidsFromTasksByProperty(List<TaskEntity> tasks, Function<TaskEntity, UUID> byProperty) {
+        return tasks.stream()
+                .map(byProperty)
+                .toList();
+    }
+
+    private String getUsernameByUserId(UUID userId, List<UserEntity> users) {
+        if (userId == null) {
+            return null;
+        }
+        return users.stream().filter(user -> user.getUserId().equals(userId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("User", "userId", userId.toString()))
+                .getUsername();
     }
 }

@@ -1,8 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.exception.ResourceNotFoundException;
-import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
-import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +15,21 @@ import java.util.UUID;
 public class TaskService {
 
     private final TaskRepository taskRepository;
-    private final UserService userService;
+
+    public Mono<TaskEntity> findById(UUID taskId) {
+
+        log.info("Looking up task by id: '{}'", taskId);
+
+        return taskRepository.findById(taskId)
+                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Task", "taskId", taskId.toString())));
+    }
+
+    public Flux<TaskEntity> findAll() {
+
+        log.info("Looking up all tasks");
+
+        return taskRepository.findAll();
+    }
 
     public Mono<TaskEntity> saveTask(TaskEntity task) {
 
@@ -31,22 +43,5 @@ public class TaskService {
         log.info("Updating task: {}", task);
 
         return taskRepository.save(task);
-    }
-
-    public Mono<TaskEntity> findById(UUID taskId) {
-
-        log.info("Looking up task by id: '{}'", taskId);
-
-        return taskRepository.findById(taskId)
-                .switchIfEmpty(Mono.error(new ResourceNotFoundException("Task", "taskId", taskId.toString())));
-    }
-
-    public Flux<TaskEntity> findAllByAssignedTo(String username) {
-
-        log.info("Looking up tasks for user: '{}'", username);
-
-        return userService.findByUsername(username)
-                .map(UserEntity::getUserId)
-                .flatMapMany(taskRepository::findAllByAssignedTo);
     }
 }
