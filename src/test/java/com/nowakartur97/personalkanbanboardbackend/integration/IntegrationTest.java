@@ -20,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Random;
@@ -84,7 +85,7 @@ public class IntegrationTest {
                         .status(TaskStatus.READY_TO_START)
                         .priority(TaskPriority.LOW)
                         .targetEndDate(LocalDate.now().plusDays(new Random().nextInt(3)))
-                        .createdOn(LocalDate.now())
+                        .createdOn(Instant.now())
                         .createdBy(authorId)
                         .build())
                 .block();

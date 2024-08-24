@@ -6,6 +6,7 @@ import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.graphql.ResponseError;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -84,9 +85,9 @@ public class TasksQueryControllerTest extends IntegrationTest {
         assertThat(taskResponse.priority()).isEqualTo(taskEntity.getPriority());
         assertThat(taskResponse.targetEndDate()).isEqualTo(taskEntity.getTargetEndDate());
         assertThat(taskResponse.assignedTo()).isEqualTo(username);
-        assertThat(taskResponse.createdOn()).isEqualTo(taskEntity.getCreatedOn());
+        assertThat(Instant.parse(taskResponse.createdOn()).toEpochMilli()).isEqualTo(taskEntity.getCreatedOn().toEpochMilli());
         assertThat(taskResponse.createdBy()).isEqualTo(username);
-        assertThat(taskResponse.updatedOn()).isEqualTo(taskEntity.getUpdatedOn());
+        assertThat(Instant.parse(taskResponse.updatedOn()).toEpochMilli()).isEqualTo(taskEntity.getUpdatedOn().toEpochMilli());
         // TODO: Change
         assertThat(taskResponse.updatedBy()).isEqualTo(null);
     }
@@ -100,8 +101,8 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 .priority(TaskPriority.MEDIUM)
                 .targetEndDate(LocalDate.now())
                 .createdBy(user.getUserId())
-                .createdOn(LocalDate.now())
-                .updatedOn(LocalDate.now())
+                .createdOn(Instant.now())
+                .updatedOn(Instant.now())
                 .updatedBy(user.getUserId())
                 .build();
         return taskRepository.save(task).block();

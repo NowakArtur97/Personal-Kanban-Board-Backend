@@ -8,6 +8,7 @@ import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -31,7 +32,7 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
         TaskEntity actualTaskEntity = taskRepository.findAll().blockLast();
         assertTaskEntity(actualTaskEntity, taskDTO, userEntity.getUserId(), taskAssignedToUserEntity.getUserId());
         assertThat(actualTaskEntity.getTaskId()).isEqualTo(taskEntity.getTaskId());
-        assertTaskResponse(taskResponse, taskEntity, taskDTO, userEntity.getUsername(), userEntity.getUsername(), taskAssignedToUserEntity.getUsername(),
+        assertTaskResponse(taskResponse, taskRepository.findAll().blockFirst(), taskDTO, userEntity.getUsername(), userEntity.getUsername(), taskAssignedToUserEntity.getUsername(),
                 taskDTO.getStatus(), taskDTO.getPriority());
     }
 
@@ -47,7 +48,7 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
         TaskEntity actualTaskEntity = taskRepository.findAll().blockLast();
         assertTaskEntity(actualTaskEntity, taskDTO, userEntity.getUserId());
         assertThat(actualTaskEntity.getTaskId()).isEqualTo(taskEntity.getTaskId());
-        assertTaskResponse(taskResponse, taskEntity, taskDTO, userEntity.getUsername(), userEntity.getUsername());
+        assertTaskResponse(taskResponse, taskRepository.findAll().blockFirst(), taskDTO, userEntity.getUsername(), userEntity.getUsername());
     }
 
     @Test
@@ -86,7 +87,7 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
                             assertThat(responseErrors.size()).isOne();
                             ResponseError responseError = responseErrors.getFirst();
                             assertValidationErrorResponse(responseError, new SourceLocation(1, 22),
-                                    "Variable 'taskId' has an invalid value: Variable 'taskId' has coerced Null value for NonNull type 'ID!'"
+                                    "Variable 'taskId' has an invalid value: Variable 'taskId' has coerced Null value for NonNull type 'UUID!'"
                             );
                         });
     }
@@ -108,7 +109,7 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
                             ResponseError responseError = responseErrors.getFirst();
-                            assertValidationErrorResponse(responseError, new SourceLocation(1, 36),
+                            assertValidationErrorResponse(responseError, new SourceLocation(1, 38),
                                     "Variable 'taskDTO' has an invalid value: Variable 'taskDTO' has coerced Null value for NonNull type 'TaskDTO!'"
                             );
                         });
@@ -126,7 +127,7 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
                             ResponseError responseError = responseErrors.getFirst();
-                            assertValidationErrorResponse(responseError, new SourceLocation(1, 36),
+                            assertValidationErrorResponse(responseError, new SourceLocation(1, 38),
                                     "Variable 'taskDTO' has an invalid value: Field 'title' has coerced Null value for NonNull type 'String!'");
                         });
     }
@@ -286,9 +287,9 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
         assertThat(taskResponse.priority()).isEqualTo(priority);
         assertThat(taskResponse.targetEndDate()).isEqualTo(taskDTO.getTargetEndDate());
         assertThat(taskResponse.assignedTo()).isEqualTo(assignedTo);
-        assertThat(taskResponse.createdOn()).isEqualTo(taskEntity.getCreatedOn());
+        assertThat(Instant.parse(taskResponse.createdOn()).toEpochMilli()).isEqualTo(taskEntity.getCreatedOn().toEpochMilli());
         assertThat(taskResponse.createdBy()).isEqualTo(createdBy);
-        assertThat(taskResponse.updatedOn()).isNotNull();
+        assertThat(Instant.parse(taskResponse.updatedOn()).toEpochMilli()).isEqualTo(taskEntity.getUpdatedOn().toEpochMilli());
         assertThat(taskResponse.updatedBy()).isEqualTo(updatedBy);
     }
 
