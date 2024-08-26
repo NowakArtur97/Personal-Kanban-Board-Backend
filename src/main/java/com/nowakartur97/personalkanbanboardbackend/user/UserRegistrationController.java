@@ -1,8 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.user;
 
-import com.nowakartur97.personalkanbanboardbackend.auth.JWTConfigurationProperties;
-import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -13,17 +12,14 @@ import reactor.core.publisher.Mono;
 
 @Controller
 @Validated
+@RequiredArgsConstructor
 @Slf4j
-public class UserRegistrationController extends UserBasicController {
+public class UserRegistrationController {
 
+    private final UserService userService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserMapper userMapper;
     private final UserValidator userValidator;
-
-    public UserRegistrationController(UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder,
-                                      JWTUtil jwtUtil, JWTConfigurationProperties jwtConfigurationProperties,
-                                      UserValidator userValidator) {
-        super(userService, bCryptPasswordEncoder, jwtUtil, jwtConfigurationProperties);
-        this.userValidator = userValidator;
-    }
 
     @MutationMapping
     public Mono<UserResponse> registerUser(@Argument @Valid UserDTO userDTO) {
@@ -32,17 +28,8 @@ public class UserRegistrationController extends UserBasicController {
                 userDTO.getUsername(), userDTO.getEmail());
 
         return userValidator.validate(userDTO)
-                .map(__ -> mapToEntity(userDTO))
+                .map(__ -> userMapper.mapToEntity(userDTO))
                 .flatMap(userService::saveUser)
-                .map(this::mapToResponse);
-    }
-
-    private UserEntity mapToEntity(UserDTO userDTO) {
-        return UserEntity.builder()
-                .username(userDTO.getUsername())
-                .password(bCryptPasswordEncoder.encode(userDTO.getPassword()))
-                .email(userDTO.getEmail())
-                .role(UserRole.USER)
-                .build();
+                .map(userMapper::mapToResponse);
     }
 }

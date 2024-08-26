@@ -4,16 +4,26 @@ import com.nowakartur97.personalkanbanboardbackend.auth.JWTConfigurationProperti
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Component;
 
+@Component
 @RequiredArgsConstructor
-public abstract class UserBasicController {
+public class UserMapper {
 
-    protected final UserService userService;
-    protected final BCryptPasswordEncoder bCryptPasswordEncoder;
-    protected final JWTUtil jwtUtil;
-    protected final JWTConfigurationProperties jwtConfigurationProperties;
+    private final JWTUtil jwtUtil;
+    private final JWTConfigurationProperties jwtConfigurationProperties;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    protected UserResponse mapToResponse(UserEntity userEntity) {
+    public UserEntity mapToEntity(UserDTO userDTO) {
+        return UserEntity.builder()
+                .username(userDTO.getUsername())
+                .password(bCryptPasswordEncoder.encode(userDTO.getPassword()))
+                .email(userDTO.getEmail())
+                .role(UserRole.USER)
+                .build();
+    }
+
+    public UserResponse mapToResponse(UserEntity userEntity) {
         return new UserResponse(
                 userEntity.getUserId(),
                 userEntity.getUsername(),
