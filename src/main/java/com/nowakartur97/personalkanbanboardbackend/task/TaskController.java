@@ -37,17 +37,20 @@ public class TaskController {
     @QueryMapping
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public Flux<TaskResponse> tasks(DataFetchingEnvironment env) {
-        return taskService.findAll()
-                .flatMap(task -> taskService.findAll().collectList()
-                        .map(t -> Stream.of(
-                                        getUuidsFromTasksByProperty(t, TaskEntity::getCreatedBy),
-                                        getUuidsFromTasksByProperty(t, TaskEntity::getUpdatedBy),
-                                        getUuidsFromTasksByProperty(t, TaskEntity::getAssignedTo))
-                                .flatMap(Collection::stream)
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toSet()))
-                        .flatMap(userIds -> userService.findAllByIds(userIds.stream().toList()).collectList())
-                        .map(users -> mapToResponse(task, users)));
+        Mono<List<TaskEntity>> allTasks = taskService.findAll().collectList();
+        return allTasks
+                .map(tasks -> Stream.of(
+                                getUuidsFromTasksByProperty(tasks, TaskEntity::getCreatedBy),
+                                getUuidsFromTasksByProperty(tasks, TaskEntity::getUpdatedBy),
+                                getUuidsFromTasksByProperty(tasks, TaskEntity::getAssignedTo))
+                        .flatMap(Collection::stream)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet()))
+                .flatMap(userIds -> userService.findAllByIds(userIds.stream().toList()).collectList())
+                .zipWith(allTasks)
+                .flatMapIterable(tuple -> tuple.getT2().stream()
+                        .map(task -> mapToResponse(task, tuple.getT1()))
+                        .toList());
     }
 
     @MutationMapping
@@ -151,10 +154,6 @@ public class TaskController {
                 taskEntity.getUpdatedOn() != null ? taskEntity.getUpdatedOn().toString() : null,
                 assignedTo
         );
-    }
-
-    private List<UUID> getUuidsFromTasksByProperty(TaskEntity task, Function<TaskEntity, UUID> byProperty) {
-        return List.of(byProperty.apply(task));
     }
 
     private List<UUID> getUuidsFromTasksByProperty(List<TaskEntity> tasks, Function<TaskEntity, UUID> byProperty) {
