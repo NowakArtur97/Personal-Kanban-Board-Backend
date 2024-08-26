@@ -38,16 +38,16 @@ public class TaskController {
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public Flux<TaskResponse> tasks(DataFetchingEnvironment env) {
         return taskService.findAll()
-                .zipWith(taskService.findAll().collectList()
-                        .map(tasks -> Stream.of(
-                                        getUuidsFromTasksByProperty(tasks, TaskEntity::getCreatedBy),
-                                        getUuidsFromTasksByProperty(tasks, TaskEntity::getUpdatedBy),
-                                        getUuidsFromTasksByProperty(tasks, TaskEntity::getAssignedTo))
+                .flatMap(task -> taskService.findAll().collectList()
+                        .map(t -> Stream.of(
+                                        getUuidsFromTasksByProperty(t, TaskEntity::getCreatedBy),
+                                        getUuidsFromTasksByProperty(t, TaskEntity::getUpdatedBy),
+                                        getUuidsFromTasksByProperty(t, TaskEntity::getAssignedTo))
                                 .flatMap(Collection::stream)
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toSet()))
-                        .flatMap(userIds -> userService.findAllByIds(userIds.stream().toList()).collectList()))
-                .map(tuple -> mapToResponse(tuple.getT1(), tuple.getT2()));
+                        .flatMap(userIds -> userService.findAllByIds(userIds.stream().toList()).collectList())
+                        .map(users -> mapToResponse(task, users)));
     }
 
     @MutationMapping
@@ -151,6 +151,10 @@ public class TaskController {
                 taskEntity.getUpdatedOn() != null ? taskEntity.getUpdatedOn().toString() : null,
                 assignedTo
         );
+    }
+
+    private List<UUID> getUuidsFromTasksByProperty(TaskEntity task, Function<TaskEntity, UUID> byProperty) {
+        return List.of(byProperty.apply(task));
     }
 
     private List<UUID> getUuidsFromTasksByProperty(List<TaskEntity> tasks, Function<TaskEntity, UUID> byProperty) {
