@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.graphql.ResponseError;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.GET_TASKS;
@@ -21,7 +20,11 @@ public class TasksQueryControllerTest extends IntegrationTest {
     public void whenGetTasksByUsername_shouldReturnTasksForSpecifiedUser() {
 
         UserEntity userEntity = createUser();
-        TaskEntity taskEntity = createTask(userEntity);
+        TaskEntity taskEntity = createTask(userEntity.getUserId());
+        UserEntity author = createUser("developer2", "developer2@domain.com");
+        UserEntity assignedTo = createUser("developer3", "developer3@domain.com");
+        UserEntity updatedBy = createUser("developer4", "developer4@domain.com");
+        TaskEntity taskEntity3 = createTask(author.getUserId(), assignedTo.getUserId(), updatedBy.getUserId());
 
         List<TaskResponse> taskResponses = httpGraphQlTester
                 .mutate()
@@ -35,9 +38,11 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 .entityList(TaskResponse.class)
                 .get();
 
-        assertThat(taskResponses.size()).isOne();
+        assertThat(taskResponses.size()).isEqualTo(2);
         TaskResponse taskResponse = taskResponses.getFirst();
-        assertTaskResponse(taskResponse, taskEntity, userEntity.getUsername());
+        TaskResponse taskResponse3 = taskResponses.getLast();
+        assertTaskResponse(taskResponse, taskEntity, userEntity.getUsername(), userEntity.getUsername(), null);
+        assertTaskResponse(taskResponse3, taskEntity3, author.getUsername(), assignedTo.getUsername(), updatedBy.getUsername());
     }
 
     @Test
@@ -77,34 +82,22 @@ public class TasksQueryControllerTest extends IntegrationTest {
         runTestForSendingRequestWithDifferentTokenSignature(GET_TASKS, TASKS_PATH);
     }
 
-    private void assertTaskResponse(TaskResponse taskResponse, TaskEntity taskEntity, String username) {
+    private void assertTaskResponse(TaskResponse taskResponse, TaskEntity taskEntity,
+                                    String assignedTo, String createdBy, String updatedBy) {
         assertThat(taskResponse).isNotNull();
         assertThat(taskResponse.taskId()).isEqualTo(taskEntity.getTaskId());
         assertThat(taskResponse.title()).isEqualTo(taskEntity.getTitle());
         assertThat(taskResponse.status()).isEqualTo(taskEntity.getStatus());
         assertThat(taskResponse.priority()).isEqualTo(taskEntity.getPriority());
         assertThat(taskResponse.targetEndDate()).isEqualTo(taskEntity.getTargetEndDate());
-        assertThat(taskResponse.assignedTo()).isEqualTo(username);
+        assertThat(taskResponse.assignedTo()).isEqualTo(assignedTo);
         assertThat(Instant.parse(taskResponse.createdOn()).toEpochMilli()).isEqualTo(taskEntity.getCreatedOn().toEpochMilli());
-        assertThat(taskResponse.createdBy()).isEqualTo(username);
-        assertThat(Instant.parse(taskResponse.updatedOn()).toEpochMilli()).isEqualTo(taskEntity.getUpdatedOn().toEpochMilli());
-        // TODO: Change
-        assertThat(taskResponse.updatedBy()).isEqualTo(null);
-    }
-
-    private TaskEntity createTask(UserEntity user) {
-        TaskEntity task = TaskEntity.builder()
-                .title("task1")
-                .description("desc1")
-                .assignedTo(user.getUserId())
-                .status(TaskStatus.READY_TO_START)
-                .priority(TaskPriority.MEDIUM)
-                .targetEndDate(LocalDate.now())
-                .createdBy(user.getUserId())
-                .createdOn(Instant.now())
-                .updatedOn(Instant.now())
-                .updatedBy(user.getUserId())
-                .build();
-        return taskRepository.save(task).block();
+        assertThat(taskResponse.createdBy()).isEqualTo(createdBy);
+        if (updatedBy != null) {
+            assertThat(Instant.parse(taskResponse.updatedOn()).toEpochMilli()).isEqualTo(taskEntity.getUpdatedOn().toEpochMilli());
+        } else {
+            assertThat(taskResponse.updatedOn()).isNull();
+        }
+        assertThat(taskResponse.updatedBy()).isEqualTo(updatedBy);
     }
 }

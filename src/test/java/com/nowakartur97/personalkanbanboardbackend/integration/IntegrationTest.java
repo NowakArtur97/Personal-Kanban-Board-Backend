@@ -78,6 +78,10 @@ public class IntegrationTest {
     }
 
     protected TaskEntity createTask(UUID authorId) {
+        return createTask(authorId, authorId, null);
+    }
+
+    protected TaskEntity createTask(UUID authorId, UUID assignedToId, UUID updatedById) {
         return taskRepository.save(TaskEntity.builder()
                         .title("testTask")
                         .description("test")
@@ -86,7 +90,9 @@ public class IntegrationTest {
                         .priority(TaskPriority.LOW)
                         .targetEndDate(LocalDate.now().plusDays(new Random().nextInt(3)))
                         .createdOn(Instant.now())
-                        .createdBy(authorId)
+                        .createdBy(assignedToId)
+                        .updatedOn(updatedById != null ? Instant.now() : null)
+                        .updatedBy(updatedById)
                         .build())
                 .block();
     }
