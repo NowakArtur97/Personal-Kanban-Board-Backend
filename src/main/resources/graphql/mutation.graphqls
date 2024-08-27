@@ -3,4 +3,5 @@ type Mutation {
 
     createTask(taskDTO: TaskDTO): TaskResponse
     updateTask(taskId: UUID, taskDTO: TaskDTO): TaskResponse
+    deleteTask(taskId: UUID): UUID
 }
