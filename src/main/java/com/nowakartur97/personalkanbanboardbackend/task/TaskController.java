@@ -60,13 +60,13 @@ public class TaskController {
         if (taskDTO.getAssignedTo() == null) {
             return author
                     .flatMap(user -> Mono.just(taskMapper.mapToEntity(taskDTO, user.getUserId()))
-                            .flatMap(taskService::saveTask)
+                            .flatMap(taskService::save)
                             .map(task -> taskMapper.mapToResponse(task, user.getUsername())));
         }
         Mono<UserEntity> assignedTo = userService.findById(taskDTO.getAssignedTo());
         return Mono.zip(author, assignedTo)
                 .flatMap(tuple -> Mono.just(taskMapper.mapToEntity(taskDTO, tuple.getT1().getUserId(), tuple.getT2().getUserId()))
-                        .flatMap(taskService::saveTask)
+                        .flatMap(taskService::save)
                         .map(task -> taskMapper.mapToResponse(task, tuple.getT1().getUsername(), tuple.getT2().getUsername())));
     }
 
@@ -79,14 +79,20 @@ public class TaskController {
         if (taskDTO.getAssignedTo() == null) {
             return Mono.zip(taskById, author)
                     .flatMap(tuple -> Mono.just(taskMapper.updateEntity(tuple.getT1(), taskDTO, tuple.getT2().getUserId()))
-                            .flatMap(taskService::updateTask)
+                            .flatMap(taskService::update)
                             .map(task -> taskMapper.mapToResponse(task, username, username, tuple.getT2().getUsername())));
         }
         Mono<UserEntity> assignedTo = userService.findById(taskDTO.getAssignedTo());
         return Mono.zip(taskById, author, assignedTo)
                 .flatMap(tuple -> Mono.just(taskMapper.updateEntity(tuple.getT1(), taskDTO, tuple.getT2().getUserId(), tuple.getT3().getUserId()))
-                        .flatMap(taskService::updateTask)
+                        .flatMap(taskService::update)
                         .map(task -> taskMapper.mapToResponse(task, tuple.getT2().getUsername(), username, tuple.getT3().getUsername())));
+    }
+
+    @MutationMapping
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    public Mono<Void> deleteTask(@Argument UUID taskId) {
+        return taskService.deleteById(taskId);
     }
 
     private List<UUID> getUuidsFromTasksByProperty(List<TaskEntity> tasks, Function<TaskEntity, UUID> byProperty) {

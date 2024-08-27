@@ -29,7 +29,7 @@ public class UserRegistrationController {
 
         return userValidator.validate(userDTO)
                 .map(__ -> userMapper.mapToEntity(userDTO))
-                .flatMap(userService::saveUser)
+                .flatMap(userService::save)
                 .map(userMapper::mapToResponse);
     }
 }

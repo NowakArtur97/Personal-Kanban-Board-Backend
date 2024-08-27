@@ -62,7 +62,7 @@ public class UserService {
         return userRepository.existsByUsernameOrEmail(username, email);
     }
 
-    public Mono<UserEntity> saveUser(UserEntity user) {
+    public Mono<UserEntity> save(UserEntity user) {
 
         log.info("Registration of new user: {}", user);
 

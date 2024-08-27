@@ -61,7 +61,7 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
                     .role(UserRole.USER)
                     .build();
 
-            userService.saveUser(user).block();
+            userService.save(user).block();
         }
 
         log.info("Token: {}", jwtUtil.generateToken(user.getUsername(), user.getRole().name()));
@@ -69,7 +69,7 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
     }
 
     private void createTestTask(UserEntity user) {
-        taskService.saveTask(TaskEntity.builder()
+        taskService.save(TaskEntity.builder()
                         .title("task1")
                         .description("desc1")
                         .assignedTo(user.getUserId())

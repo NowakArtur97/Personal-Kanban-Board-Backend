@@ -31,17 +31,24 @@ public class TaskService {
         return taskRepository.findAll();
     }
 
-    public Mono<TaskEntity> saveTask(TaskEntity task) {
+    public Mono<TaskEntity> save(TaskEntity task) {
 
         log.info("Creation of new task: {}", task);
 
         return taskRepository.save(task);
     }
 
-    public Mono<TaskEntity> updateTask(TaskEntity task) {
+    public Mono<TaskEntity> update(TaskEntity task) {
 
         log.info("Updating task: {}", task);
 
         return taskRepository.save(task);
+    }
+
+    public Mono<Void> deleteById(UUID taskId) {
+
+        log.info("Deleting task: by id: '{}'", taskId);
+
+        return taskRepository.deleteById(taskId);
     }
 }
