@@ -51,13 +51,13 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
 
         UserEntity user;
 
-        if (userService.existsByUsernameOrEmail("user", "user@domain.com").block()) {
-            user = userService.findByUsername("user").block();
+        if (userService.existsByUsernameOrEmail("admin", "admin@domain.com").block()) {
+            user = userService.findByUsername("admin").block();
         } else {
             user = UserEntity.builder()
-                    .username("user")
-                    .password(bCryptPasswordEncoder.encode("pass1"))
-                    .email("user@domain.com")
+                    .username("admin")
+                    .password(bCryptPasswordEncoder.encode("admin123"))
+                    .email("admin@domain.com")
                     .role(UserRole.ADMIN)
                     .build();
 

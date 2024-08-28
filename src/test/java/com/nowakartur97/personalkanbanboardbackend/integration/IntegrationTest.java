@@ -47,6 +47,7 @@ public class IntegrationTest {
     @Autowired
     protected BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    // TODO: Setup testcontainers
 //    @BeforeAll
 //    public static void startContainer() {
 //        postgresContainer.start();
@@ -58,6 +59,7 @@ public class IntegrationTest {
         userRepository.deleteAll().block();
     }
 
+    // TODO: Setup testcontainers
 //    @AfterAll
 //    public static void stopContainer() {
 //        postgresContainer.stop();
@@ -68,11 +70,15 @@ public class IntegrationTest {
     }
 
     protected UserEntity createUser(String username, String email) {
+        return createUser(username, email, UserRole.USER);
+    }
+
+    protected UserEntity createUser(String username, String email, UserRole role) {
         UserEntity user = UserEntity.builder()
                 .username(username)
                 .password(bCryptPasswordEncoder.encode("pass1"))
                 .email(email)
-                .role(UserRole.USER)
+                .role(role)
                 .build();
         return userRepository.save(user).block();
     }
@@ -121,6 +127,11 @@ public class IntegrationTest {
 
     protected void assertUnauthorizedErrorResponse(ResponseError responseError, String path, String message) {
         assertThat(responseError.getErrorType()).isEqualTo(ErrorType.UNAUTHORIZED);
+        assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
+    }
+
+    protected void asserForbiddenErrorResponse(ResponseError responseError, String path, String message) {
+        assertThat(responseError.getErrorType()).isEqualTo(ErrorType.FORBIDDEN);
         assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
     }
 
