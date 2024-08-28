@@ -58,7 +58,7 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
                     .username("user")
                     .password(bCryptPasswordEncoder.encode("pass1"))
                     .email("user@domain.com")
-                    .role(UserRole.USER)
+                    .role(UserRole.ADMIN)
                     .build();
 
             userService.save(user).block();

@@ -95,6 +95,12 @@ public class TaskController {
         return taskService.deleteById(taskId);
     }
 
+    @MutationMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public Mono<Void> deleteAllTasks() {
+        return taskService.deleteAll();
+    }
+
     private List<UUID> getUuidsFromTasksByProperty(List<TaskEntity> tasks, Function<TaskEntity, UUID> byProperty) {
         return tasks.stream()
                 .map(byProperty)

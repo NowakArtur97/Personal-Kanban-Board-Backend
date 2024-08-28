@@ -51,4 +51,11 @@ public class TaskService {
 
         return taskRepository.deleteById(taskId);
     }
+
+    public Mono<Void> deleteAll() {
+
+        log.info("Deleting all tasks");
+
+        return taskRepository.deleteAll();
+    }
 }
