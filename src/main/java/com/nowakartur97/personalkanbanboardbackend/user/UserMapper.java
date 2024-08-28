@@ -29,6 +29,7 @@ public class UserMapper {
                 userEntity.getUsername(),
                 userEntity.getEmail(),
                 jwtUtil.generateToken(userEntity.getUsername(), userEntity.getRole().name()),
-                jwtConfigurationProperties.getExpirationTimeInMilliseconds());
+                jwtConfigurationProperties.getExpirationTimeInMilliseconds(),
+                userEntity.getRole());
     }
 }

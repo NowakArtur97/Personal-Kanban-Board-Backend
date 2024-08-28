@@ -1,7 +1,13 @@
+enum UserRole {
+    USER
+    ADMIN
+}
+
 type UserResponse {
     userId: UUID!
     username: String!
     email: String!
     token: String!
     expirationTimeInMilliseconds: Int!
+    role: UserRole!
 }

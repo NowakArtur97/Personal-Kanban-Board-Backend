@@ -80,6 +80,7 @@ mutation REGISTER_USER {
     email
     token
     expirationTimeInMilliseconds
+    role
   }
 }
 
@@ -90,6 +91,7 @@ query LOGIN_USER {
     email
     token
     expirationTimeInMilliseconds
+    role
   }
 }
 
