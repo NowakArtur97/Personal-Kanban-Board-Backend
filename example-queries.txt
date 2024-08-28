@@ -53,6 +53,10 @@ mutation DELETE_TASK {
   deleteTask(taskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af")
 }
 
+mutation DELETE_ALL_TASKS {
+  deleteAllTasks
+}
+
 query FIND_ALL_USER_TASKS {
   tasks {
     taskId

@@ -43,6 +43,11 @@ public class GraphQLQueries {
               deleteTask(taskId: $taskId)
             }
             """;
+    public static final String DELETE_ALL_TASKS = """
+            mutation DELETE_ALL_TASKS {
+              deleteAllTasks
+            }
+            """;
 
     public static final String GET_TASKS = """
             query TASKS {
