@@ -100,7 +100,5 @@ query FIND_ALL_USERS {
     userId
     username
     email
-    token
-    expirationTimeInMilliseconds
   }
 }

@@ -75,6 +75,7 @@ public class GraphQLQueries {
                 email
                 token
                 expirationTimeInMilliseconds
+                role
               }
             }
             """;
@@ -87,6 +88,7 @@ public class GraphQLQueries {
                 email
                 token
                 expirationTimeInMilliseconds
+                role
               }
             }
             """;
@@ -97,8 +99,6 @@ public class GraphQLQueries {
                 userId
                 username
                 email
-                token
-                expirationTimeInMilliseconds
               }
             }
             """;

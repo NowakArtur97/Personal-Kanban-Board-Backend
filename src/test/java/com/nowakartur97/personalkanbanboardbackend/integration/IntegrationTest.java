@@ -45,7 +45,7 @@ public class IntegrationTest {
     @Autowired
     protected JWTConfigurationProperties jwtConfigurationProperties;
     @Autowired
-    protected BCryptPasswordEncoder bCryptPasswordEncoder;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     // TODO: Setup testcontainers
 //    @BeforeAll

@@ -17,8 +17,8 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
     @Test
     public void whenLoginUser_shouldReturnUserResponse() {
 
-        UserEntity user = createUser();
-        AuthenticationRequest authenticationRequest = new AuthenticationRequest(user.getUsername(), "pass1");
+        UserEntity userEntity = createUser();
+        AuthenticationRequest authenticationRequest = new AuthenticationRequest(userEntity.getUsername(), "pass1");
 
         UserResponse userResponse = httpGraphQlTester
                 .document(AUTHENTICATE_USER)
@@ -30,11 +30,12 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
                 .entity(UserResponse.class)
                 .get();
 
-        assertThat(userResponse.userId()).isEqualTo(user.getUserId());
-        assertThat(userResponse.username()).isEqualTo(user.getUsername());
-        assertThat(userResponse.email()).isEqualTo(user.getEmail());
-        assertThat(userResponse.token()).isEqualTo(jwtUtil.generateToken(user.getUsername(), UserRole.USER.name()));
+        assertThat(userResponse.userId()).isEqualTo(userEntity.getUserId());
+        assertThat(userResponse.username()).isEqualTo(userEntity.getUsername());
+        assertThat(userResponse.email()).isEqualTo(userEntity.getEmail());
+        assertThat(userResponse.token()).isEqualTo(jwtUtil.generateToken(userEntity.getUsername(), userEntity.getRole().name()));
         assertThat(userResponse.expirationTimeInMilliseconds()).isEqualTo(jwtConfigurationProperties.getExpirationTimeInMilliseconds());
+        assertThat(userResponse.role()).isEqualTo(userEntity.getRole());
     }
 
     @Test

@@ -37,6 +37,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
         assertThat(userResponse.email()).isEqualTo(userDTO.getEmail());
         assertThat(userResponse.token()).isEqualTo(jwtUtil.generateToken(userDTO.getUsername(), UserRole.USER.name()));
         assertThat(userResponse.expirationTimeInMilliseconds()).isEqualTo(jwtConfigurationProperties.getExpirationTimeInMilliseconds());
+        assertThat(userResponse.role()).isEqualTo(UserRole.USER);
         assertThat(userRepository.count().block()).isOne();
     }
 

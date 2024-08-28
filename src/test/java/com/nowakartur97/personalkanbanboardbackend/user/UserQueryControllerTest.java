@@ -61,6 +61,8 @@ public class UserQueryControllerTest extends IntegrationTest {
         assertThat(userResponse.userId()).isEqualTo(userEntity.getUserId());
         assertThat(userResponse.username()).isEqualTo(userEntity.getUsername());
         assertThat(userResponse.email()).isEqualTo(userEntity.getEmail());
-        assertThat(userResponse.expirationTimeInMilliseconds()).isEqualTo(jwtConfigurationProperties.getExpirationTimeInMilliseconds());
+        assertThat(userResponse.token()).isNull();
+        assertThat(userResponse.expirationTimeInMilliseconds()).isZero();
+        assertThat(userResponse.role()).isNull();
     }
 }
