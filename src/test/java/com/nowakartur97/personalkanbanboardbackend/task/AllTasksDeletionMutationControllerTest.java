@@ -29,7 +29,7 @@ public class AllTasksDeletionMutationControllerTest extends IntegrationTest {
     @Test
     public void whenDeleteAllTasksWhenThereAreNoExistingTasks_shouldReturnEmptyResponse() {
 
-        UserEntity admin = createUser("admin", "admin@domain.com", UserRole.ADMIN);
+        UserEntity admin = createUser("testAdmin", "testAdmin@domain.com", UserRole.ADMIN);
 
         sendDeleteAllTasksRequest(admin);
 

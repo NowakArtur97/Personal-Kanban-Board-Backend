@@ -57,7 +57,7 @@ mutation DELETE_ALL_TASKS {
   deleteAllTasks
 }
 
-query FIND_ALL_USER_TASKS {
+query FIND_ALL_TASKS {
   tasks {
     taskId
     title
