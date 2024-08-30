@@ -26,6 +26,7 @@ import static com.nowakartur97.personalkanbanboardbackend.auth.AuthorizationHead
 
 @Controller
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('USER')")
 public class TaskController {
 
     private final TaskService taskService;
@@ -34,7 +35,6 @@ public class TaskController {
     private final TaskMapper taskMapper;
 
     @QueryMapping
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public Flux<TaskResponse> tasks(DataFetchingEnvironment env) {
         Mono<List<TaskEntity>> allTasks = taskService.findAll().collectList();
         return allTasks
@@ -53,7 +53,6 @@ public class TaskController {
     }
 
     @MutationMapping
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public Mono<TaskResponse> createTask(@Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
         Mono<UserEntity> author = userService.findByUsername(username);
@@ -71,7 +70,6 @@ public class TaskController {
     }
 
     @MutationMapping
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public Mono<TaskResponse> updateTask(@Argument UUID taskId, @Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
         Mono<TaskEntity> taskById = taskService.findById(taskId);
@@ -90,7 +88,6 @@ public class TaskController {
     }
 
     @MutationMapping
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public Mono<Void> deleteTask(@Argument UUID taskId) {
         return taskService.deleteById(taskId);
     }
