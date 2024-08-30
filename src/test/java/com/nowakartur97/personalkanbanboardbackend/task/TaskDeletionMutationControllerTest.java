@@ -2,8 +2,11 @@ package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
+import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.graphql.ResponseError;
 
 import java.util.UUID;
@@ -15,10 +18,11 @@ public class TaskDeletionMutationControllerTest extends IntegrationTest {
 
     private final static String DELETE_TASK_PATH = "deleteTask";
 
-    @Test
-    public void whenDeleteExistingTask_shouldReturnEmptyResponse() {
+    @ParameterizedTest
+    @EnumSource(value = UserRole.class)
+    public void whenDeleteExistingTask_shouldReturnEmptyResponse(UserRole role) {
 
-        UserEntity userEntity = createUser();
+        UserEntity userEntity = createUser(role);
         TaskEntity taskEntity = createTask(userEntity.getUserId());
 
         sendDeleteTaskRequest(userEntity, taskEntity.getTaskId());

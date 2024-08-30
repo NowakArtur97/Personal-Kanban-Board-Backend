@@ -4,6 +4,8 @@ import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.graphql.ResponseError;
 
 import java.time.Instant;
@@ -16,10 +18,11 @@ public class TasksQueryControllerTest extends IntegrationTest {
 
     private final static String TASKS_PATH = "tasks";
 
-    @Test
-    public void whenGetTasksByUsername_shouldReturnTasksForSpecifiedUser() {
+    @ParameterizedTest
+    @EnumSource(value = UserRole.class)
+    public void whenGetTasksByUsername_shouldReturnAllTasks(UserRole role) {
 
-        UserEntity userEntity = createUser();
+        UserEntity userEntity = createUser(role);
         TaskEntity taskEntity = createTask(userEntity.getUserId());
         UserEntity author = createUser("developer2", "developer2@domain.com");
         UserEntity assignedTo = createUser("developer3", "developer3@domain.com");

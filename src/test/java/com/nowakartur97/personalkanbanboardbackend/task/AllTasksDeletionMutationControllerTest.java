@@ -37,7 +37,7 @@ public class AllTasksDeletionMutationControllerTest extends IntegrationTest {
     }
 
     @Test
-    public void whenDeleteAllTasksByUser_shouldReturnGraphQLErrorResponse() {
+    public void whenDeleteAllTasksByNonAdminUser_shouldReturnGraphQLErrorResponse() {
 
         UserEntity userEntity = createUser();
 

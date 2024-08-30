@@ -2,6 +2,8 @@ package com.nowakartur97.personalkanbanboardbackend.user;
 
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.List;
 
@@ -12,10 +14,11 @@ public class UserQueryControllerTest extends IntegrationTest {
 
     private final static String FIND_ALL_USERS_PATH = "users";
 
-    @Test
-    public void whenFindAllUsers_shouldReturnUsersResponse() {
+    @ParameterizedTest
+    @EnumSource(value = UserRole.class)
+    public void whenFindAllUsers_shouldReturnUsersResponse(UserRole role) {
 
-        UserEntity userEntity = createUser();
+        UserEntity userEntity = createUser(role);
         UserEntity userEntity2 = createUser("developer", "developer@domain.com");
 
         List<UserResponse> usersResponse = httpGraphQlTester

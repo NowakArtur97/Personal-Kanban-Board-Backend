@@ -69,6 +69,10 @@ public class IntegrationTest {
         return userRepository.save(createUser("testUser", "testUser@domain.com")).block();
     }
 
+    protected UserEntity createUser(UserRole role) {
+        return userRepository.save(createUser("testUser", "testUser@domain.com", role)).block();
+    }
+
     protected UserEntity createUser(String username, String email) {
         return createUser(username, email, UserRole.USER);
     }

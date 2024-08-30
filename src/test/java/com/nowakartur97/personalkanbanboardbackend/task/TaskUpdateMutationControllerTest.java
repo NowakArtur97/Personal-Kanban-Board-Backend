@@ -2,8 +2,11 @@ package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
+import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
@@ -19,10 +22,11 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
 
     private final static String UPDATE_TASK_PATH = "updateTask";
 
-    @Test
-    public void whenUpdateTask_shouldReturnTaskResponse() {
+    @ParameterizedTest
+    @EnumSource(value = UserRole.class)
+    public void whenUpdateTask_shouldReturnTaskResponse(UserRole role) {
 
-        UserEntity userEntity = createUser();
+        UserEntity userEntity = createUser(role);
         TaskEntity taskEntity = createTask(userEntity.getUserId());
         UserEntity taskAssignedToUserEntity = createUser("developer", "developer@domain.com");
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), taskAssignedToUserEntity.getUserId());
