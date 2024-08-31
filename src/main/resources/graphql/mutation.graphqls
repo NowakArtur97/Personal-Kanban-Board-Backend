@@ -3,6 +3,7 @@ type Mutation {
 
     createTask(taskDTO: TaskDTO): TaskResponse
     updateTask(taskId: UUID, taskDTO: TaskDTO): TaskResponse
+    updateUserAssignedToTask(taskId: UUID, assignedToId: UUID): TaskResponse
     deleteTask(taskId: UUID): UUID
     deleteAllTasks: UUID
 }

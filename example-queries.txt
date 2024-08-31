@@ -49,6 +49,25 @@ mutation UPDATE_TASK {
   }
 }
 
+mutation UPDATE_USER_ASSIGNED_TO_TASK {
+  updateUserAssignedToTask(
+    taskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af"
+    assignedToId: "7394e566-ad90-419b-916e-572f8ba66ac5"
+  ) {
+    taskId
+    title
+    description
+    priority
+    status
+    targetEndDate
+    assignedTo
+    createdOn
+    createdBy
+    updatedOn
+    updatedBy
+  }
+}
+
 mutation DELETE_TASK {
   deleteTask(taskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af")
 }
