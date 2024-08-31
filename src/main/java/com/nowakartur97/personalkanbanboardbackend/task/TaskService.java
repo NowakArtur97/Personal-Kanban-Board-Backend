@@ -45,6 +45,15 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
+    public Mono<TaskEntity> updateAssignedTo(TaskEntity task, UUID assignedTo) {
+
+        task.setAssignedTo(assignedTo);
+
+        log.info("Updating user assigned to task: {}", task);
+
+        return taskRepository.save(task);
+    }
+
     public Mono<Void> deleteById(UUID taskId) {
 
         log.info("Deleting task: by id: '{}'", taskId);

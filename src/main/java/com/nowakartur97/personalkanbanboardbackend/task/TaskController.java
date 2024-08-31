@@ -88,6 +88,15 @@ public class TaskController {
     }
 
     @MutationMapping
+    public Mono<TaskResponse> updateUserAssignedToTask(@Argument UUID taskId, @Argument UUID assignedToId) {
+        Mono<UserEntity> assignedTo = userService.findById(assignedToId);
+        return Mono.zip(taskService.findById(taskId), assignedTo)
+                .flatMap(tuple -> taskService.updateAssignedTo(tuple.getT1(), tuple.getT2().getUserId()))
+                .zipWith(assignedTo)
+                .map(tuple -> taskMapper.mapToResponse(tuple.getT1(), tuple.getT2().getUsername()));
+    }
+
+    @MutationMapping
     public Mono<Void> deleteTask(@Argument UUID taskId) {
         return taskService.deleteById(taskId);
     }
