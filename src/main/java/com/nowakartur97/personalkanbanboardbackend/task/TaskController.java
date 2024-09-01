@@ -73,18 +73,20 @@ public class TaskController {
     public Mono<TaskResponse> updateTask(@Argument UUID taskId, @Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
         Mono<TaskEntity> taskById = taskService.findById(taskId);
-        Mono<UserEntity> author = userService.findByUsername(username);
+        Mono<UserEntity> createdBy = taskById.map(TaskEntity::getCreatedBy)
+                .flatMap(userService::findById);
+        Mono<UserEntity> updatedBy = userService.findByUsername(username);
         if (taskDTO.getAssignedTo() == null) {
-            return Mono.zip(taskById, author)
-                    .flatMap(tuple -> Mono.just(taskMapper.updateEntity(tuple.getT1(), taskDTO, tuple.getT2().getUserId()))
+            return Mono.zip(taskById, createdBy, updatedBy)
+                    .flatMap(tuple -> Mono.just(taskMapper.updateEntity(tuple.getT1(), taskDTO, tuple.getT3().getUserId()))
                             .flatMap(taskService::update)
-                            .map(task -> taskMapper.mapToResponse(task, username, username, tuple.getT2().getUsername())));
+                            .map(task -> taskMapper.mapToResponse(task, username, tuple.getT2().getUsername(), tuple.getT3().getUsername())));
         }
         Mono<UserEntity> assignedTo = userService.findById(taskDTO.getAssignedTo());
-        return Mono.zip(taskById, author, assignedTo)
-                .flatMap(tuple -> Mono.just(taskMapper.updateEntity(tuple.getT1(), taskDTO, tuple.getT2().getUserId(), tuple.getT3().getUserId()))
+        return Mono.zip(taskById, createdBy, updatedBy, assignedTo)
+                .flatMap(tuple -> Mono.just(taskMapper.updateEntity(tuple.getT1(), taskDTO, tuple.getT3().getUserId(), tuple.getT4().getUserId()))
                         .flatMap(taskService::update)
-                        .map(task -> taskMapper.mapToResponse(task, tuple.getT2().getUsername(), username, tuple.getT3().getUsername())));
+                        .map(task -> taskMapper.mapToResponse(task, tuple.getT2().getUsername(), tuple.getT3().getUsername(), tuple.getT4().getUsername())));
     }
 
     @MutationMapping

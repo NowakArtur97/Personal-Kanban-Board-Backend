@@ -27,17 +27,33 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
     public void whenUpdateTask_shouldReturnTaskResponse(UserRole role) {
 
         UserEntity userEntity = createUser(role);
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
-        UserEntity taskAssignedToUserEntity = createUser("developer", "developer@domain.com");
-        TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), taskAssignedToUserEntity.getUserId());
+        UserEntity author = createUser("author", "author@domain.com");
+        TaskEntity taskEntity = createTask(author.getUserId());
+        UserEntity assignedTo = createUser("developer", "developer@domain.com");
+        TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), assignedTo.getUserId());
 
         TaskResponse taskResponse = sendUpdateTaskRequest(userEntity, taskEntity.getTaskId(), taskDTO);
 
-        TaskEntity actualTaskEntity = taskRepository.findAll().blockLast();
-        assertTaskEntity(actualTaskEntity, taskDTO, userEntity.getUserId(), taskAssignedToUserEntity.getUserId());
-        assertThat(actualTaskEntity.getTaskId()).isEqualTo(taskEntity.getTaskId());
-        assertTaskResponse(taskResponse, taskRepository.findAll().blockFirst(), taskDTO, userEntity.getUsername(), userEntity.getUsername(), taskAssignedToUserEntity.getUsername(),
+        TaskEntity udatedTaskEntity = taskRepository.findAll().blockLast();
+        assertTaskEntity(udatedTaskEntity, taskDTO, author.getUserId(), userEntity.getUserId(), assignedTo.getUserId());
+        assertThat(udatedTaskEntity.getTaskId()).isEqualTo(taskEntity.getTaskId());
+        assertTaskResponse(taskResponse, udatedTaskEntity, taskDTO, author.getUsername(), userEntity.getUsername(), assignedTo.getUsername(),
                 taskDTO.getStatus(), taskDTO.getPriority());
+    }
+
+    @Test
+    public void whenUpdateTaskOwnTask_shouldReturnTaskResponse() {
+
+        UserEntity userEntity = createUser();
+        TaskEntity taskEntity = createTask(userEntity.getUserId());
+        TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), userEntity.getUserId());
+
+        TaskResponse taskResponse = sendUpdateTaskRequest(userEntity, taskEntity.getTaskId(), taskDTO);
+
+        TaskEntity udatedTaskEntity = taskRepository.findAll().blockLast();
+        assertTaskEntity(udatedTaskEntity, taskDTO, userEntity.getUserId(), userEntity.getUserId(), userEntity.getUserId());
+        assertThat(udatedTaskEntity.getTaskId()).isEqualTo(taskEntity.getTaskId());
+        assertTaskResponse(taskResponse, udatedTaskEntity, taskDTO, userEntity.getUsername());
     }
 
     @Test
@@ -53,6 +69,22 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
         assertTaskEntity(actualTaskEntity, taskDTO, userEntity.getUserId());
         assertThat(actualTaskEntity.getTaskId()).isEqualTo(taskEntity.getTaskId());
         assertTaskResponse(taskResponse, taskRepository.findAll().blockFirst(), taskDTO, userEntity.getUsername(), userEntity.getUsername());
+    }
+
+    @Test
+    public void whenUpdateNotExistingTask_shouldReturnGraphQLErrorResponse() {
+
+        UserEntity userEntity = createUser();
+        UUID taskId = UUID.randomUUID();
+        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, UUID.randomUUID());
+
+        sendUpdateTaskRequestWithErrors(userEntity, taskId, taskDTO)
+                .satisfy(
+                        responseErrors -> {
+                            assertThat(responseErrors.size()).isOne();
+                            ResponseError responseError = responseErrors.getFirst();
+                            assertNotFoundErrorResponse(responseError, UPDATE_TASK_PATH, "Task with taskId: '" + taskId + "' not found.");
+                        });
     }
 
     @Test
@@ -278,6 +310,10 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
                 .errors();
     }
 
+    private void assertTaskResponse(TaskResponse taskResponse, TaskEntity taskEntity, TaskDTO taskDTO, String createdBy) {
+        assertTaskResponse(taskResponse, taskEntity, taskDTO, createdBy, createdBy, createdBy, taskDTO.getStatus(), taskDTO.getPriority());
+    }
+
     private void assertTaskResponse(TaskResponse taskResponse, TaskEntity taskEntity, TaskDTO taskDTO, String createdBy, String updatedBy) {
         assertTaskResponse(taskResponse, taskEntity, taskDTO, createdBy, updatedBy, updatedBy, TaskStatus.READY_TO_START, TaskPriority.LOW);
     }
@@ -298,14 +334,14 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
     }
 
     private void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy) {
-        assertTaskEntity(taskEntity, taskDTO, createdBy, createdBy, TaskStatus.READY_TO_START, TaskPriority.LOW);
+        assertTaskEntity(taskEntity, taskDTO, createdBy, createdBy, createdBy, TaskStatus.READY_TO_START, TaskPriority.LOW);
     }
 
-    private void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID updatedBy, UUID assignedTo) {
-        assertTaskEntity(taskEntity, taskDTO, updatedBy, assignedTo, taskDTO.getStatus(), taskDTO.getPriority());
+    private void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID updatedBy, UUID assignedTo) {
+        assertTaskEntity(taskEntity, taskDTO, createdBy, updatedBy, assignedTo, taskDTO.getStatus(), taskDTO.getPriority());
     }
 
-    private void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID updatedBy, UUID assignedTo,
+    private void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID updatedBy, UUID assignedTo,
                                   TaskStatus taskStatus, TaskPriority taskPriority) {
         assertThat(taskEntity).isNotNull();
         assertThat(taskEntity.getTaskId()).isNotNull();
@@ -315,7 +351,7 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
         assertThat(taskEntity.getTargetEndDate()).isEqualTo(taskDTO.getTargetEndDate());
         assertThat(taskEntity.getAssignedTo()).isEqualTo(assignedTo);
         assertThat(taskEntity.getCreatedOn()).isEqualTo(taskEntity.getCreatedOn());
-        assertThat(taskEntity.getCreatedBy()).isEqualTo(taskEntity.getCreatedBy());
+        assertThat(taskEntity.getCreatedBy()).isEqualTo(createdBy);
         assertThat(taskEntity.getUpdatedOn()).isNotNull();
         assertThat(taskEntity.getUpdatedBy()).isEqualTo(updatedBy);
     }
