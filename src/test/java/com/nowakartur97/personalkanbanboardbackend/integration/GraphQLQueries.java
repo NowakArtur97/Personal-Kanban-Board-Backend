@@ -38,6 +38,24 @@ public class GraphQLQueries {
             }
             """;
 
+    public static final String UPDATE_USER_ASSIGNED_TO_TASK = """
+            mutation UPDATE_USER_ASSIGNED_TO_TASK($taskId: UUID!, $assignedToId: UUID!) {
+              updateUserAssignedToTask(taskId: $taskId, assignedToId: $assignedToId) {
+                taskId
+                title
+                description
+                priority
+                status
+                targetEndDate
+                assignedTo
+                createdOn
+                createdBy
+                updatedOn
+                updatedBy
+              }
+            }
+            """;
+
     public static final String DELETE_TASK = """
             mutation DELETE_TASK($taskId: UUID!) {
               deleteTask(taskId: $taskId)

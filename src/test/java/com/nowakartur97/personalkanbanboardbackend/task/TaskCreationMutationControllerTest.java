@@ -26,13 +26,13 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
     public void whenCreateTask_shouldReturnTaskResponse(UserRole role) {
 
         UserEntity userEntity = createUser(role);
-        UserEntity taskAssignedToUserEntity = createUser("developer", "developer@domain.com");
-        TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), taskAssignedToUserEntity.getUserId());
+        UserEntity assignedTo = createUser("developer", "developer@domain.com");
+        TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), assignedTo.getUserId());
 
         TaskResponse taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
 
-        assertTaskEntity(taskRepository.findAll().blockLast(), taskDTO, userEntity.getUserId(), taskAssignedToUserEntity.getUserId());
-        assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), taskAssignedToUserEntity.getUsername(),
+        assertTaskEntity(taskRepository.findAll().blockLast(), taskDTO, userEntity.getUserId(), assignedTo.getUserId());
+        assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), assignedTo.getUsername(),
                 taskDTO.getStatus(), taskDTO.getPriority());
     }
 
