@@ -42,36 +42,46 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
     @Override
     public void run(String... args) {
         if (activeProfile.equals("local")) {
-            UserEntity user = createTestUser();
+            UserEntity user = createUser();
             createTestTask(user);
+            UserEntity admin = createAdminUser();
+            createTestTask(admin);
         }
     }
 
-    private UserEntity createTestUser() {
+    private UserEntity createUser() {
+        return createTestUser("user", "user@domain.com", "user123", UserRole.USER);
+    }
+
+    private UserEntity createAdminUser() {
+        return createTestUser("admin", "admin@domain.com", "admin123", UserRole.ADMIN);
+    }
+
+    private UserEntity createTestUser(String username, String email, String password, UserRole role) {
 
         UserEntity user;
 
-        if (userService.existsByUsernameOrEmail("admin", "admin@domain.com").block()) {
-            user = userService.findByUsername("admin").block();
+        if (userService.existsByUsernameOrEmail(username, email).block()) {
+            user = userService.findByUsername(username).block();
         } else {
             user = UserEntity.builder()
-                    .username("admin")
-                    .password(bCryptPasswordEncoder.encode("admin123"))
-                    .email("admin@domain.com")
-                    .role(UserRole.ADMIN)
+                    .username(username)
+                    .password(bCryptPasswordEncoder.encode(password))
+                    .email(email)
+                    .role(role)
                     .build();
 
             userService.save(user).block();
         }
 
-        log.info("Token: {}", jwtUtil.generateToken(user.getUsername(), user.getRole().name()));
+        log.info("Token for user with {} role: {}", role.name().toLowerCase(), jwtUtil.generateToken(user.getUsername(), user.getRole().name()));
         return user;
     }
 
     private void createTestTask(UserEntity user) {
         taskService.save(TaskEntity.builder()
-                        .title("task1")
-                        .description("desc1")
+                        .title("task for user " + user.getUsername())
+                        .description("desc for user " + user.getUsername())
                         .assignedTo(user.getUserId())
                         .status(TaskStatus.values()[new Random().nextInt(TaskStatus.values().length)])
                         .priority(TaskPriority.values()[new Random().nextInt(TaskPriority.values().length)])
