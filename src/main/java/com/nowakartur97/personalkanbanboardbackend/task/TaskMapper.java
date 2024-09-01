@@ -39,9 +39,15 @@ public class TaskMapper {
         taskEntity.setStatus(taskDTO.getStatus() != null ? taskDTO.getStatus() : TaskStatus.READY_TO_START);
         taskEntity.setPriority(taskDTO.getPriority() != null ? taskDTO.getPriority() : TaskPriority.LOW);
         taskEntity.setTargetEndDate(taskDTO.getTargetEndDate());
+        updateUserAssignedToEntity(taskEntity, updatedBy, assignedTo);
+        return taskEntity;
+    }
+
+    public TaskEntity updateUserAssignedToEntity(TaskEntity taskEntity, UUID updatedBy, UUID assignedTo) {
+        taskEntity.setAssignedTo(assignedTo);
+        // TODO: Check in Postgres to see if the date is auto-populated
         taskEntity.setAssignedTo(assignedTo);
         taskEntity.setUpdatedBy(updatedBy);
-        // TODO: Check in Postgres to see if the date is auto-populated
         taskEntity.setUpdatedOn(Instant.now());
         return taskEntity;
     }

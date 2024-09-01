@@ -57,7 +57,7 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
     }
 
     @Test
-    public void whenUpdateTask_shouldCreateTaskWithDefaultValuesAndReturnTaskResponse() {
+    public void whenUpdateTask_shouldUpdateTaskWithDefaultValuesAndReturnTaskResponse() {
 
         UserEntity userEntity = createUser();
         TaskEntity taskEntity = createTask(userEntity.getUserId());

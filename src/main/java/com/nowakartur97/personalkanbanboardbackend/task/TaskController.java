@@ -90,12 +90,17 @@ public class TaskController {
     }
 
     @MutationMapping
-    public Mono<TaskResponse> updateUserAssignedToTask(@Argument UUID taskId, @Argument UUID assignedToId) {
+    public Mono<TaskResponse> updateUserAssignedToTask(@Argument UUID taskId, @Argument UUID assignedToId, DataFetchingEnvironment env) {
+        String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
+        Mono<TaskEntity> taskById = taskService.findById(taskId);
+        Mono<UserEntity> createdBy = taskById.map(TaskEntity::getCreatedBy)
+                .flatMap(userService::findById);
+        Mono<UserEntity> updatedBy = userService.findByUsername(username);
         Mono<UserEntity> assignedTo = userService.findById(assignedToId);
-        return Mono.zip(taskService.findById(taskId), assignedTo)
-                .flatMap(tuple -> taskService.updateAssignedTo(tuple.getT1(), tuple.getT2().getUserId()))
-                .zipWith(assignedTo)
-                .map(tuple -> taskMapper.mapToResponse(tuple.getT1(), tuple.getT2().getUsername()));
+        return Mono.zip(taskById, createdBy, updatedBy, assignedTo)
+                .flatMap(tuple -> Mono.just(taskMapper.updateUserAssignedToEntity(tuple.getT1(), tuple.getT3().getUserId(), tuple.getT4().getUserId()))
+                        .flatMap(taskService::updateAssignedTo)
+                        .map(task -> taskMapper.mapToResponse(task, tuple.getT2().getUsername(), tuple.getT3().getUsername(), tuple.getT4().getUsername())));
     }
 
     @MutationMapping
