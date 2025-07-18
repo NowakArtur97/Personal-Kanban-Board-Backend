@@ -35,9 +35,19 @@ public class TaskController {
     private final TaskMapper taskMapper;
 
     @QueryMapping
-    public Flux<TaskResponse> tasks(DataFetchingEnvironment env) {
+    public Flux<TaskResponse> tasks() {
         Mono<List<TaskEntity>> allTasks = taskService.findAll().collectList();
-        return allTasks
+        return mapToTasksResponse(allTasks);
+    }
+
+    @QueryMapping
+    public Flux<TaskResponse> tasksAssignedTo(@Argument UUID assignedToId) {
+        Mono<List<TaskEntity>> assignedToUserTasks = taskService.findAllByAssignedTo(assignedToId).collectList();
+        return mapToTasksResponse(assignedToUserTasks);
+    }
+
+    private Flux<TaskResponse> mapToTasksResponse(Mono<List<TaskEntity>> tasksList) {
+        return tasksList
                 .map(tasks -> Stream.of(
                                 getUuidsFromTasksByProperty(tasks, TaskEntity::getCreatedBy),
                                 getUuidsFromTasksByProperty(tasks, TaskEntity::getUpdatedBy),
@@ -46,7 +56,7 @@ public class TaskController {
                         .filter(Objects::nonNull)
                         .collect(Collectors.toSet()))
                 .flatMap(userIds -> userService.findAllByIds(userIds.stream().toList()).collectList())
-                .zipWith(allTasks)
+                .zipWith(tasksList)
                 .flatMapIterable(tuple -> tuple.getT2().stream()
                         .map(task -> taskMapper.mapToResponse(task, tuple.getT1()))
                         .toList());

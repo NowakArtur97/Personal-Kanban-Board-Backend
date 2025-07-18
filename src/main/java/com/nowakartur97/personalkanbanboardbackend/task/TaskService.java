@@ -31,6 +31,14 @@ public class TaskService {
         return taskRepository.findAll();
     }
 
+
+    public Flux<TaskEntity> findAllByAssignedTo(UUID assignedToId) {
+
+        log.info("Looking up all tasks for assigned to user with id '{}'", assignedToId);
+
+        return taskRepository.findAllByAssignedTo(assignedToId);
+    }
+
     public Mono<TaskEntity> save(TaskEntity task) {
 
         log.info("Creation of new task: {}", task);

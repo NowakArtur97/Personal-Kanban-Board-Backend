@@ -92,6 +92,22 @@ query FIND_ALL_TASKS {
   }
 }
 
+query FIND_ALL_TASKS_ASSIGNED_TO {
+  tasksAssignedTo(taskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af") {
+    taskId
+    title
+    description
+    status
+    priority
+    targetEndDate
+    assignedTo
+    createdBy
+    createdOn
+    updatedBy
+    updatedOn
+  }
+}
+
 mutation REGISTER_USER {
   registerUser(userDTO: {username: "user123", password: "user123", email: "uesr123@domain.com"}) {
     userId
