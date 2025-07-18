@@ -4,6 +4,7 @@ scalar DateTime
 
 type Query {
     tasks: [TaskResponse]
+    tasksAssignedTo(assignedToId: UUID): [TaskResponse]
     users: [UserResponse]
     loginUser(authenticationRequest: AuthenticationRequest): UserResponse
 }
