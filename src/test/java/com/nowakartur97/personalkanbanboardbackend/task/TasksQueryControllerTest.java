@@ -55,21 +55,25 @@ public class TasksQueryControllerTest extends IntegrationTest {
 
     @Test
     public void whenGetTasksWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
+
         runTestForSendingRequestWithoutProvidingAuthorizationHeader(GET_TASKS, TASKS_PATH);
     }
 
     @Test
     public void whenGetTasksWithExpiredToken_shouldReturnGraphQLErrorResponse() {
+
         runTestForSendingRequestWithExpiredToken(GET_TASKS, TASKS_PATH);
     }
 
     @Test
     public void whenGetTasksWithInvalidToken_shouldReturnGraphQLErrorResponse() {
+
         runTestForSendingRequestWithInvalidToken(GET_TASKS, TASKS_PATH);
     }
 
     @Test
     public void whenGetTasksWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
+
         runTestForSendingRequestWithDifferentTokenSignature(GET_TASKS, TASKS_PATH);
     }
 }

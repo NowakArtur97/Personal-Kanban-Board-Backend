@@ -79,21 +79,25 @@ public class TasksAssignedToQueryControllerTest extends IntegrationTest {
 
     @Test
     public void whenGetAllTasksAssignedToUserWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
+
         runTestForSendingRequestWithoutProvidingAuthorizationHeader(GET_TASKS_ASSIGNED_TO, TASKS_ASSIGNED_TO_PATH, "assignedToId", UUID.randomUUID());
     }
 
     @Test
     public void whenGetAllTasksAssignedToUserWithExpiredToken_shouldReturnGraphQLErrorResponse() {
+
         runTestForSendingRequestWithExpiredToken(GET_TASKS_ASSIGNED_TO, TASKS_ASSIGNED_TO_PATH, "assignedToId", UUID.randomUUID());
     }
 
     @Test
     public void whenGetAllTasksAssignedToUserWithInvalidToken_shouldReturnGraphQLErrorResponse() {
+
         runTestForSendingRequestWithInvalidToken(GET_TASKS_ASSIGNED_TO, TASKS_ASSIGNED_TO_PATH, "assignedToId", UUID.randomUUID());
     }
 
     @Test
     public void whenGetAllTasksAssignedToUserWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
+
         runTestForSendingRequestWithDifferentTokenSignature(GET_TASKS_ASSIGNED_TO, TASKS_ASSIGNED_TO_PATH, "assignedToId", UUID.randomUUID());
     }
 

@@ -112,7 +112,6 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends IntegrationT
                         });
     }
 
-
     @Test
     public void whenUpdateUserAssignedToTaskWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
 
