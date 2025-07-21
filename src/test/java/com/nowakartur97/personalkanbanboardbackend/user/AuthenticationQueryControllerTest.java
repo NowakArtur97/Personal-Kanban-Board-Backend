@@ -73,21 +73,12 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
     }
 
     @Test
-    public void whenLoginUsingIncorrectPassword_shouldReturnGraphQLErrorResponse() {
+    public void whenLoginUsingInvalidCredentials_shouldReturnGraphQLErrorResponse() {
 
         UserEntity user = createUser();
         AuthenticationRequest authenticationRequest = new AuthenticationRequest(user.getUsername(), "incorrectPassword");
 
-        httpGraphQlTester
-                .document(AUTHENTICATE_USER)
-                .variable("authenticationRequest", authenticationRequest)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, AUTHENTICATE_USER_PATH, "Invalid login credentials.");
-                });
+        runTestForSendingRequestWithInvalidCredentials(AUTHENTICATE_USER, AUTHENTICATE_USER_PATH, "authenticationRequest", authenticationRequest);
     }
 
     @ParameterizedTest

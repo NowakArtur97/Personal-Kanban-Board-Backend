@@ -10,7 +10,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.test.tester.GraphQlTester;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.UPDATE_USER_ASSIGNED_TO_TASK;
@@ -33,7 +32,7 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends IntegrationT
         TaskEntity udatedTaskEntity = taskRepository.findAll().blockLast();
         assertTaskEntity(taskEntity, udatedTaskEntity, assignedTo.getUserId());
         assertThat(udatedTaskEntity.getTaskId()).isEqualTo(taskEntity.getTaskId());
-        assertTaskResponse(taskResponse, udatedTaskEntity, userEntity.getUsername(), userEntity.getUsername(), assignedTo.getUsername());
+        assertTaskResponse(taskResponse, udatedTaskEntity, assignedTo.getUsername(), userEntity.getUsername(), userEntity.getUsername());
     }
 
     @Test
@@ -164,21 +163,6 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends IntegrationT
                 .variable("assignedToId", assignedToId)
                 .execute()
                 .errors();
-    }
-
-    private void assertTaskResponse(TaskResponse taskResponse, TaskEntity taskEntity,
-                                    String createdBy, String updatedBy, String assignedTo) {
-        assertThat(taskResponse).isNotNull();
-        assertThat(taskResponse.taskId()).isEqualTo(taskEntity.getTaskId());
-        assertThat(taskResponse.title()).isEqualTo(taskEntity.getTitle());
-        assertThat(taskResponse.status()).isEqualTo(taskEntity.getStatus());
-        assertThat(taskResponse.priority()).isEqualTo(taskEntity.getPriority());
-        assertThat(taskResponse.targetEndDate()).isEqualTo(taskEntity.getTargetEndDate());
-        assertThat(taskResponse.assignedTo()).isEqualTo(assignedTo);
-        assertThat(Instant.parse(taskResponse.createdOn()).toEpochMilli()).isEqualTo(taskEntity.getCreatedOn().toEpochMilli());
-        assertThat(taskResponse.createdBy()).isEqualTo(createdBy);
-        assertThat(Instant.parse(taskResponse.updatedOn()).toEpochMilli()).isEqualTo(taskEntity.getUpdatedOn().toEpochMilli());
-        assertThat(taskResponse.updatedBy()).isEqualTo(updatedBy);
     }
 
     private void assertTaskEntity(TaskEntity taskEntity, TaskEntity taskEntityAfterUpdate, UUID assignedTo) {
