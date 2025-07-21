@@ -34,10 +34,10 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
                 .flatMap(authHeader -> {
                     String authToken = jwtUtil.getJWTFromHeader(authHeader);
                     String username = jwtUtil.extractUsername(authToken);
-                    return userService.findByUsername(username).flatMap(user -> {
+                    return userService.findByUsernameForAuthentication(username).flatMap(user -> {
                         Authentication auth = new UsernamePasswordAuthenticationToken(user.getUsername(), authToken,
                                 List.of(new SimpleGrantedAuthority(user.getRole().name())));
-                        return this.authenticationManager.authenticate(auth).map(SecurityContextImpl::new);
+                        return authenticationManager.authenticate(auth).map(SecurityContextImpl::new);
                     });
                 });
     }

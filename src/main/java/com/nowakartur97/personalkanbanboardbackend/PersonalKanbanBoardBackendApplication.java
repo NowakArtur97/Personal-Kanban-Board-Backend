@@ -44,7 +44,9 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
         if (activeProfile.equals("local")) {
             UserEntity user = createUser();
             createTestTask(user);
+            createTestTask(user);
             UserEntity admin = createAdminUser();
+            createTestTask(admin);
             createTestTask(admin);
         }
     }

@@ -3,6 +3,7 @@ package com.nowakartur97.personalkanbanboardbackend.user;
 import com.nowakartur97.personalkanbanboardbackend.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -27,10 +28,19 @@ public class UserService {
 
     public Mono<UserEntity> findByUsername(String username) {
 
+        return findByUsername(username, new ResourceNotFoundException("User", "username", username));
+    }
+
+    public Mono<UserEntity> findByUsernameForAuthentication(String username) {
+
+        return findByUsername(username, new BadCredentialsException("Invalid login credentials."));
+    }
+
+    private Mono<UserEntity> findByUsername(String username, RuntimeException ex) {
         log.info("Looking up user by username: '{}'", username);
 
         return userRepository.findByUsername(username)
-                .switchIfEmpty(Mono.error(new ResourceNotFoundException("User", "username", username)));
+                .switchIfEmpty(Mono.error(ex));
     }
 
     public Mono<UserEntity> findByUsernameOrEmail(String usernameOrEmail) {
