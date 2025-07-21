@@ -47,7 +47,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
     }
 
     @Test
-    public void whenGetTasksForNotExistingUser_shouldReturnGraphQLErrorResponse() {
+    public void whenGetTasksByNotExistingUser_shouldReturnGraphQLErrorResponse() {
 
         runTestForSendingRequestWithInvalidCredentials(GET_TASKS, TASKS_PATH,
                 jwtUtil.generateToken("notExistingUser", UserRole.USER.name()));
