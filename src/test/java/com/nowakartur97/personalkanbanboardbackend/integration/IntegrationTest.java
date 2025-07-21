@@ -5,6 +5,7 @@ import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskRepository;
+import com.nowakartur97.personalkanbanboardbackend.task.TaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRepository;
@@ -118,6 +119,25 @@ public class IntegrationTest {
         headers.add(jwtConfigurationProperties.getAuthorizationHeader(), authHeader);
     }
 
+    protected void assertTaskResponse(TaskResponse taskResponse, TaskEntity taskEntity,
+                                      String assignedTo, String createdBy, String updatedBy) {
+        assertThat(taskResponse).isNotNull();
+        assertThat(taskResponse.taskId()).isEqualTo(taskEntity.getTaskId());
+        assertThat(taskResponse.title()).isEqualTo(taskEntity.getTitle());
+        assertThat(taskResponse.status()).isEqualTo(taskEntity.getStatus());
+        assertThat(taskResponse.priority()).isEqualTo(taskEntity.getPriority());
+        assertThat(taskResponse.targetEndDate()).isEqualTo(taskEntity.getTargetEndDate());
+        assertThat(taskResponse.assignedTo()).isEqualTo(assignedTo);
+        assertThat(Instant.parse(taskResponse.createdOn()).toEpochMilli()).isEqualTo(taskEntity.getCreatedOn().toEpochMilli());
+        assertThat(taskResponse.createdBy()).isEqualTo(createdBy);
+        if (updatedBy != null) {
+            assertThat(Instant.parse(taskResponse.updatedOn()).toEpochMilli()).isEqualTo(taskEntity.getUpdatedOn().toEpochMilli());
+        } else {
+            assertThat(taskResponse.updatedOn()).isNull();
+        }
+        assertThat(taskResponse.updatedBy()).isEqualTo(updatedBy);
+    }
+
     protected void assertErrorResponse(ResponseError responseError, String message, String path, SourceLocation sourceLocation) {
         assertThat(responseError.getMessage()).contains(message);
         assertThat(responseError.getPath()).isEqualTo(path);
@@ -142,6 +162,55 @@ public class IntegrationTest {
     protected void assertNotFoundErrorResponse(ResponseError responseError, String path, String message) {
         assertThat(responseError.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
         assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
+    }
+
+    protected void runTestForSendingRequestWithInvalidCredentials(String document, String path,
+                                                                  String variableName, Object object) {
+
+        httpGraphQlTester
+                .document(document)
+                .variable(variableName, object)
+                .execute()
+                .errors()
+                .satisfy(responseErrors -> {
+                    assertThat(responseErrors.size()).isOne();
+                    ResponseError responseError = responseErrors.getFirst();
+                    assertUnauthorizedErrorResponse(responseError, path, "Invalid login credentials.");
+                });
+    }
+
+    protected void runTestForSendingRequestWithInvalidCredentials(String document, String path, String token) {
+
+        httpGraphQlTester
+                .mutate()
+                .headers(headers -> addAuthorizationHeader(headers, token))
+                .build()
+                .document(document)
+                .execute()
+                .errors()
+                .satisfy(responseErrors -> {
+                    assertThat(responseErrors.size()).isOne();
+                    ResponseError responseError = responseErrors.getFirst();
+                    assertUnauthorizedErrorResponse(responseError, path, "Invalid login credentials.");
+                });
+    }
+
+    protected void runTestForSendingRequestWithInvalidCredentials(String document, String path, String token,
+                                                                  String variableName, Object object) {
+
+        httpGraphQlTester
+                .mutate()
+                .headers(headers -> addAuthorizationHeader(headers, token))
+                .build()
+                .document(document)
+                .variable(variableName, object)
+                .execute()
+                .errors()
+                .satisfy(responseErrors -> {
+                    assertThat(responseErrors.size()).isOne();
+                    ResponseError responseError = responseErrors.getFirst();
+                    assertUnauthorizedErrorResponse(responseError, path, "Invalid login credentials.");
+                });
     }
 
     protected void runTestForSendingRequestWithoutProvidingAuthorizationHeader(String document, String path) {

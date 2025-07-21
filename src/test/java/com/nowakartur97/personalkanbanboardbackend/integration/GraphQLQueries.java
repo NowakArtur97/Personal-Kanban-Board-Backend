@@ -85,6 +85,24 @@ public class GraphQLQueries {
             }
             """;
 
+    public static final String GET_TASKS_ASSIGNED_TO = """
+            query TASKS_ASSIGNED_TO($assignedToId: UUID!) {
+              tasksAssignedTo(assignedToId: $assignedToId) {
+                taskId
+                title
+                description
+                status
+                priority
+                targetEndDate
+                assignedTo
+                createdBy
+                createdOn
+                updatedBy
+                updatedOn
+              }
+            }
+            """;
+
     public static final String REGISTER_USER = """
             mutation REGISTER_USER($userDTO: UserDTO!) {
               registerUser(userDTO: $userDTO) {
