@@ -76,7 +76,7 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
             userService.save(user).block();
         }
 
-        log.info("Token for user with {} role: {}", role.name().toLowerCase(), jwtUtil.generateToken(user.getUsername(), user.getRole().name()));
+        log.info("Token for user with {} role: {}", role.name(), jwtUtil.generateToken(user.getUsername(), user.getRole().name()));
         return user;
     }
 
@@ -87,7 +87,7 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
                         .assignedTo(user.getUserId())
                         .status(TaskStatus.values()[new Random().nextInt(TaskStatus.values().length)])
                         .priority(TaskPriority.values()[new Random().nextInt(TaskPriority.values().length)])
-                        .targetEndDate(LocalDate.now().plusDays(new Random().nextInt(3)))
+                        .targetEndDate(LocalDate.now().plusDays(new Random().nextInt(30)))
                         // TODO: Check in Postgres to see if the date is auto-populated
                         .createdOn(Instant.now())
                         .createdBy(user.getUserId())
