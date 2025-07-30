@@ -11,7 +11,7 @@ CREATE TABLE personal_kanban_board.tasks (
     "updated_by" UUID,
     "updated_on" TIMESTAMP,
 
-    CONSTRAINT "fk_tasks_assigned_to" FOREIGN KEY ("assigned_to") REFERENCES personal_kanban_board.users("user_id") ON DELETE CASCADE ON UPDATE NO ACTION,
+    CONSTRAINT "fk_tasks_assigned_to" FOREIGN KEY ("assigned_to") REFERENCES personal_kanban_board.users("user_id") ON DELETE NO ACTION ON UPDATE NO ACTION,
     CONSTRAINT "fk_tasks_created_by" FOREIGN KEY ("created_by") REFERENCES personal_kanban_board.users("user_id") ON DELETE NO ACTION ON UPDATE CASCADE,
     CONSTRAINT "fk_tasks_updated_by" FOREIGN KEY ("updated_by") REFERENCES personal_kanban_board.users("user_id") ON DELETE NO ACTION ON UPDATE CASCADE
 );
