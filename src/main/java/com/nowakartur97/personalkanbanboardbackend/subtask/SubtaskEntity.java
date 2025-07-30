@@ -1,4 +1,4 @@
-package com.nowakartur97.personalkanbanboardbackend.task;
+package com.nowakartur97.personalkanbanboardbackend.subtask;
 
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEntity;
 import jakarta.persistence.Column;
@@ -15,22 +15,26 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.util.UUID;
 
 @Entity
-@Table(name = "tasks", schema = "personal_kanban_board")
+@Table(name = "subtasks", schema = "personal_kanban_board")
 @Getter
 @Setter
 @NoArgsConstructor
 @SuperBuilder
-public class TaskEntity extends BaseTaskEntity {
+public class SubtaskEntity extends BaseTaskEntity {
 
     @Id
-    @Column(name = "task_id", updatable = false)
+    @Column(name = "subtask_id", updatable = false)
     @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID subtaskId;
+
+    @Column(name = "task_id", updatable = false)
     private UUID taskId;
 
     @Override
     public String toString() {
-        return "TaskEntity{" +
-                "taskId=" + taskId +
+        return "SubtaskEntity{" +
+                "subtaskId=" + subtaskId +
+                ", taskId=" + taskId +
                 ", title='" + getTitle() + '\'' +
                 ", description='" + getDescription() + '\'' +
                 ", status=" + getStatus() +
