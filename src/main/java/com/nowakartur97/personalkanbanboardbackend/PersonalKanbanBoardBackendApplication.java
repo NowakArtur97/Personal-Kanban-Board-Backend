@@ -1,6 +1,8 @@
 package com.nowakartur97.personalkanbanboardbackend;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskService;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskService;
@@ -36,6 +38,7 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
 
     private final UserService userService;
     private final TaskService taskService;
+    private final SubtaskService subtaskService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JWTUtil jwtUtil;
 
@@ -81,17 +84,35 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
     }
 
     private void createTestTask(UserEntity user) {
-        taskService.save(TaskEntity.builder()
-                        .title("task for user " + user.getUsername())
-                        .description("desc for user " + user.getUsername())
-                        .assignedTo(user.getUserId())
-                        .status(TaskStatus.values()[new Random().nextInt(TaskStatus.values().length)])
-                        .priority(TaskPriority.values()[new Random().nextInt(TaskPriority.values().length)])
-                        .targetEndDate(LocalDate.now().plusDays(new Random().nextInt(30)))
-                        // TODO: Check in Postgres to see if the date is auto-populated
-                        .createdOn(Instant.now())
-                        .createdBy(user.getUserId())
-                        .build())
-                .block();
+        Random random = new Random();
+        TaskEntity task = TaskEntity.builder()
+                .title("task for user " + user.getUsername())
+                .description("description for user " + user.getUsername())
+                .assignedTo(user.getUserId())
+                .status(TaskStatus.values()[random.nextInt(TaskStatus.values().length)])
+                .priority(TaskPriority.values()[random.nextInt(TaskPriority.values().length)])
+                .targetEndDate(LocalDate.now().plusDays(random.nextInt(30)))
+                // TODO: Check in Postgres to see if the date is auto-populated
+                .createdOn(Instant.now())
+                .createdBy(user.getUserId())
+                .build();
+        taskService.save(task).block();
+
+        int numberOfSubtasks = random.nextInt(3);
+        for (int i = 0; i < numberOfSubtasks; i++) {
+            SubtaskEntity subtask = SubtaskEntity.builder()
+                    .taskId(task.getTaskId())
+                    .title("subtask for user " + user.getUsername())
+                    .description("subtask description for user " + user.getUsername())
+                    .assignedTo(user.getUserId())
+                    .status(TaskStatus.values()[random.nextInt(TaskStatus.values().length)])
+                    .priority(TaskPriority.values()[random.nextInt(TaskPriority.values().length)])
+                    .targetEndDate(LocalDate.now().plusDays(random.nextInt(30)))
+                    // TODO: Check in Postgres to see if the date is auto-populated
+                    .createdOn(Instant.now())
+                    .createdBy(user.getUserId())
+                    .build();
+            subtaskService.save(subtask).block();
+        }
     }
 }
