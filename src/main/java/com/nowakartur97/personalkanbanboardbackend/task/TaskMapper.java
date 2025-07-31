@@ -73,9 +73,9 @@ public class TaskMapper {
         List<SubtaskResponse> subtaskResponses = subtasks.stream()
                 .filter(subTask -> subTask.getTaskId().equals(taskEntity.getTaskId()))
                 .map(subTask -> {
-                    String createdBy = getUsernameByUserId(taskEntity.getCreatedBy(), users);
-                    String updatedBy = getUsernameByUserId(taskEntity.getUpdatedBy(), users);
-                    String assignedTo = getUsernameByUserId(taskEntity.getAssignedTo(), users);
+                    String createdBy = getUsernameByUserId(subTask.getCreatedBy(), users);
+                    String updatedBy = getUsernameByUserId(subTask.getUpdatedBy(), users);
+                    String assignedTo = getUsernameByUserId(subTask.getAssignedTo(), users);
                     return mapToSubtaskResponse(subTask, createdBy, updatedBy, assignedTo);
                 }).toList();
         String createdBy = getUsernameByUserId(taskEntity.getCreatedBy(), users);
