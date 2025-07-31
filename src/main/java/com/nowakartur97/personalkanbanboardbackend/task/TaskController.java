@@ -2,7 +2,6 @@ package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEntity;
-import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskService;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
@@ -42,18 +41,18 @@ public class TaskController {
     private final TaskMapper taskMapper;
 
     @QueryMapping
-    public Flux<BaseTaskResponse> tasks() {
+    public Flux<TaskResponse> tasks() {
         Flux<TaskEntity> allTasks = taskService.findAll();
         return mapToTasksResponse(allTasks);
     }
 
     @QueryMapping
-    public Flux<BaseTaskResponse> tasksAssignedTo(@Argument UUID assignedToId) {
+    public Flux<TaskResponse> tasksAssignedTo(@Argument UUID assignedToId) {
         Flux<TaskEntity> assignedToUserTasks = taskService.findAllByAssignedTo(assignedToId);
         return mapToTasksResponse(assignedToUserTasks);
     }
 
-    private Flux<BaseTaskResponse> mapToTasksResponse(Flux<TaskEntity> tasksList) {
+    private Flux<TaskResponse> mapToTasksResponse(Flux<TaskEntity> tasksList) {
         Mono<List<SubtaskEntity>> subtasks = tasksList.map(TaskEntity::getTaskId)
                 .flatMap(subtaskService::findAllByTaskId)
                 .collectList();
@@ -73,7 +72,7 @@ public class TaskController {
     }
 
     @MutationMapping
-    public Mono<BaseTaskResponse> createTask(@Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
+    public Mono<TaskResponse> createTask(@Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
         Mono<UserEntity> createdBy = userService.findByUsername(username);
         if (taskDTO.getAssignedTo() == null) {
@@ -90,7 +89,7 @@ public class TaskController {
     }
 
     @MutationMapping
-    public Mono<BaseTaskResponse> updateTask(@Argument UUID taskId, @Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
+    public Mono<TaskResponse> updateTask(@Argument UUID taskId, @Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
         Mono<TaskEntity> taskById = taskService.findById(taskId);
         Mono<UserEntity> createdBy = taskById.map(TaskEntity::getCreatedBy)
@@ -110,7 +109,7 @@ public class TaskController {
     }
 
     @MutationMapping
-    public Mono<BaseTaskResponse> updateUserAssignedToTask(@Argument UUID taskId, @Argument UUID assignedToId, DataFetchingEnvironment env) {
+    public Mono<TaskResponse> updateUserAssignedToTask(@Argument UUID taskId, @Argument UUID assignedToId, DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
         Mono<TaskEntity> taskById = taskService.findById(taskId);
         Mono<UserEntity> createdBy = taskById.map(TaskEntity::getCreatedBy)

@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Getter
-public class BaseTaskResponse {
+public abstract class BaseTaskResponse {
 
     private final UUID taskId;
     private final String title;

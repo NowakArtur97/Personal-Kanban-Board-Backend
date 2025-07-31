@@ -33,7 +33,7 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
         UserEntity assignedTo = createUser("developer", "developer@domain.com");
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), assignedTo.getUserId());
 
-        BaseTaskResponse taskResponse = sendUpdateTaskRequest(userEntity, taskEntity.getTaskId(), taskDTO);
+        TaskResponse taskResponse = sendUpdateTaskRequest(userEntity, taskEntity.getTaskId(), taskDTO);
 
         TaskEntity udatedTaskEntity = taskRepository.findAll().blockLast();
         assertTaskEntity(udatedTaskEntity, taskDTO, author.getUserId(), userEntity.getUserId(), assignedTo.getUserId());
@@ -49,7 +49,7 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
         TaskEntity taskEntity = createTask(userEntity.getUserId());
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), userEntity.getUserId());
 
-        BaseTaskResponse taskResponse = sendUpdateTaskRequest(userEntity, taskEntity.getTaskId(), taskDTO);
+        TaskResponse taskResponse = sendUpdateTaskRequest(userEntity, taskEntity.getTaskId(), taskDTO);
 
         TaskEntity udatedTaskEntity = taskRepository.findAll().blockLast();
         assertTaskEntity(udatedTaskEntity, taskDTO, userEntity.getUserId(), userEntity.getUserId(), userEntity.getUserId());
@@ -64,7 +64,7 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
         TaskEntity taskEntity = createTask(userEntity.getUserId());
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
 
-        BaseTaskResponse taskResponse = sendUpdateTaskRequest(userEntity, taskEntity.getTaskId(), taskDTO);
+        TaskResponse taskResponse = sendUpdateTaskRequest(userEntity, taskEntity.getTaskId(), taskDTO);
 
         TaskEntity actualTaskEntity = taskRepository.findAll().blockLast();
         assertTaskEntity(actualTaskEntity, taskDTO, userEntity.getUserId());
@@ -283,7 +283,7 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
         runTestForSendingRequestWithDifferentTokenSignature(UPDATE_TASK, UPDATE_TASK_PATH, "taskId", UUID.randomUUID(), "taskDTO", taskDTO);
     }
 
-    private BaseTaskResponse sendUpdateTaskRequest(UserEntity userEntity, UUID taskId, TaskDTO taskDTO) {
+    private TaskResponse sendUpdateTaskRequest(UserEntity userEntity, UUID taskId, TaskDTO taskDTO) {
         return httpGraphQlTester
                 .mutate()
                 .headers(headers -> addAuthorizationHeader(headers, userEntity))
@@ -295,7 +295,7 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
                 .errors()
                 .verify()
                 .path(UPDATE_TASK_PATH)
-                .entity(BaseTaskResponse.class)
+                .entity(TaskResponse.class)
                 .get();
     }
 

@@ -30,7 +30,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
         UserEntity assignedTo = createUser("developer", "developer@domain.com");
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), assignedTo.getUserId());
 
-        BaseTaskResponse taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
+        TaskResponse taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
 
         assertTaskEntity(taskRepository.findAll().blockLast(), taskDTO, userEntity.getUserId(), assignedTo.getUserId());
         assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), assignedTo.getUsername(),
@@ -43,7 +43,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
 
-        BaseTaskResponse taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
+        TaskResponse taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
 
         assertTaskEntity(taskRepository.findAll().blockLast(), taskDTO, userEntity.getUserId());
         assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername());
@@ -212,7 +212,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
         runTestForSendingRequestWithDifferentTokenSignature(CREATE_TASK, CREATE_TASK_PATH, "taskDTO", taskDTO);
     }
 
-    private BaseTaskResponse sendCreateTaskRequest(UserEntity userEntity, TaskDTO taskDTO) {
+    private TaskResponse sendCreateTaskRequest(UserEntity userEntity, TaskDTO taskDTO) {
         return httpGraphQlTester
                 .mutate()
                 .headers(headers -> addAuthorizationHeader(headers, userEntity))
@@ -223,7 +223,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
                 .errors()
                 .verify()
                 .path(CREATE_TASK_PATH)
-                .entity(BaseTaskResponse.class)
+                .entity(TaskResponse.class)
                 .get();
     }
 

@@ -1,6 +1,5 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.exception.ResourceNotFoundException;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
@@ -69,7 +68,7 @@ public class TaskMapper {
         return mapToResponse(taskEntity, createdBy, updatedBy, assignedTo, Collections.emptyList());
     }
 
-    public BaseTaskResponse mapToResponse(TaskEntity taskEntity, List<UserEntity> users, List<SubtaskEntity> subtasks) {
+    public TaskResponse mapToResponse(TaskEntity taskEntity, List<UserEntity> users, List<SubtaskEntity> subtasks) {
         List<SubtaskResponse> subtaskResponses = subtasks.stream()
                 .filter(subTask -> subTask.getTaskId().equals(taskEntity.getTaskId()))
                 .map(subTask -> {
