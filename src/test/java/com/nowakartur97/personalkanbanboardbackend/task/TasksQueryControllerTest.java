@@ -1,7 +1,8 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import org.junit.jupiter.api.Test;
@@ -28,23 +29,39 @@ public class TasksQueryControllerTest extends IntegrationTest {
         UserEntity updatedBy = createUser("developer4", "developer4@domain.com");
         TaskEntity taskEntity2 = createTask(author.getUserId(), assignedTo.getUserId(), updatedBy.getUserId());
 
-        List<BaseTaskResponse> taskResponses = httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(GET_TASKS)
-                .execute()
-                .errors()
-                .verify()
-                .path(TASKS_PATH)
-                .entityList(BaseTaskResponse.class)
-                .get();
+        List<TaskResponse> taskResponses = sendGetTasksRequest(userEntity);
 
         assertThat(taskResponses.size()).isEqualTo(2);
-        BaseTaskResponse taskResponse = taskResponses.getFirst();
-        BaseTaskResponse taskResponse2 = taskResponses.getLast();
+        TaskResponse taskResponse = taskResponses.getFirst();
         assertTaskResponse(taskResponse, taskEntity, userEntity.getUsername(), userEntity.getUsername(), null);
+        TaskResponse taskResponse2 = taskResponses.getLast();
         assertTaskResponse(taskResponse2, taskEntity2, author.getUsername(), assignedTo.getUsername(), updatedBy.getUsername());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = UserRole.class)
+    public void whenGetAllTasksWithSubtasks_shouldReturnAllTasksWithSubtasks(UserRole role) {
+
+        UserEntity userEntity = createUser(role);
+        TaskEntity taskEntity = createTask(userEntity.getUserId());
+        SubtaskEntity subtaskEntity = createSubtask(taskEntity.getTaskId(), userEntity.getUserId());
+        UserEntity author = createUser("developer2", "developer2@domain.com");
+        UserEntity assignedTo = createUser("developer3", "developer3@domain.com");
+        UserEntity updatedBy = createUser("developer4", "developer4@domain.com");
+        TaskEntity taskEntity2 = createTask(author.getUserId(), assignedTo.getUserId(), updatedBy.getUserId());
+        SubtaskEntity subtaskEntity2 = createSubtask(taskEntity2.getTaskId(), author.getUserId(), assignedTo.getUserId(), updatedBy.getUserId());
+
+        List<TaskResponse> taskResponses = sendGetTasksRequest(userEntity);
+
+        assertThat(taskResponses.size()).isEqualTo(2);
+        TaskResponse taskResponse = taskResponses.getFirst();
+        assertTaskResponse(taskResponse, taskEntity, userEntity.getUsername(), userEntity.getUsername(), null);
+        SubtaskResponse subtaskResponse = taskResponse.getSubtasks().getFirst();
+        assertSubtaskResponse(subtaskResponse, subtaskEntity, userEntity.getUsername(), userEntity.getUsername(), null);
+        TaskResponse taskResponse2 = taskResponses.getLast();
+        assertTaskResponse(taskResponse2, taskEntity2, author.getUsername(), assignedTo.getUsername(), updatedBy.getUsername());
+        SubtaskResponse subtaskResponse2 = taskResponse2.getSubtasks().getFirst();
+        assertSubtaskResponse(subtaskResponse2, subtaskEntity2, author.getUsername(), assignedTo.getUsername(), updatedBy.getUsername());
     }
 
     @Test
@@ -76,5 +93,19 @@ public class TasksQueryControllerTest extends IntegrationTest {
     public void whenGetTasksWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
 
         runTestForSendingRequestWithDifferentTokenSignature(GET_TASKS, TASKS_PATH);
+    }
+
+    private List<TaskResponse> sendGetTasksRequest(UserEntity userEntity) {
+        return httpGraphQlTester
+                .mutate()
+                .headers(headers -> addAuthorizationHeader(headers, userEntity))
+                .build()
+                .document(GET_TASKS)
+                .execute()
+                .errors()
+                .verify()
+                .path(TASKS_PATH)
+                .entityList(TaskResponse.class)
+                .get();
     }
 }

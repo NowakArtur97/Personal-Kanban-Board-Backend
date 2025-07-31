@@ -1,7 +1,8 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
@@ -32,11 +33,36 @@ public class TasksAssignedToQueryControllerTest extends IntegrationTest {
         UserEntity updatedBy = createUser("developer4", "developer4@domain.com");
         createTask(author.getUserId(), assignedTo.getUserId(), updatedBy.getUserId());
 
-        List<BaseTaskResponse> taskResponses = sendGetAllTasksAssignedToUserRequest(userEntity, assignedToId);
+        List<TaskResponse> taskResponses = sendGetAllTasksAssignedToUserRequest(userEntity, assignedToId);
 
         assertThat(taskResponses.size()).isOne();
-        BaseTaskResponse taskResponse = taskResponses.getFirst();
+        TaskResponse taskResponse = taskResponses.getFirst();
         assertTaskResponse(taskResponse, taskEntity, userEntity.getUsername(), userEntity.getUsername(), null);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = UserRole.class)
+    public void whenGetAllTasksWithSubtasksAssignedToUser_shouldReturnOnlyTasksWithSubtasksAssignedToUser(UserRole role) {
+
+        UserEntity userEntity = createUser(role);
+        UUID assignedToId = userEntity.getUserId();
+        TaskEntity taskEntity = createTask(assignedToId);
+        SubtaskEntity subtaskEntity = createSubtask(taskEntity.getTaskId(), userEntity.getUserId());
+        UserEntity author = createUser("developer2", "developer2@domain.com");
+        UserEntity updatedBy = createUser("developer4", "developer4@domain.com");
+        SubtaskEntity subtaskEntity2 = createSubtask(taskEntity.getTaskId(), author.getUserId(), userEntity.getUserId(), updatedBy.getUserId());
+        UserEntity assignedTo = createUser("developer3", "developer3@domain.com");
+        createTask(author.getUserId(), assignedTo.getUserId(), updatedBy.getUserId());
+
+        List<TaskResponse> taskResponses = sendGetAllTasksAssignedToUserRequest(userEntity, assignedToId);
+
+        assertThat(taskResponses.size()).isOne();
+        TaskResponse taskResponse = taskResponses.getFirst();
+        assertTaskResponse(taskResponse, taskEntity, userEntity.getUsername(), userEntity.getUsername(), null);
+        SubtaskResponse subtaskResponse = taskResponse.getSubtasks().getFirst();
+        assertSubtaskResponse(subtaskResponse, subtaskEntity, userEntity.getUsername(), userEntity.getUsername(), null);
+        SubtaskResponse subtaskResponse2 = taskResponse.getSubtasks().getLast();
+        assertSubtaskResponse(subtaskResponse2, subtaskEntity2, author.getUsername(), userEntity.getUsername(), updatedBy.getUsername());
     }
 
     @Test
@@ -44,7 +70,7 @@ public class TasksAssignedToQueryControllerTest extends IntegrationTest {
 
         UserEntity userEntity = createUser();
 
-        List<BaseTaskResponse> taskResponses = sendGetAllTasksAssignedToUserRequest(userEntity, UUID.randomUUID());
+        List<TaskResponse> taskResponses = sendGetAllTasksAssignedToUserRequest(userEntity, UUID.randomUUID());
 
         assertThat(taskResponses.size()).isZero();
     }
@@ -102,7 +128,7 @@ public class TasksAssignedToQueryControllerTest extends IntegrationTest {
         runTestForSendingRequestWithDifferentTokenSignature(GET_TASKS_ASSIGNED_TO, TASKS_ASSIGNED_TO_PATH, "assignedToId", UUID.randomUUID());
     }
 
-    private List<BaseTaskResponse> sendGetAllTasksAssignedToUserRequest(UserEntity userEntity, UUID assignedToId) {
+    private List<TaskResponse> sendGetAllTasksAssignedToUserRequest(UserEntity userEntity, UUID assignedToId) {
         return httpGraphQlTester
                 .mutate()
                 .headers(headers -> addAuthorizationHeader(headers, userEntity))
@@ -113,7 +139,7 @@ public class TasksAssignedToQueryControllerTest extends IntegrationTest {
                 .errors()
                 .verify()
                 .path(TASKS_ASSIGNED_TO_PATH)
-                .entityList(BaseTaskResponse.class)
+                .entityList(TaskResponse.class)
                 .get();
     }
 }

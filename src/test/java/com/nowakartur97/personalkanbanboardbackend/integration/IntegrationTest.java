@@ -2,10 +2,15 @@ package com.nowakartur97.personalkanbanboardbackend.integration;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTConfigurationProperties;
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskRepository;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskRepository;
+import com.nowakartur97.personalkanbanboardbackend.task.TaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRepository;
@@ -37,6 +42,8 @@ public class IntegrationTest {
 
     @Autowired
     protected TaskRepository taskRepository;
+    @Autowired
+    protected SubtaskRepository subtaskRepository;
     @Autowired
     protected UserRepository userRepository;
     @Autowired
@@ -108,6 +115,27 @@ public class IntegrationTest {
                 .block();
     }
 
+    protected SubtaskEntity createSubtask(UUID taskId, UUID authorId) {
+        return createSubtask(taskId, authorId, authorId, null);
+    }
+
+    protected SubtaskEntity createSubtask(UUID taskId, UUID authorId, UUID assignedToId, UUID updatedById) {
+        return subtaskRepository.save(SubtaskEntity.builder()
+                        .taskId(taskId)
+                        .title("testTask")
+                        .description("test")
+                        .assignedTo(authorId)
+                        .status(TaskStatus.READY_TO_START)
+                        .priority(TaskPriority.LOW)
+                        .targetEndDate(LocalDate.now().plusDays(new Random().nextInt(3)))
+                        .createdOn(Instant.now())
+                        .createdBy(assignedToId)
+                        .updatedOn(updatedById != null ? Instant.now() : null)
+                        .updatedBy(updatedById)
+                        .build())
+                .block();
+    }
+
     protected void addAuthorizationHeader(HttpHeaders headers, String token) {
         String authHeader = jwtConfigurationProperties.getAuthorizationType() + " " + token;
         headers.add(jwtConfigurationProperties.getAuthorizationHeader(), authHeader);
@@ -119,10 +147,10 @@ public class IntegrationTest {
         headers.add(jwtConfigurationProperties.getAuthorizationHeader(), authHeader);
     }
 
-    protected void assertTaskResponse(BaseTaskResponse taskResponse, TaskEntity taskEntity,
-                                      String assignedTo, String createdBy, String updatedBy) {
+    private void assertBaseTaskResponse(BaseTaskResponse taskResponse, BaseTaskEntity taskEntity,
+                                        String assignedTo, String createdBy, String updatedBy) {
         assertThat(taskResponse).isNotNull();
-        assertThat(taskResponse.getTaskId()).isEqualTo(taskEntity.getTaskId());
+        assertThat(taskResponse.getTaskId()).isNotNull();
         assertThat(taskResponse.getTitle()).isEqualTo(taskEntity.getTitle());
         assertThat(taskResponse.getStatus()).isEqualTo(taskEntity.getStatus());
         assertThat(taskResponse.getPriority()).isEqualTo(taskEntity.getPriority());
@@ -136,6 +164,19 @@ public class IntegrationTest {
             assertThat(taskResponse.getUpdatedOn()).isNull();
         }
         assertThat(taskResponse.getUpdatedBy()).isEqualTo(updatedBy);
+    }
+
+    protected void assertTaskResponse(TaskResponse taskResponse, TaskEntity taskEntity,
+                                      String createdBy, String assignedTo, String updatedBy) {
+        assertBaseTaskResponse(taskResponse, taskEntity, createdBy, assignedTo, updatedBy);
+        assertThat(taskResponse.getTaskId()).isEqualTo(taskEntity.getTaskId());
+    }
+
+    protected void assertSubtaskResponse(SubtaskResponse subtaskResponse, SubtaskEntity subtaskEntity,
+                                         String createdBy, String assignedTo, String updatedBy) {
+        assertBaseTaskResponse(subtaskResponse, subtaskEntity, createdBy, assignedTo, updatedBy);
+        assertThat(subtaskResponse.getSubtaskId()).isEqualTo(subtaskEntity.getSubtaskId());
+        assertThat(subtaskResponse.getTaskId()).isEqualTo(subtaskEntity.getTaskId());
     }
 
     protected void assertErrorResponse(ResponseError responseError, String message, String path, SourceLocation sourceLocation) {
