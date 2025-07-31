@@ -1,8 +1,13 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskService;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
+import graphql.com.google.common.collect.Sets;
 import graphql.schema.DataFetchingEnvironment;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +22,7 @@ import reactor.core.publisher.Mono;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -30,40 +36,43 @@ import static com.nowakartur97.personalkanbanboardbackend.auth.AuthorizationHead
 public class TaskController {
 
     private final TaskService taskService;
+    private final SubtaskService subtaskService;
     private final UserService userService;
     private final JWTUtil jwtUtil;
     private final TaskMapper taskMapper;
 
     @QueryMapping
-    public Flux<TaskResponse> tasks() {
-        Mono<List<TaskEntity>> allTasks = taskService.findAll().collectList();
+    public Flux<BaseTaskResponse> tasks() {
+        Flux<TaskEntity> allTasks = taskService.findAll();
         return mapToTasksResponse(allTasks);
     }
 
     @QueryMapping
-    public Flux<TaskResponse> tasksAssignedTo(@Argument UUID assignedToId) {
-        Mono<List<TaskEntity>> assignedToUserTasks = taskService.findAllByAssignedTo(assignedToId).collectList();
+    public Flux<BaseTaskResponse> tasksAssignedTo(@Argument UUID assignedToId) {
+        Flux<TaskEntity> assignedToUserTasks = taskService.findAllByAssignedTo(assignedToId);
         return mapToTasksResponse(assignedToUserTasks);
     }
 
-    private Flux<TaskResponse> mapToTasksResponse(Mono<List<TaskEntity>> tasksList) {
+    private Flux<BaseTaskResponse> mapToTasksResponse(Flux<TaskEntity> tasksList) {
+        Mono<List<SubtaskEntity>> subtasks = tasksList.map(TaskEntity::getTaskId)
+                .flatMap(subtaskService::findAllByTaskId)
+                .collectList();
+        Mono<Set<UUID>> subtasksUsersIds = subtasks.map(getUserIdsForResponse());
         return tasksList
-                .map(tasks -> Stream.of(
-                                getUuidsFromTasksByProperty(tasks, TaskEntity::getCreatedBy),
-                                getUuidsFromTasksByProperty(tasks, TaskEntity::getUpdatedBy),
-                                getUuidsFromTasksByProperty(tasks, TaskEntity::getAssignedTo))
-                        .flatMap(Collection::stream)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toSet()))
-                .flatMap(userIds -> userService.findAllByIds(userIds.stream().toList()).collectList())
-                .zipWith(tasksList)
-                .flatMapIterable(tuple -> tuple.getT2().stream()
-                        .map(task -> taskMapper.mapToResponse(task, tuple.getT1()))
+                .collectList()
+                .map(getUserIdsForResponse())
+                .zipWith(subtasksUsersIds)
+                .flatMap(tuple -> userService.findAllByIds(Sets.union(tuple.getT1(), tuple.getT2())
+                        .stream().toList()).collectList())
+                .zipWith(tasksList.collectList())
+                .zipWith(subtasks)
+                .flatMapIterable(tuple -> tuple.getT1().getT2().stream()
+                        .map(task -> taskMapper.mapToResponse(task, tuple.getT1().getT1(), tuple.getT2()))
                         .toList());
     }
 
     @MutationMapping
-    public Mono<TaskResponse> createTask(@Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
+    public Mono<BaseTaskResponse> createTask(@Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
         Mono<UserEntity> createdBy = userService.findByUsername(username);
         if (taskDTO.getAssignedTo() == null) {
@@ -80,7 +89,7 @@ public class TaskController {
     }
 
     @MutationMapping
-    public Mono<TaskResponse> updateTask(@Argument UUID taskId, @Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
+    public Mono<BaseTaskResponse> updateTask(@Argument UUID taskId, @Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
         Mono<TaskEntity> taskById = taskService.findById(taskId);
         Mono<UserEntity> createdBy = taskById.map(TaskEntity::getCreatedBy)
@@ -100,7 +109,7 @@ public class TaskController {
     }
 
     @MutationMapping
-    public Mono<TaskResponse> updateUserAssignedToTask(@Argument UUID taskId, @Argument UUID assignedToId, DataFetchingEnvironment env) {
+    public Mono<BaseTaskResponse> updateUserAssignedToTask(@Argument UUID taskId, @Argument UUID assignedToId, DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
         Mono<TaskEntity> taskById = taskService.findById(taskId);
         Mono<UserEntity> createdBy = taskById.map(TaskEntity::getCreatedBy)
@@ -124,7 +133,17 @@ public class TaskController {
         return taskService.deleteAll();
     }
 
-    private List<UUID> getUuidsFromTasksByProperty(List<TaskEntity> tasks, Function<TaskEntity, UUID> byProperty) {
+    private <T extends BaseTaskEntity> Function<List<T>, Set<UUID>> getUserIdsForResponse() {
+        return tasks -> Stream.of(
+                        getUuidsFromTasksByProperty(tasks, BaseTaskEntity::getCreatedBy),
+                        getUuidsFromTasksByProperty(tasks, BaseTaskEntity::getUpdatedBy),
+                        getUuidsFromTasksByProperty(tasks, BaseTaskEntity::getAssignedTo))
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
+
+    private <T extends BaseTaskEntity> List<UUID> getUuidsFromTasksByProperty(List<T> tasks, Function<BaseTaskEntity, UUID> byProperty) {
         return tasks.stream()
                 .map(byProperty)
                 .toList();

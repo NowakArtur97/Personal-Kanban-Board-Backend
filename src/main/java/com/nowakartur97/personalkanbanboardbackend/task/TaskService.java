@@ -31,7 +31,6 @@ public class TaskService {
         return taskRepository.findAll();
     }
 
-
     public Flux<TaskEntity> findAllByAssignedTo(UUID assignedToId) {
 
         log.info("Looking up all tasks for assigned to user with id '{}'", assignedToId);
