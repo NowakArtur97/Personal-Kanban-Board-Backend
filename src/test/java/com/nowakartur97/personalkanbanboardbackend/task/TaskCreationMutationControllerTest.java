@@ -1,5 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
@@ -29,7 +30,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
         UserEntity assignedTo = createUser("developer", "developer@domain.com");
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), assignedTo.getUserId());
 
-        TaskResponse taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
+        BaseTaskResponse taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
 
         assertTaskEntity(taskRepository.findAll().blockLast(), taskDTO, userEntity.getUserId(), assignedTo.getUserId());
         assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), assignedTo.getUsername(),
@@ -42,7 +43,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
 
-        TaskResponse taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
+        BaseTaskResponse taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
 
         assertTaskEntity(taskRepository.findAll().blockLast(), taskDTO, userEntity.getUserId());
         assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername());
@@ -211,7 +212,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
         runTestForSendingRequestWithDifferentTokenSignature(CREATE_TASK, CREATE_TASK_PATH, "taskDTO", taskDTO);
     }
 
-    private TaskResponse sendCreateTaskRequest(UserEntity userEntity, TaskDTO taskDTO) {
+    private BaseTaskResponse sendCreateTaskRequest(UserEntity userEntity, TaskDTO taskDTO) {
         return httpGraphQlTester
                 .mutate()
                 .headers(headers -> addAuthorizationHeader(headers, userEntity))
@@ -222,7 +223,7 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
                 .errors()
                 .verify()
                 .path(CREATE_TASK_PATH)
-                .entity(TaskResponse.class)
+                .entity(BaseTaskResponse.class)
                 .get();
     }
 
@@ -237,23 +238,23 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
                 .errors();
     }
 
-    private void assertTaskResponse(TaskResponse taskResponse, TaskDTO taskDTO, String createdBy) {
+    private void assertTaskResponse(BaseTaskResponse taskResponse, TaskDTO taskDTO, String createdBy) {
         assertTaskResponse(taskResponse, taskDTO, createdBy, createdBy, TaskStatus.READY_TO_START, TaskPriority.LOW);
     }
 
-    private void assertTaskResponse(TaskResponse taskResponse, TaskDTO taskDTO, String createdBy, String assignedTo,
+    private void assertTaskResponse(BaseTaskResponse taskResponse, TaskDTO taskDTO, String createdBy, String assignedTo,
                                     TaskStatus status, TaskPriority priority) {
         assertThat(taskResponse).isNotNull();
-        assertThat(taskResponse.taskId()).isNotNull();
-        assertThat(taskResponse.title()).isEqualTo(taskDTO.getTitle());
-        assertThat(taskResponse.status()).isEqualTo(status);
-        assertThat(taskResponse.priority()).isEqualTo(priority);
-        assertThat(taskResponse.targetEndDate()).isEqualTo(taskDTO.getTargetEndDate());
-        assertThat(taskResponse.assignedTo()).isEqualTo(assignedTo);
-        assertThat(taskResponse.createdOn()).isNotNull();
-        assertThat(taskResponse.createdBy()).isEqualTo(createdBy);
-        assertThat(taskResponse.updatedOn()).isNull();
-        assertThat(taskResponse.updatedBy()).isNull();
+        assertThat(taskResponse.getTaskId()).isNotNull();
+        assertThat(taskResponse.getTitle()).isEqualTo(taskDTO.getTitle());
+        assertThat(taskResponse.getStatus()).isEqualTo(status);
+        assertThat(taskResponse.getPriority()).isEqualTo(priority);
+        assertThat(taskResponse.getTargetEndDate()).isEqualTo(taskDTO.getTargetEndDate());
+        assertThat(taskResponse.getAssignedTo()).isEqualTo(assignedTo);
+        assertThat(taskResponse.getCreatedOn()).isNotNull();
+        assertThat(taskResponse.getCreatedBy()).isEqualTo(createdBy);
+        assertThat(taskResponse.getUpdatedOn()).isNull();
+        assertThat(taskResponse.getUpdatedBy()).isNull();
     }
 
     private void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy) {

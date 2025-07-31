@@ -1,5 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
@@ -27,7 +28,7 @@ public class TasksQueryControllerTest extends IntegrationTest {
         UserEntity updatedBy = createUser("developer4", "developer4@domain.com");
         TaskEntity taskEntity2 = createTask(author.getUserId(), assignedTo.getUserId(), updatedBy.getUserId());
 
-        List<TaskResponse> taskResponses = httpGraphQlTester
+        List<BaseTaskResponse> taskResponses = httpGraphQlTester
                 .mutate()
                 .headers(headers -> addAuthorizationHeader(headers, userEntity))
                 .build()
@@ -36,12 +37,12 @@ public class TasksQueryControllerTest extends IntegrationTest {
                 .errors()
                 .verify()
                 .path(TASKS_PATH)
-                .entityList(TaskResponse.class)
+                .entityList(BaseTaskResponse.class)
                 .get();
 
         assertThat(taskResponses.size()).isEqualTo(2);
-        TaskResponse taskResponse = taskResponses.getFirst();
-        TaskResponse taskResponse2 = taskResponses.getLast();
+        BaseTaskResponse taskResponse = taskResponses.getFirst();
+        BaseTaskResponse taskResponse2 = taskResponses.getLast();
         assertTaskResponse(taskResponse, taskEntity, userEntity.getUsername(), userEntity.getUsername(), null);
         assertTaskResponse(taskResponse2, taskEntity2, author.getUsername(), assignedTo.getUsername(), updatedBy.getUsername());
     }

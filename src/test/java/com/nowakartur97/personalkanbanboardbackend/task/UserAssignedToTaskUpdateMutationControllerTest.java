@@ -1,5 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
@@ -27,7 +28,7 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends IntegrationT
         TaskEntity taskEntity = createTask(userEntity.getUserId(), userEntity.getUserId(), userEntity.getUserId());
         UserEntity assignedTo = createUser("developer", "developer@domain.com");
 
-        TaskResponse taskResponse = sendUpdateUserAssignedToTaskRequest(userEntity, taskEntity.getTaskId(), assignedTo.getUserId());
+        BaseTaskResponse taskResponse = sendUpdateUserAssignedToTaskRequest(userEntity, taskEntity.getTaskId(), assignedTo.getUserId());
 
         TaskEntity udatedTaskEntity = taskRepository.findAll().blockLast();
         assertTaskEntity(taskEntity, udatedTaskEntity, assignedTo.getUserId());
@@ -136,7 +137,7 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends IntegrationT
         runTestForSendingRequestWithDifferentTokenSignature(UPDATE_USER_ASSIGNED_TO_TASK, UPDATE_USER_ASSIGNED_TO_TASK_PATH, "taskId", UUID.randomUUID(), "assignedToId", UUID.randomUUID());
     }
 
-    private TaskResponse sendUpdateUserAssignedToTaskRequest(UserEntity userEntity, UUID taskId, UUID assignedToId) {
+    private BaseTaskResponse sendUpdateUserAssignedToTaskRequest(UserEntity userEntity, UUID taskId, UUID assignedToId) {
         return httpGraphQlTester
                 .mutate()
                 .headers(headers -> addAuthorizationHeader(headers, userEntity))
@@ -148,7 +149,7 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends IntegrationT
                 .errors()
                 .verify()
                 .path(UPDATE_USER_ASSIGNED_TO_TASK_PATH)
-                .entity(TaskResponse.class)
+                .entity(BaseTaskResponse.class)
                 .get();
     }
 

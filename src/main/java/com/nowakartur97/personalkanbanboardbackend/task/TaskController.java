@@ -66,6 +66,7 @@ public class TaskController {
                         .stream().toList()).collectList())
                 .zipWith(tasksList.collectList())
                 .zipWith(subtasks)
+                // TODO: Remove nesting in tuple
                 .flatMapIterable(tuple -> tuple.getT1().getT2().stream()
                         .map(task -> taskMapper.mapToResponse(task, tuple.getT1().getT1(), tuple.getT2()))
                         .toList());

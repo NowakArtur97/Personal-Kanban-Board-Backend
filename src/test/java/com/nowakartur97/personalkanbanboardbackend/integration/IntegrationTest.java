@@ -2,10 +2,10 @@ package com.nowakartur97.personalkanbanboardbackend.integration;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTConfigurationProperties;
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskRepository;
-import com.nowakartur97.personalkanbanboardbackend.task.TaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRepository;
@@ -119,23 +119,23 @@ public class IntegrationTest {
         headers.add(jwtConfigurationProperties.getAuthorizationHeader(), authHeader);
     }
 
-    protected void assertTaskResponse(TaskResponse taskResponse, TaskEntity taskEntity,
+    protected void assertTaskResponse(BaseTaskResponse taskResponse, TaskEntity taskEntity,
                                       String assignedTo, String createdBy, String updatedBy) {
         assertThat(taskResponse).isNotNull();
-        assertThat(taskResponse.taskId()).isEqualTo(taskEntity.getTaskId());
-        assertThat(taskResponse.title()).isEqualTo(taskEntity.getTitle());
-        assertThat(taskResponse.status()).isEqualTo(taskEntity.getStatus());
-        assertThat(taskResponse.priority()).isEqualTo(taskEntity.getPriority());
-        assertThat(taskResponse.targetEndDate()).isEqualTo(taskEntity.getTargetEndDate());
-        assertThat(taskResponse.assignedTo()).isEqualTo(assignedTo);
-        assertThat(Instant.parse(taskResponse.createdOn()).toEpochMilli()).isEqualTo(taskEntity.getCreatedOn().toEpochMilli());
-        assertThat(taskResponse.createdBy()).isEqualTo(createdBy);
+        assertThat(taskResponse.getTaskId()).isEqualTo(taskEntity.getTaskId());
+        assertThat(taskResponse.getTitle()).isEqualTo(taskEntity.getTitle());
+        assertThat(taskResponse.getStatus()).isEqualTo(taskEntity.getStatus());
+        assertThat(taskResponse.getPriority()).isEqualTo(taskEntity.getPriority());
+        assertThat(taskResponse.getTargetEndDate()).isEqualTo(taskEntity.getTargetEndDate());
+        assertThat(taskResponse.getAssignedTo()).isEqualTo(assignedTo);
+        assertThat(Instant.parse(taskResponse.getCreatedOn()).toEpochMilli()).isEqualTo(taskEntity.getCreatedOn().toEpochMilli());
+        assertThat(taskResponse.getCreatedBy()).isEqualTo(createdBy);
         if (updatedBy != null) {
-            assertThat(Instant.parse(taskResponse.updatedOn()).toEpochMilli()).isEqualTo(taskEntity.getUpdatedOn().toEpochMilli());
+            assertThat(Instant.parse(taskResponse.getUpdatedOn()).toEpochMilli()).isEqualTo(taskEntity.getUpdatedOn().toEpochMilli());
         } else {
-            assertThat(taskResponse.updatedOn()).isNull();
+            assertThat(taskResponse.getUpdatedOn()).isNull();
         }
-        assertThat(taskResponse.updatedBy()).isEqualTo(updatedBy);
+        assertThat(taskResponse.getUpdatedBy()).isEqualTo(updatedBy);
     }
 
     protected void assertErrorResponse(ResponseError responseError, String message, String path, SourceLocation sourceLocation) {
