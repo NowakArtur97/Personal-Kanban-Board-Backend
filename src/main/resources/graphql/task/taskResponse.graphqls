@@ -1,4 +1,38 @@
-type TaskResponse {
+interface BaseTaskResponse {
+    taskId: UUID!
+    title: String!,
+    description: String,
+    status: TaskStatus!,
+    priority: TaskPriority!,
+    targetEndDate: Date,
+
+    createdBy: String!,
+    createdOn: String!,
+    updatedBy: String,
+    updatedOn: String,
+    assignedTo: String!,
+}
+
+type TaskResponse implements BaseTaskResponse {
+    taskId: UUID!
+    title: String!,
+    description: String,
+    status: TaskStatus!,
+    priority: TaskPriority!,
+    targetEndDate: Date,
+
+    createdBy: String!,
+    createdOn: String!,
+    updatedBy: String,
+    updatedOn: String,
+    assignedTo: String!,
+
+    subtasks: [SubtaskResponse]
+}
+
+type SubtaskResponse implements BaseTaskResponse {
+    subtaskId: UUID!
+
     taskId: UUID!
     title: String!,
     description: String,

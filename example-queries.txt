@@ -89,11 +89,25 @@ query FIND_ALL_TASKS {
     createdOn
     updatedBy
     updatedOn
+    subtasks {
+      subtaskId
+      taskId
+      title
+      description
+      status
+      priority
+      targetEndDate
+      assignedTo
+      createdBy
+      createdOn
+      updatedBy
+      updatedOn
+    }
   }
 }
 
 query FIND_ALL_TASKS_ASSIGNED_TO {
-  tasksAssignedTo(taskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af") {
+  tasksAssignedTo(assignedToId: "d8f30b14-ff48-4870-88cb-2926f7cf33af") {
     taskId
     title
     description
@@ -105,6 +119,20 @@ query FIND_ALL_TASKS_ASSIGNED_TO {
     createdOn
     updatedBy
     updatedOn
+    subtasks {
+      subtaskId
+      taskId
+      title
+      description
+      status
+      priority
+      targetEndDate
+      assignedTo
+      createdBy
+      createdOn
+      updatedBy
+      updatedOn
+    }
   }
 }
 
