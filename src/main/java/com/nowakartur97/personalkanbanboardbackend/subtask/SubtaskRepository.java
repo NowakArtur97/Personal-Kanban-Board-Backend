@@ -9,5 +9,5 @@ import java.util.UUID;
 @Repository
 public interface SubtaskRepository extends R2dbcRepository<SubtaskEntity, UUID> {
 
-    Flux<SubtaskEntity> findAllByTaskId(UUID taskId);
+    Flux<SubtaskEntity> findAllByTaskIdOrderByTargetEndDate(UUID taskId);
 }

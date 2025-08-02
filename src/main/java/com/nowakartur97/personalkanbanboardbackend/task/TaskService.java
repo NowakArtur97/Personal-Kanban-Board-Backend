@@ -26,16 +26,16 @@ public class TaskService {
 
     public Flux<TaskEntity> findAll() {
 
-        log.info("Looking up all tasks");
+        log.info("Looking up all tasks ordered by target end date");
 
-        return taskRepository.findAll();
+        return taskRepository.findAllByOrderByTargetEndDate();
     }
 
     public Flux<TaskEntity> findAllByAssignedTo(UUID assignedToId) {
 
-        log.info("Looking up all tasks for assigned to user with id '{}'", assignedToId);
+        log.info("Looking up all tasks for assigned to user with id '{}' ordered by target end date", assignedToId);
 
-        return taskRepository.findAllByAssignedTo(assignedToId);
+        return taskRepository.findAllByAssignedToOrderByTargetEndDate(assignedToId);
     }
 
     public Mono<TaskEntity> save(TaskEntity task) {
