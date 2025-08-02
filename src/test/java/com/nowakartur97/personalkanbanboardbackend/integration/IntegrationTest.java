@@ -29,7 +29,6 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -106,7 +105,7 @@ public class IntegrationTest {
                         .assignedTo(authorId)
                         .status(TaskStatus.READY_TO_START)
                         .priority(TaskPriority.LOW)
-                        .targetEndDate(LocalDate.now().plusDays(new Random().nextInt(3)))
+                        .targetEndDate(LocalDate.now().plusDays(7))
                         .createdOn(Instant.now())
                         .createdBy(assignedToId)
                         .updatedOn(updatedById != null ? Instant.now() : null)
@@ -127,7 +126,7 @@ public class IntegrationTest {
                         .assignedTo(authorId)
                         .status(TaskStatus.READY_TO_START)
                         .priority(TaskPriority.LOW)
-                        .targetEndDate(LocalDate.now().plusDays(new Random().nextInt(3)))
+                        .targetEndDate(LocalDate.now().plusDays(7))
                         .createdOn(Instant.now())
                         .createdBy(assignedToId)
                         .updatedOn(updatedById != null ? Instant.now() : null)
