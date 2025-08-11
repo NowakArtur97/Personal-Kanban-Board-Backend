@@ -131,6 +131,12 @@ public class GraphQLQueries {
             }
             """;
 
+    public static final String DELETE_SUBTASK = """
+            mutation DELETE_SUBTASK($subtaskId: UUID!) {
+              deleteSubtask(subtaskId: $subtaskId)
+            }
+            """;
+
     public static final String REGISTER_USER = """
             mutation REGISTER_USER($userDTO: UserDTO!) {
               registerUser(userDTO: $userDTO) {
