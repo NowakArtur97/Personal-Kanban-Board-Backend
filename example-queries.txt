@@ -136,6 +136,10 @@ query FIND_ALL_TASKS_ASSIGNED_TO {
   }
 }
 
+mutation DELETE_SUBTASK {
+  deleteSubtask(subtaskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af")
+}
+
 mutation REGISTER_USER {
   registerUser(userDTO: {username: "user123", password: "user123", email: "uesr123@domain.com"}) {
     userId

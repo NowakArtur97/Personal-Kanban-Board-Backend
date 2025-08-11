@@ -28,4 +28,11 @@ public class SubtaskService {
 
         return subtaskRepository.save(subtask);
     }
+
+    public Mono<Void> deleteById(UUID subtaskId) {
+
+        log.info("Deleting subtask: by id: '{}'", subtaskId);
+
+        return subtaskRepository.deleteById(subtaskId);
+    }
 }
