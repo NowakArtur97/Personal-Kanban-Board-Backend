@@ -6,4 +6,6 @@ type Mutation {
     updateUserAssignedToTask(taskId: UUID, assignedToId: UUID): TaskResponse
     deleteTask(taskId: UUID): UUID
     deleteAllTasks: UUID
+
+    deleteSubtask(subtaskId: UUID): UUID
 }
