@@ -30,6 +30,20 @@ public class TaskDeletionMutationControllerTest extends IntegrationTest {
         assertThat(taskRepository.count().block()).isZero();
     }
 
+    @ParameterizedTest
+    @EnumSource(value = UserRole.class)
+    public void whenDeleteExistingTaskWithSubtasks_shouldReturnEmptyResponse(UserRole role) {
+
+        UserEntity userEntity = createUser(role);
+        TaskEntity taskEntity = createTask(userEntity.getUserId());
+        createSubtask(taskEntity.getTaskId(), userEntity.getUserId());
+
+        sendDeleteTaskRequest(userEntity, taskEntity.getTaskId());
+
+        assertThat(taskRepository.count().block()).isZero();
+        assertThat(subtaskRepository.count().block()).isZero();
+    }
+
     @Test
     public void whenDeleteNotExistingTask_shouldReturnEmptyResponse() {
 
