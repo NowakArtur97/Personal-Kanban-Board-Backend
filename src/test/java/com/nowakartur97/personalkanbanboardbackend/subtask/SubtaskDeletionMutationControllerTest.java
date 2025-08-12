@@ -59,7 +59,7 @@ public class SubtaskDeletionMutationControllerTest extends IntegrationTest {
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
                             ResponseError responseError = responseErrors.getFirst();
-                            assertValidationErrorResponse(responseError, new SourceLocation(1, 22),
+                            assertValidationErrorResponse(responseError, new SourceLocation(1, 25),
                                     "Variable 'subtaskId' has an invalid value: Variable 'subtaskId' has coerced Null value for NonNull type 'UUID!'"
                             );
                         });

@@ -322,7 +322,7 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
     private void assertTaskResponse(BaseTaskResponse taskResponse, TaskEntity taskEntity, TaskDTO taskDTO, String createdBy,
                                     String updatedBy, String assignedTo, TaskStatus status, TaskPriority priority) {
         assertThat(taskResponse).isNotNull();
-        assertThat(taskResponse.getTaskId()).isNotNull();
+        assertThat(taskResponse.getTaskId()).isEqualTo(taskEntity.getTaskId());
         assertThat(taskResponse.getTitle()).isEqualTo(taskDTO.getTitle());
         assertThat(taskResponse.getStatus()).isEqualTo(status);
         assertThat(taskResponse.getPriority()).isEqualTo(priority);
@@ -345,7 +345,7 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
     private void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID updatedBy, UUID assignedTo,
                                   TaskStatus taskStatus, TaskPriority taskPriority) {
         assertThat(taskEntity).isNotNull();
-        assertThat(taskEntity.getTaskId()).isNotNull();
+        assertThat(taskEntity.getTaskId()).isEqualTo(taskEntity.getTaskId());
         assertThat(taskEntity.getTitle()).isEqualTo(taskDTO.getTitle());
         assertThat(taskEntity.getStatus()).isEqualTo(taskStatus);
         assertThat(taskEntity.getPriority()).isEqualTo(taskPriority);

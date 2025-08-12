@@ -2,7 +2,6 @@ package com.nowakartur97.personalkanbanboardbackend.subtask;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
-import com.nowakartur97.personalkanbanboardbackend.task.TaskService;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import graphql.schema.DataFetchingEnvironment;
@@ -24,7 +23,6 @@ import static com.nowakartur97.personalkanbanboardbackend.auth.AuthorizationHead
 public class SubtaskController {
 
     private final SubtaskService subtaskService;
-    private final TaskService taskService;
     private final UserService userService;
     private final JWTUtil jwtUtil;
     private final SubtaskMapper subtaskMapper;

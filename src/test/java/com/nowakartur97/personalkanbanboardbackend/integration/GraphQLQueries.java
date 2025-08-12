@@ -2,6 +2,70 @@ package com.nowakartur97.personalkanbanboardbackend.integration;
 
 public class GraphQLQueries {
 
+    public static final String GET_TASKS = """
+            query TASKS {
+              tasks {
+                taskId
+                title
+                description
+                status
+                priority
+                targetEndDate
+                assignedTo
+                createdBy
+                createdOn
+                updatedBy
+                updatedOn
+                subtasks {
+                  subtaskId
+                  taskId
+                  title
+                  description
+                  status
+                  priority
+                  targetEndDate
+                  assignedTo
+                  createdBy
+                  createdOn
+                  updatedBy
+                  updatedOn
+                }
+              }
+            }
+            """;
+
+    public static final String GET_TASKS_ASSIGNED_TO = """
+            query TASKS_ASSIGNED_TO($assignedToId: UUID!) {
+              tasksAssignedTo(assignedToId: $assignedToId) {
+                taskId
+                title
+                description
+                status
+                priority
+                targetEndDate
+                assignedTo
+                createdBy
+                createdOn
+                updatedBy
+                updatedOn
+                subtasks {
+                  subtaskId
+                  taskId
+                  title
+                  description
+                  status
+                  priority
+                  targetEndDate
+                  assignedTo
+                  createdBy
+                  createdOn
+                  updatedBy
+                  updatedOn
+                }
+              }
+            }
+            """;
+
     public static final String CREATE_TASK = """
             mutation CREATE_TASK($taskDTO: TaskDTO!) {
               createTask(taskDTO: $taskDTO) {
@@ -66,67 +130,21 @@ public class GraphQLQueries {
               deleteAllTasks
             }
             """;
-
-    public static final String GET_TASKS = """
-            query TASKS {
-              tasks {
+    public static final String CREATE_SUBTASK = """
+            mutation CREATE_SUBTASK($taskId: UUID!, $subtaskDTO: TaskDTO!) {
+              createSubtask(taskId: $taskId, subtaskDTO: $subtaskDTO) {
+                subtaskId
                 taskId
                 title
                 description
-                status
                 priority
+                status
                 targetEndDate
                 assignedTo
-                createdBy
                 createdOn
-                updatedBy
-                updatedOn
-                subtasks {
-                  subtaskId
-                  taskId
-                  title
-                  description
-                  status
-                  priority
-                  targetEndDate
-                  assignedTo
-                  createdBy
-                  createdOn
-                  updatedBy
-                  updatedOn
-                }
-              }
-            }
-            """;
-
-    public static final String GET_TASKS_ASSIGNED_TO = """
-            query TASKS_ASSIGNED_TO($assignedToId: UUID!) {
-              tasksAssignedTo(assignedToId: $assignedToId) {
-                taskId
-                title
-                description
-                status
-                priority
-                targetEndDate
-                assignedTo
                 createdBy
-                createdOn
-                updatedBy
                 updatedOn
-                subtasks {
-                  subtaskId
-                  taskId
-                  title
-                  description
-                  status
-                  priority
-                  targetEndDate
-                  assignedTo
-                  createdBy
-                  createdOn
-                  updatedBy
-                  updatedOn
-                }
+                updatedBy
               }
             }
             """;
