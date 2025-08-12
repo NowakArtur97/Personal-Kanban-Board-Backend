@@ -1,3 +1,63 @@
+query FIND_ALL_TASKS {
+  tasks {
+    taskId
+    title
+    description
+    status
+    priority
+    targetEndDate
+    assignedTo
+    createdBy
+    createdOn
+    updatedBy
+    updatedOn
+    subtasks {
+      subtaskId
+      taskId
+      title
+      description
+      status
+      priority
+      targetEndDate
+      assignedTo
+      createdBy
+      createdOn
+      updatedBy
+      updatedOn
+    }
+  }
+}
+
+query FIND_ALL_TASKS_ASSIGNED_TO {
+  tasksAssignedTo(assignedToId: "d8f30b14-ff48-4870-88cb-2926f7cf33af") {
+    taskId
+    title
+    description
+    status
+    priority
+    targetEndDate
+    assignedTo
+    createdBy
+    createdOn
+    updatedBy
+    updatedOn
+    subtasks {
+      subtaskId
+      taskId
+      title
+      description
+      status
+      priority
+      targetEndDate
+      assignedTo
+      createdBy
+      createdOn
+      updatedBy
+      updatedOn
+    }
+  }
+}
+
 mutation CREATE_TASK {
   createTask(
     taskDTO: {
@@ -76,63 +136,30 @@ mutation DELETE_ALL_TASKS {
   deleteAllTasks
 }
 
-query FIND_ALL_TASKS {
-  tasks {
+mutation CREATE_SUBTASK {
+  createSubtask(
+    taskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af"
+    subtaskDTO: {
+      title: "Updated task"
+      description: "Updated description"
+      status: IN_PROGRESS
+      priority: HIGH
+      targetEndDate: "2024-08-20"
+      assignedTo: "7394e566-ad90-419b-916e-572f8ba66ac5"
+    }
+  ) {
+    subtaskId
     taskId
     title
     description
-    status
     priority
+    status
     targetEndDate
     assignedTo
-    createdBy
     createdOn
-    updatedBy
-    updatedOn
-    subtasks {
-      subtaskId
-      taskId
-      title
-      description
-      status
-      priority
-      targetEndDate
-      assignedTo
-      createdBy
-      createdOn
-      updatedBy
-      updatedOn
-    }
-  }
-}
-
-query FIND_ALL_TASKS_ASSIGNED_TO {
-  tasksAssignedTo(assignedToId: "d8f30b14-ff48-4870-88cb-2926f7cf33af") {
-    taskId
-    title
-    description
-    status
-    priority
-    targetEndDate
-    assignedTo
     createdBy
-    createdOn
-    updatedBy
     updatedOn
-    subtasks {
-      subtaskId
-      taskId
-      title
-      description
-      status
-      priority
-      targetEndDate
-      assignedTo
-      createdBy
-      createdOn
-      updatedBy
-      updatedOn
-    }
+    updatedBy
   }
 }
 

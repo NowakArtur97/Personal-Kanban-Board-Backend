@@ -38,6 +38,13 @@ public class TaskService {
         return taskRepository.findAllByAssignedToOrderByTargetEndDate(assignedToId);
     }
 
+    public Mono<Boolean> existsByTaskId(UUID taskId) {
+
+        log.info("Checking if task exists by task id: '{}'", taskId);
+
+        return taskRepository.existsById(taskId);
+    }
+
     public Mono<TaskEntity> save(TaskEntity task) {
 
         log.info("Creation of new task: {}", task);
