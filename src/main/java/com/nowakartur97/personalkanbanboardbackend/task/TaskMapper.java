@@ -1,9 +1,11 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.exception.ResourceNotFoundException;
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskMapper;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskMapper;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -12,7 +14,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class TaskMapper {
+@RequiredArgsConstructor
+public class TaskMapper extends BaseTaskMapper {
+
+    private final SubtaskMapper subtaskMapper;
 
     public TaskEntity mapToEntity(TaskDTO taskDTO, UUID createdBy) {
         return mapToEntity(taskDTO, createdBy, createdBy);
@@ -75,7 +80,7 @@ public class TaskMapper {
                     String createdBy = getUsernameByUserId(subTask.getCreatedBy(), users);
                     String updatedBy = getUsernameByUserId(subTask.getUpdatedBy(), users);
                     String assignedTo = getUsernameByUserId(subTask.getAssignedTo(), users);
-                    return mapToSubtaskResponse(subTask, createdBy, updatedBy, assignedTo);
+                    return subtaskMapper.mapToResponse(subTask, createdBy, updatedBy, assignedTo);
                 }).toList();
         String createdBy = getUsernameByUserId(taskEntity.getCreatedBy(), users);
         String updatedBy = getUsernameByUserId(taskEntity.getUpdatedBy(), users);
@@ -99,32 +104,5 @@ public class TaskMapper {
                 assignedTo,
                 subtasks
         );
-    }
-
-    public SubtaskResponse mapToSubtaskResponse(SubtaskEntity subtaskEntity, String createdBy, String updatedBy, String assignedTo) {
-        return new SubtaskResponse(
-                subtaskEntity.getSubtaskId(),
-                subtaskEntity.getTaskId(),
-                subtaskEntity.getTitle(),
-                subtaskEntity.getDescription(),
-                subtaskEntity.getStatus(),
-                subtaskEntity.getPriority(),
-                subtaskEntity.getTargetEndDate(),
-                createdBy,
-                subtaskEntity.getCreatedOn().toString(),
-                updatedBy,
-                subtaskEntity.getUpdatedOn() != null ? subtaskEntity.getUpdatedOn().toString() : null,
-                assignedTo
-        );
-    }
-
-    private String getUsernameByUserId(UUID userId, List<UserEntity> users) {
-        if (userId == null) {
-            return null;
-        }
-        return users.stream().filter(user -> user.getUserId().equals(userId))
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("User", "userId", userId.toString()))
-                .getUsername();
     }
 }
