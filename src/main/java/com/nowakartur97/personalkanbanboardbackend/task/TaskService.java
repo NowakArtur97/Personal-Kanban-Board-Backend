@@ -16,7 +16,7 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
 
-    public Mono<TaskEntity> findById(UUID taskId) {
+    Mono<TaskEntity> findById(UUID taskId) {
 
         log.info("Looking up task by id: '{}'", taskId);
 
@@ -24,14 +24,14 @@ public class TaskService {
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("Task", "taskId", taskId.toString())));
     }
 
-    public Flux<TaskEntity> findAll() {
+    Flux<TaskEntity> findAll() {
 
         log.info("Looking up all tasks ordered by target end date");
 
         return taskRepository.findAllByOrderByTargetEndDate();
     }
 
-    public Flux<TaskEntity> findAllByAssignedTo(UUID assignedToId) {
+    Flux<TaskEntity> findAllByAssignedTo(UUID assignedToId) {
 
         log.info("Looking up all tasks for assigned to user with id '{}' ordered by target end date", assignedToId);
 
@@ -45,28 +45,28 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public Mono<TaskEntity> update(TaskEntity task) {
+    Mono<TaskEntity> update(TaskEntity task) {
 
         log.info("Updating task: {}", task);
 
         return taskRepository.save(task);
     }
 
-    public Mono<TaskEntity> updateAssignedTo(TaskEntity task) {
+    Mono<TaskEntity> updateAssignedTo(TaskEntity task) {
 
         log.info("Updating user assigned to task: {}", task);
 
         return taskRepository.save(task);
     }
 
-    public Mono<Void> deleteById(UUID taskId) {
+    Mono<Void> deleteById(UUID taskId) {
 
         log.info("Deleting task: by id: '{}'", taskId);
 
         return taskRepository.deleteById(taskId);
     }
 
-    public Mono<Void> deleteAll() {
+    Mono<Void> deleteAll() {
 
         log.info("Deleting all tasks");
 

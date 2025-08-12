@@ -14,7 +14,7 @@ public class UserMapper {
     private final JWTConfigurationProperties jwtConfigurationProperties;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public UserEntity mapToEntity(UserDTO userDTO) {
+    UserEntity mapToEntity(UserDTO userDTO) {
         return UserEntity.builder()
                 .username(userDTO.getUsername())
                 .password(bCryptPasswordEncoder.encode(userDTO.getPassword()))
@@ -23,7 +23,7 @@ public class UserMapper {
                 .build();
     }
 
-    public UserResponse mapToResponse(UserEntity userEntity) {
+    UserResponse mapToResponse(UserEntity userEntity) {
         return new UserResponse(
                 userEntity.getUserId(),
                 userEntity.getUsername(),

@@ -89,6 +89,7 @@ public class TaskController {
     }
 
     @MutationMapping
+    // TODO: Add subtasks to response?
     public Mono<TaskResponse> updateTask(@Argument UUID taskId, @Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
         Mono<TaskEntity> taskById = taskService.findById(taskId);
@@ -109,6 +110,7 @@ public class TaskController {
     }
 
     @MutationMapping
+    // TODO: Add subtasks to response?
     public Mono<TaskResponse> updateUserAssignedToTask(@Argument UUID taskId, @Argument UUID assignedToId, DataFetchingEnvironment env) {
         String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
         Mono<TaskEntity> taskById = taskService.findById(taskId);

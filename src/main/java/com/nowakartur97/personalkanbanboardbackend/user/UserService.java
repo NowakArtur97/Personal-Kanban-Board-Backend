@@ -43,7 +43,7 @@ public class UserService {
                 .switchIfEmpty(Mono.error(ex));
     }
 
-    public Mono<UserEntity> findByUsernameOrEmail(String usernameOrEmail) {
+    Mono<UserEntity> findByUsernameOrEmail(String usernameOrEmail) {
 
         log.info("Looking up user by username or email: '{}'", usernameOrEmail);
 
@@ -51,7 +51,7 @@ public class UserService {
                 .switchIfEmpty(Mono.error(new ResourceNotFoundException("User", "username/email", usernameOrEmail)));
     }
 
-    public Flux<UserEntity> findAll() {
+    Flux<UserEntity> findAll() {
 
         log.info("Looking up all users");
 

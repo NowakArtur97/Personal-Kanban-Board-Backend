@@ -15,15 +15,15 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class TaskMapper extends BaseTaskMapper {
+class TaskMapper extends BaseTaskMapper {
 
     private final SubtaskMapper subtaskMapper;
 
-    public TaskEntity mapToEntity(TaskDTO taskDTO, UUID createdBy) {
+    TaskEntity mapToEntity(TaskDTO taskDTO, UUID createdBy) {
         return mapToEntity(taskDTO, createdBy, createdBy);
     }
 
-    public TaskEntity mapToEntity(TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
+    TaskEntity mapToEntity(TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
         return TaskEntity.builder()
                 .title(taskDTO.getTitle())
                 .description(taskDTO.getDescription())
@@ -37,11 +37,11 @@ public class TaskMapper extends BaseTaskMapper {
                 .build();
     }
 
-    public TaskEntity updateEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID updatedBy) {
+    TaskEntity updateEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID updatedBy) {
         return updateEntity(taskEntity, taskDTO, updatedBy, updatedBy);
     }
 
-    public TaskEntity updateEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID updatedBy, UUID assignedTo) {
+    TaskEntity updateEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID updatedBy, UUID assignedTo) {
         taskEntity.setTitle(taskDTO.getTitle());
         taskEntity.setDescription(taskDTO.getDescription());
         taskEntity.setStatus(taskDTO.getStatus() != null ? taskDTO.getStatus() : TaskStatus.READY_TO_START);
@@ -51,7 +51,7 @@ public class TaskMapper extends BaseTaskMapper {
         return taskEntity;
     }
 
-    public TaskEntity updateUserAssignedToEntity(TaskEntity taskEntity, UUID updatedBy, UUID assignedTo) {
+    TaskEntity updateUserAssignedToEntity(TaskEntity taskEntity, UUID updatedBy, UUID assignedTo) {
         taskEntity.setAssignedTo(assignedTo);
         // TODO: Check in Postgres to see if the date is auto-populated
         taskEntity.setAssignedTo(assignedTo);
@@ -60,20 +60,20 @@ public class TaskMapper extends BaseTaskMapper {
         return taskEntity;
     }
 
-    public TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy) {
+    TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy) {
         return mapToResponse(taskEntity, createdBy, createdBy);
     }
 
-    public TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String assignedTo) {
+    TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String assignedTo) {
         return mapToResponse(taskEntity, createdBy, null, assignedTo, Collections.emptyList());
     }
 
-    public TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String updatedBy, String assignedTo) {
+    TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String updatedBy, String assignedTo) {
         // TODO: Add subtasks
         return mapToResponse(taskEntity, createdBy, updatedBy, assignedTo, Collections.emptyList());
     }
 
-    public TaskResponse mapToResponse(TaskEntity taskEntity, List<UserEntity> users, List<SubtaskEntity> subtasks) {
+    TaskResponse mapToResponse(TaskEntity taskEntity, List<UserEntity> users, List<SubtaskEntity> subtasks) {
         List<SubtaskResponse> subtaskResponses = subtasks.stream()
                 .filter(subTask -> subTask.getTaskId().equals(taskEntity.getTaskId()))
                 .map(subTask -> {
@@ -88,8 +88,8 @@ public class TaskMapper extends BaseTaskMapper {
         return mapToResponse(taskEntity, createdBy, updatedBy, assignedTo, subtaskResponses);
     }
 
-    public TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String updatedBy, String assignedTo,
-                                      List<SubtaskResponse> subtasks) {
+    TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String updatedBy, String assignedTo,
+                               List<SubtaskResponse> subtasks) {
         return new TaskResponse(
                 taskEntity.getTaskId(),
                 taskEntity.getTitle(),
