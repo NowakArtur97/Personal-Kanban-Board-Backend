@@ -2,6 +2,7 @@ package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskController;
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskValidator;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import graphql.schema.DataFetchingEnvironment;
@@ -26,8 +27,9 @@ public class TaskController extends BaseTaskController<TaskResponse, TaskEntity>
     private final TaskService taskService;
     private final TaskMapper taskMapper;
 
-    public TaskController(TaskService taskService, UserService userService, JWTUtil jwtUtil, TaskMapper taskMapper) {
-        super(taskService, userService, jwtUtil, taskMapper);
+    public TaskController(TaskService taskService, UserService userService, JWTUtil jwtUtil, TaskMapper taskMapper,
+                          BaseTaskValidator validator) {
+        super(taskService, userService, jwtUtil, taskMapper, validator);
         this.taskService = taskService;
         this.taskMapper = taskMapper;
     }

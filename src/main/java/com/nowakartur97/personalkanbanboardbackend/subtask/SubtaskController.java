@@ -31,7 +31,7 @@ public class SubtaskController extends BaseTaskController<SubtaskResponse, Subta
 
     public SubtaskController(SubtaskService subtaskService, UserService userService, JWTUtil jwtUtil,
                              SubtaskMapper subtaskMapper, SubtaskValidator subtaskValidator) {
-        super(subtaskService, userService, jwtUtil, subtaskMapper);
+        super(subtaskService, userService, jwtUtil, subtaskMapper, subtaskValidator);
         this.subtaskService = subtaskService;
         this.subtaskMapper = subtaskMapper;
         this.subtaskValidator = subtaskValidator;

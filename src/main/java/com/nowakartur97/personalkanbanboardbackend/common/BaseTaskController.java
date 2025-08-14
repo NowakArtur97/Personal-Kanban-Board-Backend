@@ -19,12 +19,15 @@ public abstract class BaseTaskController<R extends BaseTaskResponse, E extends B
     protected final UserService userService;
     protected final JWTUtil jwtUtil;
     private final BaseTaskMapper<R, E> mapper;
+    private final BaseTaskValidator validator;
 
-    public BaseTaskController(BaseTaskService<E> service, UserService userService, JWTUtil jwtUtil, BaseTaskMapper<R, E> mapper) {
+    public BaseTaskController(BaseTaskService<E> service, UserService userService, JWTUtil
+            jwtUtil, BaseTaskMapper<R, E> mapper, BaseTaskValidator validator) {
         this.service = service;
         this.userService = userService;
         this.jwtUtil = jwtUtil;
         this.mapper = mapper;
+        this.validator = validator;
     }
 
     protected Flux<R> mapToTasksResponse(Mono<List<E>> tasksList) {
@@ -43,7 +46,7 @@ public abstract class BaseTaskController<R extends BaseTaskResponse, E extends B
                         .toList());
     }
 
-    protected <E> List<UUID> getUuidsFromTasksByProperty(List<E> tasks, Function<E, UUID> byProperty) {
+    protected List<UUID> getUuidsFromTasksByProperty(List<E> tasks, Function<E, UUID> byProperty) {
         return tasks.stream()
                 .map(byProperty)
                 .toList();
