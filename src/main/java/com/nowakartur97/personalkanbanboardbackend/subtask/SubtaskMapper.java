@@ -1,15 +1,18 @@
 package com.nowakartur97.personalkanbanboardbackend.subtask;
 
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskMapper;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
+import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Component
-public class SubtaskMapper {
+public class SubtaskMapper extends BaseTaskMapper {
 
     SubtaskEntity mapToEntity(UUID taskId, TaskDTO taskDTO, UUID createdBy) {
         return mapToEntity(taskId, taskDTO, createdBy, createdBy);
@@ -38,7 +41,14 @@ public class SubtaskMapper {
         return mapToResponse(subtaskEntity, createdBy, null, assignedTo);
     }
 
-    public SubtaskResponse mapToResponse(SubtaskEntity subtaskEntity, String createdBy, String updatedBy, String assignedTo) {
+    SubtaskResponse mapToResponse(SubtaskEntity subtaskEntity, List<UserEntity> users) {
+        String createdBy = getUsernameByUserId(subtaskEntity.getCreatedBy(), users);
+        String updatedBy = getUsernameByUserId(subtaskEntity.getUpdatedBy(), users);
+        String assignedTo = getUsernameByUserId(subtaskEntity.getAssignedTo(), users);
+        return mapToResponse(subtaskEntity, createdBy, updatedBy, assignedTo);
+    }
+
+    SubtaskResponse mapToResponse(SubtaskEntity subtaskEntity, String createdBy, String updatedBy, String assignedTo) {
         return new SubtaskResponse(
                 subtaskEntity.getSubtaskId(),
                 subtaskEntity.getTaskId(),

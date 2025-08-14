@@ -1,11 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskMapper;
-import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
-import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskMapper;
-import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -14,10 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-@RequiredArgsConstructor
 class TaskMapper extends BaseTaskMapper {
-
-    private final SubtaskMapper subtaskMapper;
 
     TaskEntity mapToEntity(TaskDTO taskDTO, UUID createdBy) {
         return mapToEntity(taskDTO, createdBy, createdBy);
@@ -65,31 +58,17 @@ class TaskMapper extends BaseTaskMapper {
     }
 
     TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String assignedTo) {
-        return mapToResponse(taskEntity, createdBy, null, assignedTo, Collections.emptyList());
+        return mapToResponse(taskEntity, createdBy, null, assignedTo);
     }
 
-    TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String updatedBy, String assignedTo) {
-        // TODO: Add subtasks
-        return mapToResponse(taskEntity, createdBy, updatedBy, assignedTo, Collections.emptyList());
-    }
-
-    TaskResponse mapToResponse(TaskEntity taskEntity, List<UserEntity> users, List<SubtaskEntity> subtasks) {
-        List<SubtaskResponse> subtaskResponses = subtasks.stream()
-                .filter(subTask -> subTask.getTaskId().equals(taskEntity.getTaskId()))
-                .map(subTask -> {
-                    String createdBy = getUsernameByUserId(subTask.getCreatedBy(), users);
-                    String updatedBy = getUsernameByUserId(subTask.getUpdatedBy(), users);
-                    String assignedTo = getUsernameByUserId(subTask.getAssignedTo(), users);
-                    return subtaskMapper.mapToResponse(subTask, createdBy, updatedBy, assignedTo);
-                }).toList();
+    TaskResponse mapToResponse(TaskEntity taskEntity, List<UserEntity> users) {
         String createdBy = getUsernameByUserId(taskEntity.getCreatedBy(), users);
         String updatedBy = getUsernameByUserId(taskEntity.getUpdatedBy(), users);
         String assignedTo = getUsernameByUserId(taskEntity.getAssignedTo(), users);
-        return mapToResponse(taskEntity, createdBy, updatedBy, assignedTo, subtaskResponses);
+        return mapToResponse(taskEntity, createdBy, updatedBy, assignedTo);
     }
 
-    TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String updatedBy, String assignedTo,
-                               List<SubtaskResponse> subtasks) {
+    TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String updatedBy, String assignedTo) {
         return new TaskResponse(
                 taskEntity.getTaskId(),
                 taskEntity.getTitle(),
@@ -102,7 +81,7 @@ class TaskMapper extends BaseTaskMapper {
                 updatedBy,
                 taskEntity.getUpdatedOn() != null ? taskEntity.getUpdatedOn().toString() : null,
                 assignedTo,
-                subtasks
+                Collections.emptyList()
         );
     }
 }

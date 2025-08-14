@@ -15,7 +15,7 @@ public class SubtaskService {
 
     private final SubtaskRepository subtaskRepository;
 
-    public Flux<SubtaskEntity> findAllByTaskId(UUID taskId) {
+    Flux<SubtaskEntity> findAllByTaskId(UUID taskId) {
 
         log.info("Looking up subtasks by task id: '{}' ordered by target end date", taskId);
 

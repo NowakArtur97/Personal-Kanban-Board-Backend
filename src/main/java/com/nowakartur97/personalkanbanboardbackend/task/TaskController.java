@@ -2,11 +2,8 @@ package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEntity;
-import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
-import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskService;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
-import graphql.com.google.common.collect.Sets;
 import graphql.schema.DataFetchingEnvironment;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,39 +32,35 @@ import static com.nowakartur97.personalkanbanboardbackend.auth.AuthorizationHead
 public class TaskController {
 
     private final TaskService taskService;
-    private final SubtaskService subtaskService;
     private final UserService userService;
     private final JWTUtil jwtUtil;
     private final TaskMapper taskMapper;
 
     @QueryMapping
     public Flux<TaskResponse> tasks() {
-        Flux<TaskEntity> allTasks = taskService.findAll();
+        Mono<List<TaskEntity>> allTasks = taskService.findAll().collectList();
         return mapToTasksResponse(allTasks);
     }
 
     @QueryMapping
     public Flux<TaskResponse> tasksAssignedTo(@Argument UUID assignedToId) {
-        Flux<TaskEntity> assignedToUserTasks = taskService.findAllByAssignedTo(assignedToId);
+        Mono<List<TaskEntity>> assignedToUserTasks = taskService.findAllByAssignedTo(assignedToId).collectList();
         return mapToTasksResponse(assignedToUserTasks);
     }
 
-    private Flux<TaskResponse> mapToTasksResponse(Flux<TaskEntity> tasksList) {
-        Mono<List<SubtaskEntity>> subtasks = tasksList.map(TaskEntity::getTaskId)
-                .flatMap(subtaskService::findAllByTaskId)
-                .collectList();
-        Mono<Set<UUID>> subtasksUsersIds = subtasks.map(getUserIdsForResponse());
+    private Flux<TaskResponse> mapToTasksResponse(Mono<List<TaskEntity>> tasksList) {
         return tasksList
-                .collectList()
-                .map(getUserIdsForResponse())
-                .zipWith(subtasksUsersIds)
-                .flatMap(tuple -> userService.findAllByIds(Sets.union(tuple.getT1(), tuple.getT2())
-                        .stream().toList()).collectList())
-                .zipWith(tasksList.collectList())
-                .zipWith(subtasks)
-                // TODO: Remove nesting in tuple
-                .flatMapIterable(tuple -> tuple.getT1().getT2().stream()
-                        .map(task -> taskMapper.mapToResponse(task, tuple.getT1().getT1(), tuple.getT2()))
+                .map(tasks -> Stream.of(
+                                getUuidsFromTasksByProperty(tasks, BaseTaskEntity::getCreatedBy),
+                                getUuidsFromTasksByProperty(tasks, BaseTaskEntity::getUpdatedBy),
+                                getUuidsFromTasksByProperty(tasks, BaseTaskEntity::getAssignedTo))
+                        .flatMap(Collection::stream)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet()))
+                .flatMap(userIds -> userService.findAllByIds(userIds.stream().toList()).collectList())
+                .zipWith(tasksList)
+                .flatMapIterable(tuple -> tuple.getT2().stream()
+                        .map(task -> taskMapper.mapToResponse(task, tuple.getT1()))
                         .toList());
     }
 
