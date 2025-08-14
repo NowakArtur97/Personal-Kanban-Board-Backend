@@ -11,13 +11,13 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class SubtaskValidator implements BaseTaskValidator {
+public class SubtaskValidator extends BaseTaskValidator {
 
     private final TaskService taskService;
 
     @Override
-    public Mono<Boolean> validate(UUID taskId) {
-        return taskService.existsByTaskId(taskId)
+    public Mono<Boolean> validate(Object taskId) {
+        return taskService.existsByTaskId((UUID) taskId)
                 .map(exists -> {
                     if (!exists) {
                         throw new ResourceNotFoundException("Task", "taskId", taskId.toString());

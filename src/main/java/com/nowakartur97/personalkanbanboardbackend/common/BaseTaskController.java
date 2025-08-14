@@ -1,7 +1,11 @@
 package com.nowakartur97.personalkanbanboardbackend.common;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
+import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
+import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
+import graphql.schema.DataFetchingEnvironment;
+import org.springframework.beans.factory.annotation.Qualifier;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -13,16 +17,18 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class BaseTaskController<R extends BaseTaskResponse, E extends BaseTaskEntity> {
+import static com.nowakartur97.personalkanbanboardbackend.auth.AuthorizationHeaderInterceptor.TOKEN_IN_CONTEXT;
+
+public abstract class BaseTaskController<E extends BaseTaskEntity, R extends BaseTaskResponse> {
 
     private final BaseTaskService<E> service;
     protected final UserService userService;
     protected final JWTUtil jwtUtil;
-    private final BaseTaskMapper<R, E> mapper;
+    private final BaseTaskMapper<E, R> mapper;
     private final BaseTaskValidator validator;
 
     public BaseTaskController(BaseTaskService<E> service, UserService userService, JWTUtil
-            jwtUtil, BaseTaskMapper<R, E> mapper, BaseTaskValidator validator) {
+            jwtUtil, BaseTaskMapper<E, R> mapper, @Qualifier("BaseTaskValidator") BaseTaskValidator validator) {
         this.service = service;
         this.userService = userService;
         this.jwtUtil = jwtUtil;
@@ -44,6 +50,24 @@ public abstract class BaseTaskController<R extends BaseTaskResponse, E extends B
                 .flatMapIterable(tuple -> tuple.getT2().stream()
                         .map(task -> mapper.mapToResponse(task, tuple.getT1()))
                         .toList());
+    }
+
+    protected Mono<R> createTask(UUID taskId, TaskDTO taskDTO, DataFetchingEnvironment env) {
+        String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
+        Mono<UserEntity> createdBy = userService.findByUsername(username);
+        if (taskDTO.getAssignedTo() == null) {
+            return validator.validate(taskId)
+                    .flatMap(__ -> createdBy)
+                    .flatMap(user -> Mono.just(mapper.mapToEntity(taskId, taskDTO, user.getUserId()))
+                            .flatMap(service::save)
+                            .map(subtask -> mapper.mapToResponse(subtask, user.getUsername())));
+        }
+        Mono<UserEntity> assignedTo = userService.findById(taskDTO.getAssignedTo());
+        return validator.validate(taskId)
+                .flatMap(__ -> Mono.zip(createdBy, assignedTo))
+                .flatMap(tuple -> Mono.just(mapper.mapToEntity(taskId, taskDTO, tuple.getT1().getUserId(), tuple.getT2().getUserId()))
+                        .flatMap(service::save)
+                        .map(subtask -> mapper.mapToResponse(subtask, tuple.getT1().getUsername(), tuple.getT2().getUsername())));
     }
 
     protected List<UUID> getUuidsFromTasksByProperty(List<E> tasks, Function<E, UUID> byProperty) {

@@ -26,6 +26,7 @@ public class SubtaskService extends BaseTaskService<SubtaskEntity> {
         return subtaskRepository.findAllByTaskIdOrderByTargetEndDate(taskId);
     }
 
+    @Override
     public Mono<SubtaskEntity> save(SubtaskEntity subtask) {
 
         log.info("Creation of new subtask: {}", subtask);

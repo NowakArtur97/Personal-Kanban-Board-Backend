@@ -49,6 +49,7 @@ public class TaskService extends BaseTaskService<TaskEntity> {
         return taskRepository.existsById(taskId);
     }
 
+    @Override
     public Mono<TaskEntity> save(TaskEntity task) {
 
         log.info("Creation of new task: {}", task);

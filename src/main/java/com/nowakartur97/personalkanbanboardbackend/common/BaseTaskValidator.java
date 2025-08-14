@@ -1,12 +1,12 @@
 package com.nowakartur97.personalkanbanboardbackend.common;
 
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
+@Component
+public class BaseTaskValidator {
 
-public interface BaseTaskValidator {
-
-    default Mono<Boolean> validate(UUID taskId) {
+    public Mono<Boolean> validate(Object parameter) {
         return Mono.just(true);
     }
 }

@@ -12,13 +12,15 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-class SubtaskMapper extends BaseTaskMapper<SubtaskResponse, SubtaskEntity> {
+class SubtaskMapper extends BaseTaskMapper<SubtaskEntity, SubtaskResponse> {
 
-    SubtaskEntity mapToEntity(UUID taskId, TaskDTO taskDTO, UUID createdBy) {
+    @Override
+    public SubtaskEntity mapToEntity(UUID taskId, TaskDTO taskDTO, UUID createdBy) {
         return mapToEntity(taskId, taskDTO, createdBy, createdBy);
     }
 
-    SubtaskEntity mapToEntity(UUID taskId, TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
+    @Override
+    public SubtaskEntity mapToEntity(UUID taskId, TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
         return SubtaskEntity.builder()
                 .taskId(taskId)
                 .title(taskDTO.getTitle())
@@ -33,11 +35,13 @@ class SubtaskMapper extends BaseTaskMapper<SubtaskResponse, SubtaskEntity> {
                 .build();
     }
 
-    SubtaskResponse mapToResponse(SubtaskEntity subtaskEntity, String createdBy) {
+    @Override
+    public SubtaskResponse mapToResponse(SubtaskEntity subtaskEntity, String createdBy) {
         return mapToResponse(subtaskEntity, createdBy, createdBy);
     }
 
-    SubtaskResponse mapToResponse(SubtaskEntity subtaskEntity, String createdBy, String assignedTo) {
+    @Override
+    public SubtaskResponse mapToResponse(SubtaskEntity subtaskEntity, String createdBy, String assignedTo) {
         return mapToResponse(subtaskEntity, createdBy, null, assignedTo);
     }
 

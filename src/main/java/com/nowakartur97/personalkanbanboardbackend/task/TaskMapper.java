@@ -10,13 +10,15 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-class TaskMapper extends BaseTaskMapper<TaskResponse, TaskEntity> {
+class TaskMapper extends BaseTaskMapper<TaskEntity, TaskResponse> {
 
-    TaskEntity mapToEntity(TaskDTO taskDTO, UUID createdBy) {
-        return mapToEntity(taskDTO, createdBy, createdBy);
+    @Override
+    public TaskEntity mapToEntity(UUID taskId, TaskDTO taskDTO, UUID createdBy) {
+        return mapToEntity(taskId, taskDTO, createdBy, createdBy);
     }
 
-    TaskEntity mapToEntity(TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
+    @Override
+    public TaskEntity mapToEntity(UUID taskId, TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
         return TaskEntity.builder()
                 .title(taskDTO.getTitle())
                 .description(taskDTO.getDescription())
@@ -53,11 +55,13 @@ class TaskMapper extends BaseTaskMapper<TaskResponse, TaskEntity> {
         return taskEntity;
     }
 
-    TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy) {
+    @Override
+    public TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy) {
         return mapToResponse(taskEntity, createdBy, createdBy);
     }
 
-    TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String assignedTo) {
+    @Override
+    public TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String assignedTo) {
         return mapToResponse(taskEntity, createdBy, null, assignedTo);
     }
 

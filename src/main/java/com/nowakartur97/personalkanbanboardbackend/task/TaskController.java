@@ -22,14 +22,14 @@ import static com.nowakartur97.personalkanbanboardbackend.auth.AuthorizationHead
 
 @Controller
 @PreAuthorize("hasAuthority('USER')")
-public class TaskController extends BaseTaskController<TaskResponse, TaskEntity> {
+public class TaskController extends BaseTaskController<TaskEntity, TaskResponse> {
 
     private final TaskService taskService;
     private final TaskMapper taskMapper;
 
     public TaskController(TaskService taskService, UserService userService, JWTUtil jwtUtil, TaskMapper taskMapper,
-                          BaseTaskValidator validator) {
-        super(taskService, userService, jwtUtil, taskMapper, validator);
+                          BaseTaskValidator baseTaskValidator) {
+        super(taskService, userService, jwtUtil, taskMapper, baseTaskValidator);
         this.taskService = taskService;
         this.taskMapper = taskMapper;
     }
@@ -48,19 +48,7 @@ public class TaskController extends BaseTaskController<TaskResponse, TaskEntity>
 
     @MutationMapping
     public Mono<TaskResponse> createTask(@Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
-        String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
-        Mono<UserEntity> createdBy = userService.findByUsername(username);
-        if (taskDTO.getAssignedTo() == null) {
-            return createdBy
-                    .flatMap(user -> Mono.just(taskMapper.mapToEntity(taskDTO, user.getUserId()))
-                            .flatMap(taskService::save)
-                            .map(task -> taskMapper.mapToResponse(task, user.getUsername())));
-        }
-        Mono<UserEntity> assignedTo = userService.findById(taskDTO.getAssignedTo());
-        return Mono.zip(createdBy, assignedTo)
-                .flatMap(tuple -> Mono.just(taskMapper.mapToEntity(taskDTO, tuple.getT1().getUserId(), tuple.getT2().getUserId()))
-                        .flatMap(taskService::save)
-                        .map(task -> taskMapper.mapToResponse(task, tuple.getT1().getUsername(), tuple.getT2().getUsername())));
+        return createTask(null, taskDTO, env);
     }
 
     @MutationMapping
