@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class SubtaskMapper extends BaseTaskMapper {
+class SubtaskMapper extends BaseTaskMapper<SubtaskResponse, SubtaskEntity> {
 
     SubtaskEntity mapToEntity(UUID taskId, TaskDTO taskDTO, UUID createdBy) {
         return mapToEntity(taskId, taskDTO, createdBy, createdBy);
@@ -41,7 +41,8 @@ public class SubtaskMapper extends BaseTaskMapper {
         return mapToResponse(subtaskEntity, createdBy, null, assignedTo);
     }
 
-    SubtaskResponse mapToResponse(SubtaskEntity subtaskEntity, List<UserEntity> users) {
+    @Override
+    public SubtaskResponse mapToResponse(SubtaskEntity subtaskEntity, List<UserEntity> users) {
         String createdBy = getUsernameByUserId(subtaskEntity.getCreatedBy(), users);
         String updatedBy = getUsernameByUserId(subtaskEntity.getUpdatedBy(), users);
         String assignedTo = getUsernameByUserId(subtaskEntity.getAssignedTo(), users);

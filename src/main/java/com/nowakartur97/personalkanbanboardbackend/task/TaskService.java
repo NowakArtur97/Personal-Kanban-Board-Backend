@@ -1,7 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskService;
 import com.nowakartur97.personalkanbanboardbackend.exception.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -10,11 +10,15 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class TaskService {
+public class TaskService extends BaseTaskService<TaskEntity> {
 
     private final TaskRepository taskRepository;
+
+    public TaskService(TaskRepository taskRepository) {
+        super(taskRepository);
+        this.taskRepository = taskRepository;
+    }
 
     Mono<TaskEntity> findById(UUID taskId) {
 

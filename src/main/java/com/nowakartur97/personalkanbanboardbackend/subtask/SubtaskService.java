@@ -1,6 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.subtask;
 
-import lombok.RequiredArgsConstructor;
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -9,11 +9,15 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class SubtaskService {
+public class SubtaskService extends BaseTaskService<SubtaskEntity> {
 
     private final SubtaskRepository subtaskRepository;
+
+    public SubtaskService(SubtaskRepository subtaskRepository) {
+        super(subtaskRepository);
+        this.subtaskRepository = subtaskRepository;
+    }
 
     Flux<SubtaskEntity> findAllByTaskId(UUID taskId) {
 

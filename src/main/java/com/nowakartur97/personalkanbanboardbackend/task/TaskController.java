@@ -1,12 +1,11 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
-import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskController;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import graphql.schema.DataFetchingEnvironment;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -15,26 +14,23 @@ import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.nowakartur97.personalkanbanboardbackend.auth.AuthorizationHeaderInterceptor.TOKEN_IN_CONTEXT;
 
 @Controller
-@RequiredArgsConstructor
 @PreAuthorize("hasAuthority('USER')")
-public class TaskController {
+public class TaskController extends BaseTaskController<TaskResponse, TaskEntity> {
 
     private final TaskService taskService;
-    private final UserService userService;
-    private final JWTUtil jwtUtil;
     private final TaskMapper taskMapper;
+
+    public TaskController(TaskService taskService, UserService userService, JWTUtil jwtUtil, TaskMapper taskMapper) {
+        super(taskService, userService, jwtUtil, taskMapper);
+        this.taskService = taskService;
+        this.taskMapper = taskMapper;
+    }
 
     @QueryMapping
     public Flux<TaskResponse> tasks() {
@@ -46,22 +42,6 @@ public class TaskController {
     public Flux<TaskResponse> tasksAssignedTo(@Argument UUID assignedToId) {
         Mono<List<TaskEntity>> assignedToUserTasks = taskService.findAllByAssignedTo(assignedToId).collectList();
         return mapToTasksResponse(assignedToUserTasks);
-    }
-
-    private Flux<TaskResponse> mapToTasksResponse(Mono<List<TaskEntity>> tasksList) {
-        return tasksList
-                .map(tasks -> Stream.of(
-                                getUuidsFromTasksByProperty(tasks, BaseTaskEntity::getCreatedBy),
-                                getUuidsFromTasksByProperty(tasks, BaseTaskEntity::getUpdatedBy),
-                                getUuidsFromTasksByProperty(tasks, BaseTaskEntity::getAssignedTo))
-                        .flatMap(Collection::stream)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toSet()))
-                .flatMap(userIds -> userService.findAllByIds(userIds.stream().toList()).collectList())
-                .zipWith(tasksList)
-                .flatMapIterable(tuple -> tuple.getT2().stream()
-                        .map(task -> taskMapper.mapToResponse(task, tuple.getT1()))
-                        .toList());
     }
 
     @MutationMapping
@@ -126,21 +106,5 @@ public class TaskController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public Mono<Void> deleteAllTasks() {
         return taskService.deleteAll();
-    }
-
-    private <T extends BaseTaskEntity> Function<List<T>, Set<UUID>> getUserIdsForResponse() {
-        return tasks -> Stream.of(
-                        getUuidsFromTasksByProperty(tasks, BaseTaskEntity::getCreatedBy),
-                        getUuidsFromTasksByProperty(tasks, BaseTaskEntity::getUpdatedBy),
-                        getUuidsFromTasksByProperty(tasks, BaseTaskEntity::getAssignedTo))
-                .flatMap(Collection::stream)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-    }
-
-    private <T extends BaseTaskEntity> List<UUID> getUuidsFromTasksByProperty(List<T> tasks, Function<BaseTaskEntity, UUID> byProperty) {
-        return tasks.stream()
-                .map(byProperty)
-                .toList();
     }
 }

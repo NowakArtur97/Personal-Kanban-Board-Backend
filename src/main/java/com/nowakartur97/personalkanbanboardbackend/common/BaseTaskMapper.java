@@ -6,7 +6,9 @@ import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import java.util.List;
 import java.util.UUID;
 
-public class BaseTaskMapper {
+public abstract class BaseTaskMapper<R extends BaseTaskResponse, E extends BaseTaskEntity> {
+
+    public abstract R mapToResponse(E task, List<UserEntity> t1);
 
     protected String getUsernameByUserId(UUID userId, List<UserEntity> users) {
         if (userId == null) {
