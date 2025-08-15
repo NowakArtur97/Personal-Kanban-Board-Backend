@@ -1,8 +1,10 @@
 package com.nowakartur97.personalkanbanboardbackend.common;
 
 import com.nowakartur97.personalkanbanboardbackend.exception.ResourceNotFoundException;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
+import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
@@ -21,7 +23,8 @@ public abstract class BaseTaskMapper<E extends BaseTaskEntity, R extends BaseTas
 
     public abstract E mapToEntity(UUID taskId, TaskDTO taskDTO, UUID createdBy, UUID assignedTo);
 
-    public final void setEntityFields(BaseTaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
+    public final BaseTaskEntity mapToEntity(boolean isTask, UUID taskId, TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
+        BaseTaskEntity taskEntity = isTask ? new TaskEntity() : new SubtaskEntity();
         taskEntity.setTitle(taskDTO.getTitle());
         taskEntity.setDescription(taskDTO.getDescription());
         taskEntity.setStatus(taskDTO.getStatus() != null ? taskDTO.getStatus() : TaskStatus.READY_TO_START);
@@ -31,6 +34,10 @@ public abstract class BaseTaskMapper<E extends BaseTaskEntity, R extends BaseTas
         taskEntity.setCreatedBy(createdBy);
         // TODO: Check in Postgres to see if the date is auto-populated
         taskEntity.setCreatedOn(Instant.now());
+        if (taskEntity instanceof SubtaskEntity) {
+            ((SubtaskEntity) taskEntity).setTaskId(taskId);
+        }
+        return taskEntity;
     }
 
     public final E updateEntity(E taskEntity, TaskDTO taskDTO, UUID updatedBy) {

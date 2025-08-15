@@ -11,10 +11,7 @@ class SubtaskMapper extends BaseTaskMapper<SubtaskEntity, SubtaskResponse> {
 
     @Override
     public SubtaskEntity mapToEntity(UUID taskId, TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
-        SubtaskEntity subtaskEntity = new SubtaskEntity();
-        setEntityFields(subtaskEntity, taskDTO, createdBy, assignedTo);
-        subtaskEntity.setTaskId(taskId);
-        return subtaskEntity;
+        return (SubtaskEntity) mapToEntity(false, taskId, taskDTO, createdBy, assignedTo);
     }
 
     @Override

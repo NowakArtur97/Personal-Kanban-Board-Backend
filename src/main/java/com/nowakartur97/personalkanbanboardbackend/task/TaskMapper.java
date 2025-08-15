@@ -10,10 +10,7 @@ class TaskMapper extends BaseTaskMapper<TaskEntity, TaskResponse> {
 
     @Override
     public TaskEntity mapToEntity(UUID taskId, TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
-        TaskEntity taskEntity = new TaskEntity();
-        setEntityFields(taskEntity, taskDTO, createdBy, assignedTo);
-        taskEntity.setTaskId(taskId);
-        return taskEntity;
+        return (TaskEntity) mapToEntity(true, taskId, taskDTO, createdBy, assignedTo);
     }
 
     @Override
