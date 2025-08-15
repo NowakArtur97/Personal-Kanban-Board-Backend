@@ -32,26 +32,19 @@ class TaskMapper extends BaseTaskMapper<TaskEntity, TaskResponse> {
                 .build();
     }
 
-    TaskEntity updateEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID updatedBy) {
+    @Override
+    public TaskEntity updateEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID updatedBy) {
         return updateEntity(taskEntity, taskDTO, updatedBy, updatedBy);
     }
 
-    TaskEntity updateEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID updatedBy, UUID assignedTo) {
+    @Override
+    public TaskEntity updateEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID updatedBy, UUID assignedTo) {
         taskEntity.setTitle(taskDTO.getTitle());
         taskEntity.setDescription(taskDTO.getDescription());
         taskEntity.setStatus(taskDTO.getStatus() != null ? taskDTO.getStatus() : TaskStatus.READY_TO_START);
         taskEntity.setPriority(taskDTO.getPriority() != null ? taskDTO.getPriority() : TaskPriority.LOW);
         taskEntity.setTargetEndDate(taskDTO.getTargetEndDate());
         updateUserAssignedToEntity(taskEntity, updatedBy, assignedTo);
-        return taskEntity;
-    }
-
-    TaskEntity updateUserAssignedToEntity(TaskEntity taskEntity, UUID updatedBy, UUID assignedTo) {
-        taskEntity.setAssignedTo(assignedTo);
-        // TODO: Check in Postgres to see if the date is auto-populated
-        taskEntity.setAssignedTo(assignedTo);
-        taskEntity.setUpdatedBy(updatedBy);
-        taskEntity.setUpdatedOn(Instant.now());
         return taskEntity;
     }
 
@@ -73,7 +66,8 @@ class TaskMapper extends BaseTaskMapper<TaskEntity, TaskResponse> {
         return mapToResponse(taskEntity, createdBy, updatedBy, assignedTo);
     }
 
-    TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String updatedBy, String assignedTo) {
+    @Override
+    public TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String updatedBy, String assignedTo) {
         return new TaskResponse(
                 taskEntity.getTaskId(),
                 taskEntity.getTitle(),

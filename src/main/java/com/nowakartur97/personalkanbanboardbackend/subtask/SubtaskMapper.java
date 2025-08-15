@@ -36,6 +36,22 @@ class SubtaskMapper extends BaseTaskMapper<SubtaskEntity, SubtaskResponse> {
     }
 
     @Override
+    public SubtaskEntity updateEntity(SubtaskEntity subtaskEntity, TaskDTO taskDTO, UUID updatedBy) {
+        return updateEntity(subtaskEntity, taskDTO, updatedBy, updatedBy);
+    }
+
+    @Override
+    public SubtaskEntity updateEntity(SubtaskEntity subtaskEntity, TaskDTO taskDTO, UUID updatedBy, UUID assignedTo) {
+        subtaskEntity.setTitle(taskDTO.getTitle());
+        subtaskEntity.setDescription(taskDTO.getDescription());
+        subtaskEntity.setStatus(taskDTO.getStatus() != null ? taskDTO.getStatus() : TaskStatus.READY_TO_START);
+        subtaskEntity.setPriority(taskDTO.getPriority() != null ? taskDTO.getPriority() : TaskPriority.LOW);
+        subtaskEntity.setTargetEndDate(taskDTO.getTargetEndDate());
+        updateUserAssignedToEntity(subtaskEntity, updatedBy, assignedTo);
+        return subtaskEntity;
+    }
+
+    @Override
     public SubtaskResponse mapToResponse(SubtaskEntity subtaskEntity, String createdBy) {
         return mapToResponse(subtaskEntity, createdBy, createdBy);
     }
@@ -53,7 +69,8 @@ class SubtaskMapper extends BaseTaskMapper<SubtaskEntity, SubtaskResponse> {
         return mapToResponse(subtaskEntity, createdBy, updatedBy, assignedTo);
     }
 
-    SubtaskResponse mapToResponse(SubtaskEntity subtaskEntity, String createdBy, String updatedBy, String assignedTo) {
+    @Override
+    public SubtaskResponse mapToResponse(SubtaskEntity subtaskEntity, String createdBy, String updatedBy, String assignedTo) {
         return new SubtaskResponse(
                 subtaskEntity.getSubtaskId(),
                 subtaskEntity.getTaskId(),

@@ -20,7 +20,8 @@ public class TaskService extends BaseTaskService<TaskEntity> {
         this.taskRepository = taskRepository;
     }
 
-    Mono<TaskEntity> findById(UUID taskId) {
+    @Override
+    public Mono<TaskEntity> findById(UUID taskId) {
 
         log.info("Looking up task by id: '{}'", taskId);
 
@@ -57,7 +58,8 @@ public class TaskService extends BaseTaskService<TaskEntity> {
         return taskRepository.save(task);
     }
 
-    Mono<TaskEntity> update(TaskEntity task) {
+    @Override
+    public Mono<TaskEntity> update(TaskEntity task) {
 
         log.info("Updating task: {}", task);
 
