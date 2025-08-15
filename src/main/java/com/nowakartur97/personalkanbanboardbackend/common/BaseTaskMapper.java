@@ -1,12 +1,15 @@
 package com.nowakartur97.personalkanbanboardbackend.common;
 
 import com.nowakartur97.personalkanbanboardbackend.exception.ResourceNotFoundException;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
+import com.nowakartur97.personalkanbanboardbackend.task.TaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,18 +73,38 @@ public abstract class BaseTaskMapper<E extends BaseTaskEntity, R extends BaseTas
         return mapToResponse(taskEntity, createdBy, updatedBy, assignedTo);
     }
 
-    public final void setResponseFields(R taskResponse, E taskEntity, String createdBy, String updatedBy, String assignedTo) {
-        taskResponse.setTitle(taskEntity.getTitle());
-        taskResponse.setDescription(taskEntity.getDescription());
-        taskResponse.setStatus(taskEntity.getStatus());
-        taskResponse.setPriority(taskEntity.getPriority());
-        taskResponse.setTargetEndDate(taskEntity.getTargetEndDate());
-        taskResponse.setCreatedBy(createdBy);
-        taskResponse.setCreatedOn(taskEntity.getCreatedOn().toString());
-        taskResponse.setCreatedBy(createdBy);
-        taskResponse.setUpdatedOn(taskEntity.getUpdatedOn() != null ? taskEntity.getUpdatedOn().toString() : null);
-        taskResponse.setUpdatedBy(updatedBy);
-        taskResponse.setAssignedTo(assignedTo);
+    public final BaseTaskResponse mapToResponse(E taskEntity, UUID taskId, UUID subtaskId, String createdBy, String updatedBy, String assignedTo) {
+        if (subtaskId == null) {
+            return new TaskResponse(
+                    taskId,
+                    taskEntity.getTitle(),
+                    taskEntity.getDescription(),
+                    taskEntity.getStatus(),
+                    taskEntity.getPriority(),
+                    taskEntity.getTargetEndDate(),
+                    createdBy,
+                    taskEntity.getCreatedOn().toString(),
+                    updatedBy,
+                    taskEntity.getUpdatedOn() != null ? taskEntity.getUpdatedOn().toString() : null,
+                    assignedTo,
+                    Collections.emptyList()
+            );
+        } else {
+            return new SubtaskResponse(
+                    subtaskId,
+                    taskId,
+                    taskEntity.getTitle(),
+                    taskEntity.getDescription(),
+                    taskEntity.getStatus(),
+                    taskEntity.getPriority(),
+                    taskEntity.getTargetEndDate(),
+                    createdBy,
+                    taskEntity.getCreatedOn().toString(),
+                    updatedBy,
+                    taskEntity.getUpdatedOn() != null ? taskEntity.getUpdatedOn().toString() : null,
+                    assignedTo
+            );
+        }
     }
 
     protected final String getUsernameByUserId(UUID userId, List<UserEntity> users) {

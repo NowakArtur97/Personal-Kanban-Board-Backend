@@ -19,10 +19,6 @@ class SubtaskMapper extends BaseTaskMapper<SubtaskEntity, SubtaskResponse> {
 
     @Override
     public SubtaskResponse mapToResponse(SubtaskEntity subtaskEntity, String createdBy, String updatedBy, String assignedTo) {
-        SubtaskResponse subtaskResponse = new SubtaskResponse();
-        setResponseFields(subtaskResponse, subtaskEntity, createdBy, updatedBy, assignedTo);
-        subtaskResponse.setSubtaskId(subtaskEntity.getSubtaskId());
-        subtaskResponse.setTaskId(subtaskEntity.getTaskId());
-        return subtaskResponse;
+        return (SubtaskResponse) mapToResponse(subtaskEntity, subtaskEntity.getTaskId(), subtaskEntity.getSubtaskId(), createdBy, updatedBy, assignedTo);
     }
 }

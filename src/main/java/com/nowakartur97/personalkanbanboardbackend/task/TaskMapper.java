@@ -3,7 +3,6 @@ package com.nowakartur97.personalkanbanboardbackend.task;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskMapper;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.UUID;
 
 @Component
@@ -19,10 +18,6 @@ class TaskMapper extends BaseTaskMapper<TaskEntity, TaskResponse> {
 
     @Override
     public TaskResponse mapToResponse(TaskEntity taskEntity, String createdBy, String updatedBy, String assignedTo) {
-        TaskResponse taskResponse = new TaskResponse();
-        setResponseFields(taskResponse, taskEntity, createdBy, updatedBy, assignedTo);
-        taskResponse.setTaskId(taskEntity.getTaskId());
-        taskResponse.setSubtasks(Collections.emptyList());
-        return taskResponse;
+        return (TaskResponse) mapToResponse(taskEntity, taskEntity.getTaskId(), null, createdBy, updatedBy, assignedTo);
     }
 }
