@@ -1,6 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.TaskMutationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
@@ -9,7 +9,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.test.tester.GraphQlTester;
-import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -17,9 +16,13 @@ import java.util.UUID;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.UPDATE_TASK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class TaskUpdateMutationControllerTest extends IntegrationTest {
+public class TaskUpdateMutationControllerTest extends TaskMutationTest {
 
     private final static String UPDATE_TASK_PATH = "updateTask";
+
+    public TaskUpdateMutationControllerTest() {
+        super(UPDATE_TASK_PATH, UPDATE_TASK, "taskDTO", 38);
+    }
 
     @ParameterizedTest
     @EnumSource(value = UserRole.class)
@@ -87,23 +90,6 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
     }
 
     @Test
-    public void whenUpdateTaskForNotExistingUserAssignedTo_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
-        UUID assignedTo = UUID.randomUUID();
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, assignedTo);
-
-        sendUpdateTaskRequestWithErrors(userEntity, taskEntity.getTaskId(), taskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertNotFoundErrorResponse(responseError, UPDATE_TASK_PATH, "User with userId: '" + assignedTo + "' not found.");
-                        });
-    }
-
-    @Test
     public void whenUpdateTaskWithoutTaskId_shouldReturnGraphQLErrorResponse() {
 
         UserEntity userEntity = createUser();
@@ -124,128 +110,6 @@ public class TaskUpdateMutationControllerTest extends IntegrationTest {
                             assertValidationErrorResponse(responseError, new SourceLocation(1, 22),
                                     "Variable 'taskId' has an invalid value: Variable 'taskId' has coerced Null value for NonNull type 'UUID!'"
                             );
-                        });
-    }
-
-    @Test
-    public void whenUpdateTaskWithoutTaskData_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(UPDATE_TASK)
-                .variable("taskId", UUID.randomUUID())
-                .execute()
-                .errors()
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertValidationErrorResponse(responseError, new SourceLocation(1, 38),
-                                    "Variable 'taskDTO' has an invalid value: Variable 'taskDTO' has coerced Null value for NonNull type 'TaskDTO!'"
-                            );
-                        });
-    }
-
-    @Test
-    public void whenUpdateTaskWithoutTitle_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
-        TaskDTO taskDTO = new TaskDTO(null, null, null, null, null, null);
-
-        sendUpdateTaskRequestWithErrors(userEntity, taskEntity.getTaskId(), taskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertValidationErrorResponse(responseError, new SourceLocation(1, 38),
-                                    "Variable 'taskDTO' has an invalid value: Field 'title' has coerced Null value for NonNull type 'String!'");
-                        });
-    }
-
-    @Test
-    public void whenUpdateTaskWitBlankTitle_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
-        TaskDTO taskDTO = new TaskDTO("", null, null, null, null, null);
-
-        sendUpdateTaskRequestWithErrors(userEntity, taskEntity.getTaskId(), taskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isEqualTo(2);
-                            ResponseError firstResponseError = responseErrors.getFirst();
-                            assertErrorResponse(firstResponseError, "Title cannot be empty.");
-                            ResponseError secondResponseError = responseErrors.getLast();
-                            assertErrorResponse(secondResponseError, "Title must be between 4 and 100 characters.");
-                        });
-    }
-
-    @Test
-    public void whenUpdateTaskWitTooShortTitle_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
-        TaskDTO taskDTO = new TaskDTO("ti", null, null, null, null, null);
-
-        sendUpdateTaskRequestWithErrors(userEntity, taskEntity.getTaskId(), taskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getLast();
-                            assertErrorResponse(responseError, "Title must be between 4 and 100 characters.");
-                        });
-    }
-
-    @Test
-    public void whenUpdateTaskWitTooLongTitle_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
-        TaskDTO taskDTO = new TaskDTO(StringUtils.repeat("t", 101), null, null, null, null, null);
-
-        sendUpdateTaskRequestWithErrors(userEntity, taskEntity.getTaskId(), taskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getLast();
-                            assertErrorResponse(responseError, "Title must be between 4 and 100 characters.");
-                        });
-    }
-
-    @Test
-    public void whenUpdateTaskWitTooLongDescription_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
-        TaskDTO taskDTO = new TaskDTO("title", StringUtils.repeat("d", 1001), null, null, null, null);
-
-        sendUpdateTaskRequestWithErrors(userEntity, taskEntity.getTaskId(), taskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getLast();
-                            assertErrorResponse(responseError, "Description must be between 0 and 1000 characters.");
-                        });
-    }
-
-    @Test
-    public void whenUpdateTaskWitTargetEndDateInThePast_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, LocalDate.of(2024, 1, 1), null);
-
-        sendUpdateTaskRequestWithErrors(userEntity, taskEntity.getTaskId(), taskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getLast();
-                            assertErrorResponse(responseError, "Target end date cannot be in the past.");
                         });
     }
 

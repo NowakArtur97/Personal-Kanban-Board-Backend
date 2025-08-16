@@ -1,6 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.subtask;
 
-import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.TaskMutationTest;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
@@ -12,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.graphql.ResponseError;
-import org.springframework.graphql.test.tester.GraphQlTester;
-import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -21,9 +19,13 @@ import java.util.UUID;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.CREATE_SUBTASK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class SubtaskCreationMutationControllerTest extends IntegrationTest {
+public class SubtaskCreationMutationControllerTest extends TaskMutationTest {
 
     private final static String CREATE_SUBTASK_PATH = "createSubtask";
+
+    public SubtaskCreationMutationControllerTest() {
+        super(CREATE_SUBTASK_PATH, CREATE_SUBTASK, "subtaskDTO", 41);
+    }
 
     @ParameterizedTest
     @EnumSource(value = UserRole.class)
@@ -61,29 +63,20 @@ public class SubtaskCreationMutationControllerTest extends IntegrationTest {
         UUID taskId = UUID.randomUUID();
         TaskDTO subtaskDTO = new TaskDTO("title", "description", null, null, null, UUID.randomUUID());
 
-        sendCreateSubtaskRequestWithErrors(userEntity, taskId, subtaskDTO)
+        httpGraphQlTester
+                .mutate()
+                .headers(headers -> addAuthorizationHeader(headers, userEntity))
+                .build()
+                .document(CREATE_SUBTASK)
+                .variable("taskId", taskId)
+                .variable("subtaskDTO", subtaskDTO)
+                .execute()
+                .errors()
                 .satisfy(
                         responseErrors -> {
                             assertThat(responseErrors.size()).isOne();
                             ResponseError responseError = responseErrors.getFirst();
                             assertNotFoundErrorResponse(responseError, CREATE_SUBTASK_PATH, "Task with taskId: '" + taskId + "' not found.");
-                        });
-    }
-
-    @Test
-    public void whenCreateSubtaskForNotExistingUserAssignedTo_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-        UUID assignedTo = UUID.randomUUID();
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
-        TaskDTO subtaskDTO = new TaskDTO("title", "description", null, null, null, assignedTo);
-
-        sendCreateSubtaskRequestWithErrors(userEntity, taskEntity.getTaskId(), subtaskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertNotFoundErrorResponse(responseError, CREATE_SUBTASK_PATH, "User with userId: '" + assignedTo + "' not found.");
                         });
     }
 
@@ -108,129 +101,6 @@ public class SubtaskCreationMutationControllerTest extends IntegrationTest {
                             assertValidationErrorResponse(responseError, new SourceLocation(1, 25),
                                     "Variable 'taskId' has an invalid value: Variable 'taskId' has coerced Null value for NonNull type 'UUID!'"
                             );
-                        });
-    }
-
-    @Test
-    public void whenCreateSubtaskWithoutSubtaskData_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
-
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(CREATE_SUBTASK)
-                .variable("taskId", taskEntity.getTaskId())
-                .execute()
-                .errors()
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertValidationErrorResponse(responseError, new SourceLocation(1, 41),
-                                    "Variable 'subtaskDTO' has an invalid value: Variable 'subtaskDTO' has coerced Null value for NonNull type 'TaskDTO!'"
-                            );
-                        });
-    }
-
-    @Test
-    public void whenCreateSubtaskWithoutTitle_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
-        TaskDTO subtaskDTO = new TaskDTO(null, null, null, null, null, null);
-
-        sendCreateSubtaskRequestWithErrors(userEntity, taskEntity.getTaskId(), subtaskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertValidationErrorResponse(responseError, new SourceLocation(1, 41),
-                                    "Variable 'subtaskDTO' has an invalid value: Field 'title' has coerced Null value for NonNull type 'String!'");
-                        });
-    }
-
-    @Test
-    public void whenCreateSubtaskWitBlankTitle_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
-        TaskDTO subtaskDTO = new TaskDTO("", null, null, null, null, null);
-
-        sendCreateSubtaskRequestWithErrors(userEntity, taskEntity.getTaskId(), subtaskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isEqualTo(2);
-                            ResponseError firstResponseError = responseErrors.getFirst();
-                            assertErrorResponse(firstResponseError, "Title cannot be empty.");
-                            ResponseError secondResponseError = responseErrors.getLast();
-                            assertErrorResponse(secondResponseError, "Title must be between 4 and 100 characters.");
-                        });
-    }
-
-    @Test
-    public void whenCreateSubtaskWitTooShortTitle_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
-        TaskDTO subtaskDTO = new TaskDTO("ti", null, null, null, null, null);
-
-        sendCreateSubtaskRequestWithErrors(userEntity, taskEntity.getTaskId(), subtaskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getLast();
-                            assertErrorResponse(responseError, "Title must be between 4 and 100 characters.");
-                        });
-    }
-
-    @Test
-    public void whenCreateSubtaskWitTooLongTitle_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
-        TaskDTO subtaskDTO = new TaskDTO(StringUtils.repeat("t", 101), null, null, null, null, null);
-
-        sendCreateSubtaskRequestWithErrors(userEntity, taskEntity.getTaskId(), subtaskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getLast();
-                            assertErrorResponse(responseError, "Title must be between 4 and 100 characters.");
-                        });
-    }
-
-    @Test
-    public void whenCreateSubtaskWitTooLongDescription_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
-        TaskDTO subtaskDTO = new TaskDTO("title", StringUtils.repeat("d", 1001), null, null, null, null);
-
-        sendCreateSubtaskRequestWithErrors(userEntity, taskEntity.getTaskId(), subtaskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getLast();
-                            assertErrorResponse(responseError, "Description must be between 0 and 1000 characters.");
-                        });
-    }
-
-    @Test
-    public void whenCreateSubtaskWitTargetEndDateInThePast_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity userEntity = createUser();
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
-        TaskDTO subtaskDTO = new TaskDTO("title", "description", null, null, LocalDate.of(2024, 1, 1), null);
-
-        sendCreateSubtaskRequestWithErrors(userEntity, taskEntity.getTaskId(), subtaskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getLast();
-                            assertErrorResponse(responseError, "Target end date cannot be in the past.");
                         });
     }
 
@@ -282,18 +152,6 @@ public class SubtaskCreationMutationControllerTest extends IntegrationTest {
                 .get();
     }
 
-    private GraphQlTester.Errors sendCreateSubtaskRequestWithErrors(UserEntity userEntity, UUID taskId, TaskDTO subtaskDTO) {
-        return httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(CREATE_SUBTASK)
-                .variable("taskId", taskId)
-                .variable("subtaskDTO", subtaskDTO)
-                .execute()
-                .errors();
-    }
-
     private void assertSubtaskResponse(SubtaskResponse subtaskResponse, UUID taskId, TaskDTO subtaskDTO, String createdBy) {
         assertSubtaskResponse(subtaskResponse, taskId, subtaskDTO, createdBy, createdBy, TaskStatus.READY_TO_START, TaskPriority.LOW);
     }
@@ -319,9 +177,5 @@ public class SubtaskCreationMutationControllerTest extends IntegrationTest {
         assertBaseTaskEntity(subtaskEntity, subtaskDTO, createdBy, assignedTo, subtaskStatus, subtaskPriority);
         assertThat(subtaskEntity.getSubtaskId()).isNotNull();
         assertThat(subtaskEntity.getTaskId()).isEqualTo(taskId);
-    }
-
-    private void assertErrorResponse(ResponseError responseError, String message) {
-        assertErrorResponse(responseError, message, CREATE_SUBTASK_PATH, new SourceLocation(2, 3));
     }
 }
