@@ -7,6 +7,7 @@ import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskRepository;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
+import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskRepository;
@@ -145,6 +146,64 @@ public class IntegrationTest {
         String authHeader = jwtConfigurationProperties.getAuthorizationType() + " " + token;
         headers.add(jwtConfigurationProperties.getAuthorizationHeader(), authHeader);
     }
+
+    protected void assertBaseTaskEntity(BaseTaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo,
+                                        TaskStatus taskStatus, TaskPriority taskPriority) {
+        assertThat(taskEntity).isNotNull();
+        assertThat(taskEntity.getTitle()).isEqualTo(taskDTO.getTitle());
+        assertThat(taskEntity.getStatus()).isEqualTo(taskStatus);
+        assertThat(taskEntity.getPriority()).isEqualTo(taskPriority);
+        assertThat(taskEntity.getTargetEndDate()).isEqualTo(taskDTO.getTargetEndDate());
+        assertThat(taskEntity.getAssignedTo()).isEqualTo(assignedTo);
+        assertThat(taskEntity.getCreatedOn()).isNotNull();
+        assertThat(taskEntity.getCreatedBy()).isEqualTo(createdBy);
+        assertThat(taskEntity.getUpdatedOn()).isNull();
+        assertThat(taskEntity.getUpdatedBy()).isNull();
+    }
+
+    protected void assertBaseTaskEntity(BaseTaskEntity taskEntity, BaseTaskEntity taskEntityAfterUpdate, UUID assignedTo) {
+        assertThat(taskEntityAfterUpdate).isNotNull();
+        assertThat(taskEntityAfterUpdate.getTitle()).isEqualTo(taskEntity.getTitle());
+        assertThat(taskEntityAfterUpdate.getStatus()).isEqualTo(taskEntity.getStatus());
+        assertThat(taskEntityAfterUpdate.getPriority()).isEqualTo(taskEntity.getPriority());
+        assertThat(taskEntityAfterUpdate.getTargetEndDate()).isEqualTo(taskEntity.getTargetEndDate());
+        assertThat(taskEntityAfterUpdate.getAssignedTo()).isEqualTo(assignedTo);
+        assertThat(taskEntityAfterUpdate.getCreatedOn().toEpochMilli()).isEqualTo(taskEntity.getCreatedOn().toEpochMilli());
+        assertThat(taskEntityAfterUpdate.getCreatedBy()).isEqualTo(taskEntity.getCreatedBy());
+        assertThat(taskEntityAfterUpdate.getUpdatedOn()).isAfter(taskEntity.getUpdatedOn());
+        assertThat(taskEntityAfterUpdate.getUpdatedBy()).isEqualTo(taskEntity.getUpdatedBy());
+    }
+
+    protected void assertBaseTaskResponse(BaseTaskResponse taskResponse, TaskDTO taskDTO, String createdBy, String assignedTo,
+                                          TaskStatus status, TaskPriority priority) {
+        assertThat(taskResponse).isNotNull();
+        assertThat(taskResponse.getTaskId()).isNotNull();
+        assertThat(taskResponse.getTitle()).isEqualTo(taskDTO.getTitle());
+        assertThat(taskResponse.getStatus()).isEqualTo(status);
+        assertThat(taskResponse.getPriority()).isEqualTo(priority);
+        assertThat(taskResponse.getTargetEndDate()).isEqualTo(taskDTO.getTargetEndDate());
+        assertThat(taskResponse.getAssignedTo()).isEqualTo(assignedTo);
+        assertThat(taskResponse.getCreatedOn()).isNotNull();
+        assertThat(taskResponse.getCreatedBy()).isEqualTo(createdBy);
+        assertThat(taskResponse.getUpdatedOn()).isNull();
+        assertThat(taskResponse.getUpdatedBy()).isNull();
+    }
+
+    protected void assertBaseTaskResponse(BaseTaskResponse taskResponse, TaskEntity taskEntity, TaskDTO taskDTO, String createdBy,
+                                          String updatedBy, String assignedTo, TaskStatus status, TaskPriority priority) {
+        assertThat(taskResponse).isNotNull();
+        assertThat(taskResponse.getTaskId()).isEqualTo(taskEntity.getTaskId());
+        assertThat(taskResponse.getTitle()).isEqualTo(taskDTO.getTitle());
+        assertThat(taskResponse.getStatus()).isEqualTo(status);
+        assertThat(taskResponse.getPriority()).isEqualTo(priority);
+        assertThat(taskResponse.getTargetEndDate()).isEqualTo(taskDTO.getTargetEndDate());
+        assertThat(taskResponse.getAssignedTo()).isEqualTo(assignedTo);
+        assertThat(Instant.parse(taskResponse.getCreatedOn()).toEpochMilli()).isEqualTo(taskEntity.getCreatedOn().toEpochMilli());
+        assertThat(taskResponse.getCreatedBy()).isEqualTo(createdBy);
+        assertThat(Instant.parse(taskResponse.getUpdatedOn()).toEpochMilli()).isEqualTo(taskEntity.getUpdatedOn().toEpochMilli());
+        assertThat(taskResponse.getUpdatedBy()).isEqualTo(updatedBy);
+    }
+
 
     private void assertBaseTaskResponse(BaseTaskResponse taskResponse, BaseTaskEntity taskEntity,
                                         String assignedTo, String createdBy, String updatedBy) {

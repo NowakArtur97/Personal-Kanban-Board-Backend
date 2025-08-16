@@ -301,18 +301,9 @@ public class SubtaskCreationMutationControllerTest extends IntegrationTest {
     private void assertSubtaskResponse(SubtaskResponse subtaskResponse, UUID taskId, TaskDTO subtaskDTO,
                                        String createdBy, String assignedTo,
                                        TaskStatus status, TaskPriority priority) {
-        assertThat(subtaskResponse).isNotNull();
+        assertBaseTaskResponse(subtaskResponse, subtaskDTO, createdBy, assignedTo, status, priority);
         assertThat(subtaskResponse.getSubtaskId()).isNotNull();
         assertThat(subtaskResponse.getTaskId()).isEqualTo(taskId);
-        assertThat(subtaskResponse.getTitle()).isEqualTo(subtaskDTO.getTitle());
-        assertThat(subtaskResponse.getStatus()).isEqualTo(status);
-        assertThat(subtaskResponse.getPriority()).isEqualTo(priority);
-        assertThat(subtaskResponse.getTargetEndDate()).isEqualTo(subtaskDTO.getTargetEndDate());
-        assertThat(subtaskResponse.getAssignedTo()).isEqualTo(assignedTo);
-        assertThat(subtaskResponse.getCreatedOn()).isNotNull();
-        assertThat(subtaskResponse.getCreatedBy()).isEqualTo(createdBy);
-        assertThat(subtaskResponse.getUpdatedOn()).isNull();
-        assertThat(subtaskResponse.getUpdatedBy()).isNull();
     }
 
     private void assertSubtaskEntity(SubtaskEntity subtaskEntity, UUID taskId, TaskDTO subtaskDTO, UUID createdBy) {
@@ -325,18 +316,9 @@ public class SubtaskCreationMutationControllerTest extends IntegrationTest {
 
     private void assertSubtaskEntity(SubtaskEntity subtaskEntity, UUID taskId, TaskDTO subtaskDTO, UUID createdBy, UUID assignedTo,
                                      TaskStatus subtaskStatus, TaskPriority subtaskPriority) {
-        assertThat(subtaskEntity).isNotNull();
+        assertBaseTaskEntity(subtaskEntity, subtaskDTO, createdBy, assignedTo, subtaskStatus, subtaskPriority);
         assertThat(subtaskEntity.getSubtaskId()).isNotNull();
         assertThat(subtaskEntity.getTaskId()).isEqualTo(taskId);
-        assertThat(subtaskEntity.getTitle()).isEqualTo(subtaskDTO.getTitle());
-        assertThat(subtaskEntity.getStatus()).isEqualTo(subtaskStatus);
-        assertThat(subtaskEntity.getPriority()).isEqualTo(subtaskPriority);
-        assertThat(subtaskEntity.getTargetEndDate()).isEqualTo(subtaskDTO.getTargetEndDate());
-        assertThat(subtaskEntity.getAssignedTo()).isEqualTo(assignedTo);
-        assertThat(subtaskEntity.getCreatedOn()).isNotNull();
-        assertThat(subtaskEntity.getCreatedBy()).isEqualTo(createdBy);
-        assertThat(subtaskEntity.getUpdatedOn()).isNull();
-        assertThat(subtaskEntity.getUpdatedBy()).isNull();
     }
 
     private void assertErrorResponse(ResponseError responseError, String message) {

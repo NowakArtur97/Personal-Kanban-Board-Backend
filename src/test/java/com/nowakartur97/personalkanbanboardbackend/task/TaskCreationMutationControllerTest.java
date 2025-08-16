@@ -1,6 +1,5 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
@@ -238,23 +237,15 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
                 .errors();
     }
 
-    private void assertTaskResponse(BaseTaskResponse taskResponse, TaskDTO taskDTO, String createdBy) {
+    private void assertTaskResponse(TaskResponse taskResponse, TaskDTO taskDTO, String createdBy) {
         assertTaskResponse(taskResponse, taskDTO, createdBy, createdBy, TaskStatus.READY_TO_START, TaskPriority.LOW);
     }
 
-    private void assertTaskResponse(BaseTaskResponse taskResponse, TaskDTO taskDTO, String createdBy, String assignedTo,
+    private void assertTaskResponse(TaskResponse taskResponse, TaskDTO taskDTO, String createdBy, String assignedTo,
                                     TaskStatus status, TaskPriority priority) {
-        assertThat(taskResponse).isNotNull();
+        assertBaseTaskResponse(taskResponse, taskDTO, createdBy, assignedTo, status, priority);
         assertThat(taskResponse.getTaskId()).isNotNull();
-        assertThat(taskResponse.getTitle()).isEqualTo(taskDTO.getTitle());
-        assertThat(taskResponse.getStatus()).isEqualTo(status);
-        assertThat(taskResponse.getPriority()).isEqualTo(priority);
-        assertThat(taskResponse.getTargetEndDate()).isEqualTo(taskDTO.getTargetEndDate());
-        assertThat(taskResponse.getAssignedTo()).isEqualTo(assignedTo);
-        assertThat(taskResponse.getCreatedOn()).isNotNull();
-        assertThat(taskResponse.getCreatedBy()).isEqualTo(createdBy);
-        assertThat(taskResponse.getUpdatedOn()).isNull();
-        assertThat(taskResponse.getUpdatedBy()).isNull();
+        assertThat(taskResponse.getSubtasks()).isNull();
     }
 
     private void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy) {
@@ -267,17 +258,8 @@ public class TaskCreationMutationControllerTest extends IntegrationTest {
 
     private void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo,
                                   TaskStatus taskStatus, TaskPriority taskPriority) {
-        assertThat(taskEntity).isNotNull();
+        assertBaseTaskEntity(taskEntity, taskDTO, createdBy, assignedTo, taskStatus, taskPriority);
         assertThat(taskEntity.getTaskId()).isNotNull();
-        assertThat(taskEntity.getTitle()).isEqualTo(taskDTO.getTitle());
-        assertThat(taskEntity.getStatus()).isEqualTo(taskStatus);
-        assertThat(taskEntity.getPriority()).isEqualTo(taskPriority);
-        assertThat(taskEntity.getTargetEndDate()).isEqualTo(taskDTO.getTargetEndDate());
-        assertThat(taskEntity.getAssignedTo()).isEqualTo(assignedTo);
-        assertThat(taskEntity.getCreatedOn()).isNotNull();
-        assertThat(taskEntity.getCreatedBy()).isEqualTo(createdBy);
-        assertThat(taskEntity.getUpdatedOn()).isNull();
-        assertThat(taskEntity.getUpdatedBy()).isNull();
     }
 
     private void assertErrorResponse(ResponseError responseError, String message) {
