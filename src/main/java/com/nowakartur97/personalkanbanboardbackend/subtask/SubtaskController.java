@@ -23,15 +23,11 @@ import java.util.UUID;
 public class SubtaskController extends BaseTaskController<SubtaskEntity, SubtaskResponse> {
 
     private final SubtaskService subtaskService;
-    private final SubtaskMapper subtaskMapper;
-    private final SubtaskValidator subtaskValidator;
 
     public SubtaskController(SubtaskService subtaskService, UserService userService, JWTUtil jwtUtil,
                              SubtaskMapper subtaskMapper, SubtaskValidator subtaskValidator) {
         super(subtaskService, userService, jwtUtil, subtaskMapper, subtaskValidator);
         this.subtaskService = subtaskService;
-        this.subtaskMapper = subtaskMapper;
-        this.subtaskValidator = subtaskValidator;
     }
 
     @SchemaMapping(typeName = "TaskResponse", field = "subtasks")
@@ -42,7 +38,12 @@ public class SubtaskController extends BaseTaskController<SubtaskEntity, Subtask
 
     @MutationMapping
     public Mono<SubtaskResponse> createSubtask(@Argument UUID taskId, @Argument @Valid TaskDTO subtaskDTO, DataFetchingEnvironment env) {
-        return createTask(taskId, subtaskDTO, env);
+        return create(taskId, subtaskDTO, env);
+    }
+
+    @MutationMapping
+    public Mono<SubtaskResponse> updateSubtask(@Argument UUID subtaskId, @Argument @Valid TaskDTO subtaskDTO, DataFetchingEnvironment env) {
+        return update(subtaskId, subtaskDTO, env);
     }
 
     @MutationMapping

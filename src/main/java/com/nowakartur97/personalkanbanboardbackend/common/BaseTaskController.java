@@ -87,7 +87,6 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
                 .flatMap(tuple -> Mono.just(mapper.updateEntity(tuple.getT1(), taskDTO, tuple.getT3().getUserId(), tuple.getT4().getUserId()))
                         .flatMap(service::update)
                         .map(task -> mapper.mapToResponse(task, tuple.getT2().getUsername(), tuple.getT3().getUsername(), tuple.getT4().getUsername())));
-
     }
 
     protected List<UUID> getUuidsFromTasksByProperty(List<E> tasks, Function<E, UUID> byProperty) {
