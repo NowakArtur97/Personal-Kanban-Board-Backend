@@ -12,7 +12,6 @@ import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.CREATE_TASK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public abstract class TaskMutationTest extends BasicIntegrationTest {
@@ -35,13 +34,7 @@ public abstract class TaskMutationTest extends BasicIntegrationTest {
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, assignedTo);
         TaskEntity taskEntity = createTask(userEntity.getUserId());
 
-        sendTaskRequestWithErrors(userEntity, taskDTO, taskEntity.getTaskId())
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertNotFoundErrorResponse(responseError, path, "User with userId: '" + assignedTo + "' not found.");
-                        });
+        assertNotFoundErrorResponse(sendTaskRequestWithErrors(userEntity, taskDTO, taskEntity.getTaskId()), "User with userId: '" + assignedTo + "' not found.");
     }
 
     @Test
@@ -49,21 +42,8 @@ public abstract class TaskMutationTest extends BasicIntegrationTest {
 
         UserEntity userEntity = createUser();
 
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(CREATE_TASK)
-                .execute()
-                .errors()
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertValidationErrorResponse(responseError, new SourceLocation(1, 22),
-                                    "Variable 'taskDTO' has an invalid value: Variable 'taskDTO' has coerced Null value for NonNull type 'TaskDTO!'"
-                            );
-                        });
+        assertResponseErrors(sendTaskRequestWithErrors(userEntity, null), new SourceLocation(1, sourceLocationColumn),
+                "Variable '" + taskDTOVariableName + "' has an invalid value: Variable '" + taskDTOVariableName + "' has coerced Null value for NonNull type 'TaskDTO!'");
     }
 
     @Test
@@ -72,14 +52,8 @@ public abstract class TaskMutationTest extends BasicIntegrationTest {
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO(null, null, null, null, null, null);
 
-        sendTaskRequestWithErrors(userEntity, taskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertValidationErrorResponse(responseError, new SourceLocation(1, sourceLocationColumn),
-                                    "Variable '" + taskDTOVariableName + "' has an invalid value: Field 'title' has coerced Null value for NonNull type 'String!'");
-                        });
+        assertResponseErrors(sendTaskRequestWithErrors(userEntity, taskDTO), new SourceLocation(1, sourceLocationColumn),
+                "Variable '" + taskDTOVariableName + "' has an invalid value: Field 'title' has coerced Null value for NonNull type 'String!'");
     }
 
     @Test
@@ -88,15 +62,7 @@ public abstract class TaskMutationTest extends BasicIntegrationTest {
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO("", null, null, null, null, null);
 
-        sendTaskRequestWithErrors(userEntity, taskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isEqualTo(2);
-                            ResponseError firstResponseError = responseErrors.getFirst();
-                            assertErrorResponse(firstResponseError, "Title cannot be empty.");
-                            ResponseError secondResponseError = responseErrors.getLast();
-                            assertErrorResponse(secondResponseError, "Title must be between 4 and 100 characters.");
-                        });
+        assertResponseErrors(sendTaskRequestWithErrors(userEntity, taskDTO), "Title cannot be empty.", "Title must be between 4 and 100 characters.");
     }
 
     @Test
@@ -105,13 +71,7 @@ public abstract class TaskMutationTest extends BasicIntegrationTest {
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO("ti", null, null, null, null, null);
 
-        sendTaskRequestWithErrors(userEntity, taskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getLast();
-                            assertErrorResponse(responseError, "Title must be between 4 and 100 characters.");
-                        });
+        assertResponseErrors(sendTaskRequestWithErrors(userEntity, taskDTO), "Title must be between 4 and 100 characters.");
     }
 
     @Test
@@ -120,13 +80,7 @@ public abstract class TaskMutationTest extends BasicIntegrationTest {
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO(StringUtils.repeat("t", 101), null, null, null, null, null);
 
-        sendTaskRequestWithErrors(userEntity, taskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getLast();
-                            assertErrorResponse(responseError, "Title must be between 4 and 100 characters.");
-                        });
+        assertResponseErrors(sendTaskRequestWithErrors(userEntity, taskDTO), "Title must be between 4 and 100 characters.");
     }
 
     @Test
@@ -135,13 +89,7 @@ public abstract class TaskMutationTest extends BasicIntegrationTest {
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO("title", StringUtils.repeat("d", 1001), null, null, null, null);
 
-        sendTaskRequestWithErrors(userEntity, taskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getLast();
-                            assertErrorResponse(responseError, "Description must be between 0 and 1000 characters.");
-                        });
+        assertResponseErrors(sendTaskRequestWithErrors(userEntity, taskDTO), "Description must be between 0 and 1000 characters.");
     }
 
     @Test
@@ -150,13 +98,7 @@ public abstract class TaskMutationTest extends BasicIntegrationTest {
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, LocalDate.of(2024, 1, 1), null);
 
-        sendTaskRequestWithErrors(userEntity, taskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getLast();
-                            assertErrorResponse(responseError, "Target end date cannot be in the past.");
-                        });
+        assertResponseErrors(sendTaskRequestWithErrors(userEntity, taskDTO), "Target end date cannot be in the past.");
     }
 
     private GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, TaskDTO taskDTO) {
@@ -164,18 +106,24 @@ public abstract class TaskMutationTest extends BasicIntegrationTest {
     }
 
     private GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, TaskDTO taskDTO, UUID taskId) {
-        return httpGraphQlTester
+        GraphQlTester.Request<?> request = httpGraphQlTester
                 .mutate()
                 .headers(headers -> addAuthorizationHeader(headers, userEntity))
                 .build()
                 .document(document)
-                .variable("taskId", taskId)
-                .variable(taskDTOVariableName, taskDTO)
-                .execute()
-                .errors();
+                .variable("taskId", taskId);
+        if (taskDTO != null) {
+            request = request.variable(taskDTOVariableName, taskDTO);
+        }
+        return request.execute().errors();
     }
 
-    private void assertErrorResponse(ResponseError responseError, String message) {
-        assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
+    protected void assertResponseErrors(GraphQlTester.Errors errors, SourceLocation sourceLocation, String message) {
+        errors.satisfy(
+                responseErrors -> {
+                    assertThat(responseErrors.size()).isOne();
+                    ResponseError responseError = responseErrors.getFirst();
+                    assertValidationErrorResponse(responseError, sourceLocation, message);
+                });
     }
 }
