@@ -72,15 +72,6 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
                 });
     }
 
-    @Test
-    public void whenLoginUsingInvalidCredentials_shouldReturnGraphQLErrorResponse() {
-
-        UserEntity user = createUser();
-        AuthenticationRequest authenticationRequest = new AuthenticationRequest(user.getUsername(), "incorrectPassword");
-
-        runTestForSendingRequestWithInvalidCredentials(AUTHENTICATE_USER, AUTHENTICATE_USER_PATH, "authenticationRequest", authenticationRequest);
-    }
-
     @ParameterizedTest
     @CsvSource({",password,usernameOrEmail", "username,,password"})
     public void whenLoginWithNullValues_shouldReturnGraphQLErrorResponse(String username, String password, String field) {

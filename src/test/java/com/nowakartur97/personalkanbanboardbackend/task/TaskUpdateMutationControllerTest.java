@@ -1,5 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
+import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.TaskMutationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
@@ -21,7 +22,9 @@ public class TaskUpdateMutationControllerTest extends TaskMutationTest {
     private final static String UPDATE_TASK_PATH = "updateTask";
 
     public TaskUpdateMutationControllerTest() {
-        super(UPDATE_TASK_PATH, UPDATE_TASK, "taskDTO", 38);
+        super(UPDATE_TASK_PATH, UPDATE_TASK,
+                new DoubleRequestVariable("taskId", UUID.randomUUID(), "taskDTO", new TaskDTO("title", "description", null, null, null, null)),
+                "taskDTO", 38);
     }
 
     @ParameterizedTest
@@ -111,38 +114,6 @@ public class TaskUpdateMutationControllerTest extends TaskMutationTest {
                                     "Variable 'taskId' has an invalid value: Variable 'taskId' has coerced Null value for NonNull type 'UUID!'"
                             );
                         });
-    }
-
-    @Test
-    public void whenUpdateTaskWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
-
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
-
-        runTestForSendingRequestWithoutProvidingAuthorizationHeader(UPDATE_TASK, UPDATE_TASK_PATH, "taskId", UUID.randomUUID(), "taskDTO", taskDTO);
-    }
-
-    @Test
-    public void whenUpdateTaskWithExpiredToken_shouldReturnGraphQLErrorResponse() {
-
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
-
-        runTestForSendingRequestWithExpiredToken(UPDATE_TASK, UPDATE_TASK_PATH, "taskId", UUID.randomUUID(), "taskDTO", taskDTO);
-    }
-
-    @Test
-    public void whenUpdateTaskWithInvalidToken_shouldReturnGraphQLErrorResponse() {
-
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
-
-        runTestForSendingRequestWithInvalidToken(UPDATE_TASK, UPDATE_TASK_PATH, "taskId", UUID.randomUUID(), "taskDTO", taskDTO);
-    }
-
-    @Test
-    public void whenUpdateTaskWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
-
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
-
-        runTestForSendingRequestWithDifferentTokenSignature(UPDATE_TASK, UPDATE_TASK_PATH, "taskId", UUID.randomUUID(), "taskDTO", taskDTO);
     }
 
     private TaskResponse sendUpdateTaskRequest(UserEntity userEntity, UUID taskId, TaskDTO taskDTO) {

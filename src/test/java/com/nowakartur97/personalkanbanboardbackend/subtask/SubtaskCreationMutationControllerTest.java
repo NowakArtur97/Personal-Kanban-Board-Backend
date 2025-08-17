@@ -1,5 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.subtask;
 
+import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.TaskMutationTest;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
@@ -24,7 +25,9 @@ public class SubtaskCreationMutationControllerTest extends TaskMutationTest {
     private final static String CREATE_SUBTASK_PATH = "createSubtask";
 
     public SubtaskCreationMutationControllerTest() {
-        super(CREATE_SUBTASK_PATH, CREATE_SUBTASK, "subtaskDTO", 41);
+        super(CREATE_SUBTASK_PATH, CREATE_SUBTASK,
+                new DoubleRequestVariable("taskId", UUID.randomUUID(), "subtaskDTO", new TaskDTO("title", "description", null, null, null, null)),
+                "subtaskDTO", 41);
     }
 
     @ParameterizedTest
@@ -102,38 +105,6 @@ public class SubtaskCreationMutationControllerTest extends TaskMutationTest {
                                     "Variable 'taskId' has an invalid value: Variable 'taskId' has coerced Null value for NonNull type 'UUID!'"
                             );
                         });
-    }
-
-    @Test
-    public void whenCreateSubtaskWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
-
-        TaskDTO subtaskDTO = new TaskDTO("title", "description", null, null, null, null);
-
-        runTestForSendingRequestWithoutProvidingAuthorizationHeader(CREATE_SUBTASK, CREATE_SUBTASK_PATH, "taskId", UUID.randomUUID(), "subtaskDTO", subtaskDTO);
-    }
-
-    @Test
-    public void whenCreateSubtaskWithExpiredToken_shouldReturnGraphQLErrorResponse() {
-
-        TaskDTO subtaskDTO = new TaskDTO("title", "description", null, null, null, null);
-
-        runTestForSendingRequestWithExpiredToken(CREATE_SUBTASK, CREATE_SUBTASK_PATH, "taskId", UUID.randomUUID(), "subtaskDTO", subtaskDTO);
-    }
-
-    @Test
-    public void whenCreateSubtaskWithInvalidToken_shouldReturnGraphQLErrorResponse() {
-
-        TaskDTO subtaskDTO = new TaskDTO("title", "description", null, null, null, null);
-
-        runTestForSendingRequestWithInvalidToken(CREATE_SUBTASK, CREATE_SUBTASK_PATH, "taskId", UUID.randomUUID(), "subtaskDTO", subtaskDTO);
-    }
-
-    @Test
-    public void whenCreateSubtaskWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
-
-        TaskDTO subtaskDTO = new TaskDTO("title", "description", null, null, null, null);
-
-        runTestForSendingRequestWithDifferentTokenSignature(CREATE_SUBTASK, CREATE_SUBTASK_PATH, "taskId", UUID.randomUUID(), "subtaskDTO", subtaskDTO);
     }
 
     private SubtaskResponse sendCreateSubtaskRequest(UserEntity userEntity, UUID taskId, TaskDTO subtaskDTO) {

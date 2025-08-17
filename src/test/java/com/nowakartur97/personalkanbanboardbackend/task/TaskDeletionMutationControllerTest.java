@@ -1,6 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.BasicIntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
@@ -14,9 +15,14 @@ import java.util.UUID;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_TASK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class TaskDeletionMutationControllerTest extends IntegrationTest {
+public class TaskDeletionMutationControllerTest extends BasicIntegrationTest {
 
     private final static String DELETE_TASK_PATH = "deleteTask";
+
+    public TaskDeletionMutationControllerTest() {
+        super(DELETE_TASK_PATH, DELETE_TASK,
+                new RequestVariable("taskId", UUID.randomUUID()));
+    }
 
     @ParameterizedTest
     @EnumSource(value = UserRole.class)
@@ -74,30 +80,6 @@ public class TaskDeletionMutationControllerTest extends IntegrationTest {
                                     "Variable 'taskId' has an invalid value: Variable 'taskId' has coerced Null value for NonNull type 'UUID!'"
                             );
                         });
-    }
-
-    @Test
-    public void whenDeleteTaskWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithoutProvidingAuthorizationHeader(DELETE_TASK, DELETE_TASK_PATH, "taskId", UUID.randomUUID());
-    }
-
-    @Test
-    public void whenDeleteTaskWithExpiredToken_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithExpiredToken(DELETE_TASK, DELETE_TASK_PATH, "taskId", UUID.randomUUID());
-    }
-
-    @Test
-    public void whenDeleteTaskWithInvalidToken_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithInvalidToken(DELETE_TASK, DELETE_TASK_PATH, "taskId", UUID.randomUUID());
-    }
-
-    @Test
-    public void whenDeleteTaskWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithDifferentTokenSignature(DELETE_TASK, DELETE_TASK_PATH, "taskId", UUID.randomUUID());
     }
 
     private void sendDeleteTaskRequest(UserEntity userEntity, UUID taskId) {

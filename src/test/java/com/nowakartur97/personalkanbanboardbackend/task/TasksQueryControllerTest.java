@@ -1,11 +1,10 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.BasicIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -14,9 +13,13 @@ import java.util.List;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.GET_TASKS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class TasksQueryControllerTest extends IntegrationTest {
+public class TasksQueryControllerTest extends BasicIntegrationTest {
 
     private final static String TASKS_PATH = "tasks";
+
+    public TasksQueryControllerTest() {
+        super(TASKS_PATH, GET_TASKS, null);
+    }
 
     @ParameterizedTest
     @EnumSource(value = UserRole.class)
@@ -62,37 +65,6 @@ public class TasksQueryControllerTest extends IntegrationTest {
         assertTaskResponse(taskResponse2, taskEntity2, author.getUsername(), assignedTo.getUsername(), updatedBy.getUsername());
         SubtaskResponse subtaskResponse2 = taskResponse2.getSubtasks().getFirst();
         assertSubtaskResponse(subtaskResponse2, subtaskEntity2, author.getUsername(), assignedTo.getUsername(), updatedBy.getUsername());
-    }
-
-    @Test
-    public void whenGetTasksByNotExistingUser_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithInvalidCredentials(GET_TASKS, TASKS_PATH,
-                jwtUtil.generateToken("notExistingUser", UserRole.USER.name()));
-    }
-
-    @Test
-    public void whenGetTasksWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithoutProvidingAuthorizationHeader(GET_TASKS, TASKS_PATH);
-    }
-
-    @Test
-    public void whenGetTasksWithExpiredToken_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithExpiredToken(GET_TASKS, TASKS_PATH);
-    }
-
-    @Test
-    public void whenGetTasksWithInvalidToken_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithInvalidToken(GET_TASKS, TASKS_PATH);
-    }
-
-    @Test
-    public void whenGetTasksWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithDifferentTokenSignature(GET_TASKS, TASKS_PATH);
     }
 
     private List<TaskResponse> sendGetTasksRequest(UserEntity userEntity) {

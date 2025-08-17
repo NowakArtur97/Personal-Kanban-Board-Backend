@@ -1,7 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.user;
 
-import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
-import org.junit.jupiter.api.Test;
+import com.nowakartur97.personalkanbanboardbackend.common.BasicIntegrationTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -10,9 +9,13 @@ import java.util.List;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.FIND_ALL_USERS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class UserQueryControllerTest extends IntegrationTest {
+public class UserQueryControllerTest extends BasicIntegrationTest {
 
     private final static String FIND_ALL_USERS_PATH = "users";
+
+    public UserQueryControllerTest() {
+        super(FIND_ALL_USERS_PATH, FIND_ALL_USERS, null);
+    }
 
     @ParameterizedTest
     @EnumSource(value = UserRole.class)
@@ -38,26 +41,6 @@ public class UserQueryControllerTest extends IntegrationTest {
         UserResponse secondUserResponse = usersResponse.getLast();
         assertUserResponse(firstUserResponse, userEntity);
         assertUserResponse(secondUserResponse, userEntity2);
-    }
-
-    @Test
-    public void whenFindAllUsersWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
-        runTestForSendingRequestWithoutProvidingAuthorizationHeader(FIND_ALL_USERS, FIND_ALL_USERS_PATH);
-    }
-
-    @Test
-    public void whenFindAllUsersWithExpiredToken_shouldReturnGraphQLErrorResponse() {
-        runTestForSendingRequestWithExpiredToken(FIND_ALL_USERS, FIND_ALL_USERS_PATH);
-    }
-
-    @Test
-    public void whenFindAllUsersWithInvalidToken_shouldReturnGraphQLErrorResponse() {
-        runTestForSendingRequestWithInvalidToken(FIND_ALL_USERS, FIND_ALL_USERS_PATH);
-    }
-
-    @Test
-    public void whenFindAllUsersWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
-        runTestForSendingRequestWithDifferentTokenSignature(FIND_ALL_USERS, FIND_ALL_USERS_PATH);
     }
 
     private void assertUserResponse(UserResponse userResponse, UserEntity userEntity) {

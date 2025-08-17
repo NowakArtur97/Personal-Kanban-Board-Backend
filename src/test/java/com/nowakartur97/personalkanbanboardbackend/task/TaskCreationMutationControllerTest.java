@@ -1,5 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
+import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.TaskMutationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
@@ -18,7 +19,9 @@ public class TaskCreationMutationControllerTest extends TaskMutationTest {
     private final static String CREATE_TASK_PATH = "createTask";
 
     public TaskCreationMutationControllerTest() {
-        super(CREATE_TASK_PATH, CREATE_TASK, "taskDTO", 22);
+        super(CREATE_TASK_PATH, CREATE_TASK,
+                new RequestVariable("taskDTO", new TaskDTO("title", "description", null, null, null, null)),
+                "taskDTO", 22);
     }
 
     @ParameterizedTest
@@ -46,38 +49,6 @@ public class TaskCreationMutationControllerTest extends TaskMutationTest {
 
         assertTaskEntity(taskRepository.findAll().blockLast(), taskDTO, userEntity.getUserId());
         assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername());
-    }
-
-    @Test
-    public void whenCreateTaskWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
-
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
-
-        runTestForSendingRequestWithoutProvidingAuthorizationHeader(CREATE_TASK, CREATE_TASK_PATH, "taskDTO", taskDTO);
-    }
-
-    @Test
-    public void whenCreateTaskWithExpiredToken_shouldReturnGraphQLErrorResponse() {
-
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
-
-        runTestForSendingRequestWithExpiredToken(CREATE_TASK, CREATE_TASK_PATH, "taskDTO", taskDTO);
-    }
-
-    @Test
-    public void whenCreateTaskWithInvalidToken_shouldReturnGraphQLErrorResponse() {
-
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
-
-        runTestForSendingRequestWithInvalidToken(CREATE_TASK, CREATE_TASK_PATH, "taskDTO", taskDTO);
-    }
-
-    @Test
-    public void whenCreateTaskWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
-
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
-
-        runTestForSendingRequestWithDifferentTokenSignature(CREATE_TASK, CREATE_TASK_PATH, "taskDTO", taskDTO);
     }
 
     private TaskResponse sendCreateTaskRequest(UserEntity userEntity, TaskDTO taskDTO) {

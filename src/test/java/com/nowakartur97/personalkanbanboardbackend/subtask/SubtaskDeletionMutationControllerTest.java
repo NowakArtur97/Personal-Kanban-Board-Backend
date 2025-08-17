@@ -1,6 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.subtask;
 
-import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.BasicIntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
@@ -15,9 +16,14 @@ import java.util.UUID;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_SUBTASK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class SubtaskDeletionMutationControllerTest extends IntegrationTest {
+public class SubtaskDeletionMutationControllerTest extends BasicIntegrationTest {
 
     private final static String DELETE_SUBTASK_PATH = "deleteSubtask";
+
+    public SubtaskDeletionMutationControllerTest() {
+        super(DELETE_SUBTASK_PATH, DELETE_SUBTASK,
+                new RequestVariable("subtaskId", UUID.randomUUID()));
+    }
 
     @ParameterizedTest
     @EnumSource(value = UserRole.class)
@@ -63,30 +69,6 @@ public class SubtaskDeletionMutationControllerTest extends IntegrationTest {
                                     "Variable 'subtaskId' has an invalid value: Variable 'subtaskId' has coerced Null value for NonNull type 'UUID!'"
                             );
                         });
-    }
-
-    @Test
-    public void whenDeleteSubtaskWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithoutProvidingAuthorizationHeader(DELETE_SUBTASK, DELETE_SUBTASK_PATH, "subtaskId", UUID.randomUUID());
-    }
-
-    @Test
-    public void whenDeleteSubtaskWithExpiredToken_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithExpiredToken(DELETE_SUBTASK, DELETE_SUBTASK_PATH, "subtaskId", UUID.randomUUID());
-    }
-
-    @Test
-    public void whenDeleteSubtaskWithInvalidToken_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithInvalidToken(DELETE_SUBTASK, DELETE_SUBTASK_PATH, "subtaskId", UUID.randomUUID());
-    }
-
-    @Test
-    public void whenDeleteSubtaskWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithDifferentTokenSignature(DELETE_SUBTASK, DELETE_SUBTASK_PATH, "subtaskId", UUID.randomUUID());
     }
 
     private void sendDeleteSubtaskRequest(UserEntity userEntity, UUID subtaskId) {

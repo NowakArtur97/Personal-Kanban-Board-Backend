@@ -1,6 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.BasicIntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
@@ -17,9 +18,14 @@ import java.util.UUID;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.GET_TASKS_ASSIGNED_TO;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class TasksAssignedToQueryControllerTest extends IntegrationTest {
+public class TasksAssignedToQueryControllerTest extends BasicIntegrationTest {
 
     private final static String TASKS_ASSIGNED_TO_PATH = "tasksAssignedTo";
+
+    public TasksAssignedToQueryControllerTest() {
+        super(TASKS_ASSIGNED_TO_PATH, GET_TASKS_ASSIGNED_TO,
+                new RequestVariable("assignedToId", UUID.randomUUID()));
+    }
 
     @ParameterizedTest
     @EnumSource(value = UserRole.class)
@@ -95,37 +101,6 @@ public class TasksAssignedToQueryControllerTest extends IntegrationTest {
                                     "Variable 'assignedToId' has an invalid value: Variable 'assignedToId' has coerced Null value for NonNull type 'UUID!'"
                             );
                         });
-    }
-
-    @Test
-    public void whenGetAllTasksAssignedToUserByNotExistingUser_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithInvalidCredentials(GET_TASKS_ASSIGNED_TO, TASKS_ASSIGNED_TO_PATH,
-                jwtUtil.generateToken("notExistingUser", UserRole.USER.name()), "assignedToId", UUID.randomUUID());
-    }
-
-    @Test
-    public void whenGetAllTasksAssignedToUserWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithoutProvidingAuthorizationHeader(GET_TASKS_ASSIGNED_TO, TASKS_ASSIGNED_TO_PATH, "assignedToId", UUID.randomUUID());
-    }
-
-    @Test
-    public void whenGetAllTasksAssignedToUserWithExpiredToken_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithExpiredToken(GET_TASKS_ASSIGNED_TO, TASKS_ASSIGNED_TO_PATH, "assignedToId", UUID.randomUUID());
-    }
-
-    @Test
-    public void whenGetAllTasksAssignedToUserWithInvalidToken_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithInvalidToken(GET_TASKS_ASSIGNED_TO, TASKS_ASSIGNED_TO_PATH, "assignedToId", UUID.randomUUID());
-    }
-
-    @Test
-    public void whenGetAllTasksAssignedToUserWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithDifferentTokenSignature(GET_TASKS_ASSIGNED_TO, TASKS_ASSIGNED_TO_PATH, "assignedToId", UUID.randomUUID());
     }
 
     private List<TaskResponse> sendGetAllTasksAssignedToUserRequest(UserEntity userEntity, UUID assignedToId) {

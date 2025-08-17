@@ -1,11 +1,9 @@
 package com.nowakartur97.personalkanbanboardbackend.common;
 
-import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import graphql.language.SourceLocation;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.test.tester.GraphQlTester;
@@ -17,13 +15,17 @@ import java.util.UUID;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.CREATE_TASK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@RequiredArgsConstructor
-public abstract class TaskMutationTest extends IntegrationTest {
+public abstract class TaskMutationTest extends BasicIntegrationTest {
 
-    private final String path;
-    private final String document;
     private final String taskDTOVariableName;
     private final int sourceLocationColumn;
+
+    protected TaskMutationTest(String path, String document, RequestVariable requestVariable,
+                               String taskDTOVariableName, int sourceLocationColumn) {
+        super(path, document, requestVariable);
+        this.taskDTOVariableName = taskDTOVariableName;
+        this.sourceLocationColumn = sourceLocationColumn;
+    }
 
     @Test
     public void whenMutateTaskForNotExistingUserAssignedTo_shouldReturnGraphQLErrorResponse() {

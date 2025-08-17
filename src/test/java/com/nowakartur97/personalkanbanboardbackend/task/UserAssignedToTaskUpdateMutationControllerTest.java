@@ -1,6 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.BasicIntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
@@ -15,9 +16,14 @@ import java.util.UUID;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.UPDATE_USER_ASSIGNED_TO_TASK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class UserAssignedToTaskUpdateMutationControllerTest extends IntegrationTest {
+public class UserAssignedToTaskUpdateMutationControllerTest extends BasicIntegrationTest {
 
     private final static String UPDATE_USER_ASSIGNED_TO_TASK_PATH = "updateUserAssignedToTask";
+
+    public UserAssignedToTaskUpdateMutationControllerTest() {
+        super(UPDATE_USER_ASSIGNED_TO_TASK_PATH, UPDATE_USER_ASSIGNED_TO_TASK,
+                new DoubleRequestVariable("taskId", UUID.randomUUID(), "assignedToId", UUID.randomUUID()));
+    }
 
     @ParameterizedTest
     @EnumSource(value = UserRole.class)
@@ -110,30 +116,6 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends IntegrationT
                                     "Variable 'assignedToId' has an invalid value: Variable 'assignedToId' has coerced Null value for NonNull type 'UUID!'"
                             );
                         });
-    }
-
-    @Test
-    public void whenUpdateUserAssignedToTaskWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithoutProvidingAuthorizationHeader(UPDATE_USER_ASSIGNED_TO_TASK, UPDATE_USER_ASSIGNED_TO_TASK_PATH, "taskId", UUID.randomUUID(), "assignedToId", UUID.randomUUID());
-    }
-
-    @Test
-    public void whenUpdateUserAssignedToTaskWithExpiredToken_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithExpiredToken(UPDATE_USER_ASSIGNED_TO_TASK, UPDATE_USER_ASSIGNED_TO_TASK_PATH, "taskId", UUID.randomUUID(), "assignedToId", UUID.randomUUID());
-    }
-
-    @Test
-    public void whenUpdateUserAssignedToTaskWithInvalidToken_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithInvalidToken(UPDATE_USER_ASSIGNED_TO_TASK, UPDATE_USER_ASSIGNED_TO_TASK_PATH, "taskId", UUID.randomUUID(), "assignedToId", UUID.randomUUID());
-    }
-
-    @Test
-    public void whenUpdateUserAssignedToTaskWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithDifferentTokenSignature(UPDATE_USER_ASSIGNED_TO_TASK, UPDATE_USER_ASSIGNED_TO_TASK_PATH, "taskId", UUID.randomUUID(), "assignedToId", UUID.randomUUID());
     }
 
     private TaskResponse sendUpdateUserAssignedToTaskRequest(UserEntity userEntity, UUID taskId, UUID assignedToId) {

@@ -4,6 +4,8 @@ import com.nowakartur97.personalkanbanboardbackend.auth.JWTConfigurationProperti
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
+import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskRepository;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
@@ -18,10 +20,12 @@ import com.nowakartur97.personalkanbanboardbackend.user.UserRepository;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.execution.ErrorType;
+import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.graphql.test.tester.HttpGraphQlTester;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -263,218 +267,58 @@ public class IntegrationTest {
         assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
     }
 
-    protected void runTestForSendingRequestWithInvalidCredentials(String document, String path,
-                                                                  String variableName, Object object) {
+    protected void runTestForSendingRequestWithInvalidCredentials(String document, String path, String token, RequestVariable requestVariable) {
 
-        httpGraphQlTester
-                .document(document)
-                .variable(variableName, object)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, path, "Invalid login credentials.");
-                });
+        sendRequestWithErrors(token, document, path, requestVariable, "Invalid login credentials.");
     }
 
-    protected void runTestForSendingRequestWithInvalidCredentials(String document, String path, String token) {
+    protected void runTestForSendingRequestWithoutProvidingAuthorizationHeader(String document, String path, RequestVariable requestVariable) {
 
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, token))
-                .build()
-                .document(document)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, path, "Invalid login credentials.");
-                });
+        sendRequestWithErrors(null, document, path, requestVariable, "Unauthorized");
     }
 
-    protected void runTestForSendingRequestWithInvalidCredentials(String document, String path, String token,
-                                                                  String variableName, Object object) {
-
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, token))
-                .build()
-                .document(document)
-                .variable(variableName, object)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, path, "Invalid login credentials.");
-                });
-    }
-
-    protected void runTestForSendingRequestWithoutProvidingAuthorizationHeader(String document, String path) {
-
-        httpGraphQlTester
-                .mutate()
-                .build()
-                .document(document)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, path, "Unauthorized");
-                });
-    }
-
-    protected void runTestForSendingRequestWithoutProvidingAuthorizationHeader(String document, String path,
-                                                                               String variableName, Object object) {
-        httpGraphQlTester
-                .mutate()
-                .build()
-                .document(document)
-                .variable(variableName, object)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, path, "Unauthorized");
-                });
-    }
-
-    protected void runTestForSendingRequestWithoutProvidingAuthorizationHeader(String document, String path,
-                                                                               String variableName, Object object,
-                                                                               String variableName2, Object object2) {
-        httpGraphQlTester
-                .mutate()
-                .build()
-                .document(document)
-                .variable(variableName, object)
-                .variable(variableName2, object2)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, path, "Unauthorized");
-                });
-    }
-
-    protected void runTestForSendingRequestWithExpiredToken(String document, String path) {
+    protected void runTestForSendingRequestWithExpiredToken(String document, String path, RequestVariable requestVariable) {
 
         String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidGVzdFVzZXIiLCJpYXQiOjE3MTEyNzg1ODAsImV4cCI6MTcxMTI3ODU4MH0.nouAgIkDaanTk0LX37HSRjM4SDZxqBqz1gDufnU2fzQ";
 
-        sendRequestWithJWTErrors(expiredToken, document, path, "JWT expired");
+        sendRequestWithErrors(expiredToken, document, path, requestVariable, "JWT expired");
     }
 
-    protected void runTestForSendingRequestWithExpiredToken(String document, String path, String variableName, Object object) {
-
-        String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidGVzdFVzZXIiLCJpYXQiOjE3MTEyNzg1ODAsImV4cCI6MTcxMTI3ODU4MH0.nouAgIkDaanTk0LX37HSRjM4SDZxqBqz1gDufnU2fzQ";
-
-        sendRequestWithJWTErrors(expiredToken, document, path, variableName, object, "JWT expired");
-    }
-
-    protected void runTestForSendingRequestWithExpiredToken(String document, String path, String variableName, Object object, String variableName2, Object object2) {
-
-        String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidGVzdFVzZXIiLCJpYXQiOjE3MTEyNzg1ODAsImV4cCI6MTcxMTI3ODU4MH0.nouAgIkDaanTk0LX37HSRjM4SDZxqBqz1gDufnU2fzQ";
-
-        sendRequestWithJWTErrors(expiredToken, document, path, variableName, object, variableName2, object2, "JWT expired");
-    }
-
-    protected void runTestForSendingRequestWithInvalidToken(String document, String path) {
+    protected void runTestForSendingRequestWithInvalidToken(String document, String path, RequestVariable requestVariable) {
 
         String invalidToken = "invalid";
 
-        sendRequestWithJWTErrors(invalidToken, document, path,
+        sendRequestWithErrors(invalidToken, document, path, requestVariable,
                 "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 0");
     }
 
-    protected void runTestForSendingRequestWithInvalidToken(String document, String path, String variableName, Object object) {
-
-        String invalidToken = "invalid";
-
-        sendRequestWithJWTErrors(invalidToken, document, path, variableName, object,
-                "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 0");
-    }
-
-    protected void runTestForSendingRequestWithInvalidToken(String document, String path, String variableName, Object object, String variableName2, Object object2) {
-
-        String invalidToken = "invalid";
-
-        sendRequestWithJWTErrors(invalidToken, document, path, variableName, object, variableName2, object2,
-                "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 0");
-    }
-
-    protected void runTestForSendingRequestWithDifferentTokenSignature(String document, String path) {
+    protected void runTestForSendingRequestWithDifferentTokenSignature(String document, String path, RequestVariable requestVariable) {
 
         String invalidToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidXNlciIsImlhdCI6MTcxMTIwOTEzMiwiZXhwIjoxNzExMjE5OTMyfQ.n-h8vIdov2voZhwNdqbmgiO44XjeCdAMzf7ddqufoXc";
 
-        sendRequestWithJWTErrors(invalidToken, document, path,
+        sendRequestWithErrors(invalidToken, document, path, requestVariable,
                 "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.");
     }
 
-    protected void runTestForSendingRequestWithDifferentTokenSignature(String document, String path, String variableName, Object object) {
+    private void sendRequestWithErrors(String token, String document, String path, RequestVariable requestVariable, String message) {
 
-        String invalidToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidXNlciIsImlhdCI6MTcxMTIwOTEzMiwiZXhwIjoxNzExMjE5OTMyfQ.n-h8vIdov2voZhwNdqbmgiO44XjeCdAMzf7ddqufoXc";
-
-        sendRequestWithJWTErrors(invalidToken, document, path, variableName, object,
-                "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.");
-    }
-
-    protected void runTestForSendingRequestWithDifferentTokenSignature(String document, String path, String variableName, Object object, String variableName2, Object object2) {
-
-        String invalidToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidXNlciIsImlhdCI6MTcxMTIwOTEzMiwiZXhwIjoxNzExMjE5OTMyfQ.n-h8vIdov2voZhwNdqbmgiO44XjeCdAMzf7ddqufoXc";
-
-        sendRequestWithJWTErrors(invalidToken, document, path, variableName, object, variableName2, object2,
-                "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.");
-    }
-
-    private void sendRequestWithJWTErrors(String token, String document, String path, String message) {
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, token))
-                .build()
-                .document(document)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, path, message);
-                });
-    }
-
-    private void sendRequestWithJWTErrors(String token, String document, String path,
-                                          String variableName, Object object,
-                                          String message) {
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, token))
-                .build()
-                .document(document)
-                .variable(variableName, object)
-                .execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, path, message);
-                });
-    }
-
-    private void sendRequestWithJWTErrors(String token, String document, String path,
-                                          String variableName, Object object,
-                                          String variableName2, Object object2,
-                                          String message) {
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, token))
-                .build()
-                .document(document)
-                .variable(variableName, object)
-                .variable(variableName2, object2)
-                .execute()
+        HttpGraphQlTester.Builder<?> builder = httpGraphQlTester
+                .mutate();
+        if (StringUtils.isNotBlank(token)) {
+            builder = builder.headers(headers -> addAuthorizationHeader(headers, token));
+        }
+        GraphQlTester.Request<?> requestDocument = builder.build().document(document);
+        GraphQlTester.Request<?> requestVar = requestDocument;
+        if (requestVariable instanceof DoubleRequestVariable) {
+            DoubleRequestVariable doubleRequestVariable = (DoubleRequestVariable) requestVariable;
+            requestVar = requestDocument
+                    .variable(requestVariable.getName(), requestVariable.getValue())
+                    .variable(doubleRequestVariable.getName2(), doubleRequestVariable.getValue2());
+        } else if (requestVariable != null) {
+            requestVar = requestDocument
+                    .variable(requestVariable.getName(), requestVariable.getValue());
+        }
+        requestVar.execute()
                 .errors()
                 .satisfy(responseErrors -> {
                     assertThat(responseErrors.size()).isOne();

@@ -1,6 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.BasicIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import org.junit.jupiter.api.Test;
@@ -9,9 +9,13 @@ import org.springframework.graphql.ResponseError;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_ALL_TASKS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class AllTasksDeletionMutationControllerTest extends IntegrationTest {
+public class AllTasksDeletionMutationControllerTest extends BasicIntegrationTest {
 
     private final static String DELETE_ALL_TASKS_PATH = "deleteAllTasks";
+
+    public AllTasksDeletionMutationControllerTest() {
+        super(DELETE_ALL_TASKS_PATH, DELETE_ALL_TASKS, null);
+    }
 
     @Test
     public void whenDeleteAllTasksByAdmin_shouldReturnEmptyResponse() {
@@ -54,30 +58,6 @@ public class AllTasksDeletionMutationControllerTest extends IntegrationTest {
                             ResponseError responseError = responseErrors.getFirst();
                             asserForbiddenErrorResponse(responseError, DELETE_ALL_TASKS_PATH, "Forbidden");
                         });
-    }
-
-    @Test
-    public void whenDeleteAllTasksWithoutProvidingAuthorizationHeader_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithoutProvidingAuthorizationHeader(DELETE_ALL_TASKS, DELETE_ALL_TASKS_PATH);
-    }
-
-    @Test
-    public void whenDeleteAllTasksWithExpiredToken_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithExpiredToken(DELETE_ALL_TASKS, DELETE_ALL_TASKS_PATH);
-    }
-
-    @Test
-    public void whenDeleteAllTasksWithInvalidToken_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithInvalidToken(DELETE_ALL_TASKS, DELETE_ALL_TASKS_PATH);
-    }
-
-    @Test
-    public void whenDeleteAllTasksWithDifferentTokenSignature_shouldReturnGraphQLErrorResponse() {
-
-        runTestForSendingRequestWithDifferentTokenSignature(DELETE_ALL_TASKS, DELETE_ALL_TASKS_PATH);
     }
 
     private void sendDeleteAllTasksRequest(UserEntity userEntity) {
