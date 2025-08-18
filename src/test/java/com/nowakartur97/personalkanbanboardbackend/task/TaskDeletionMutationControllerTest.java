@@ -1,7 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.common.BasicIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.TaskIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
@@ -15,13 +15,12 @@ import java.util.UUID;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_TASK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class TaskDeletionMutationControllerTest extends BasicIntegrationTest {
+public class TaskDeletionMutationControllerTest extends TaskIntegrationTest {
 
     private final static String DELETE_TASK_PATH = "deleteTask";
 
     public TaskDeletionMutationControllerTest() {
-        super(DELETE_TASK_PATH, DELETE_TASK,
-                new RequestVariable("taskId", UUID.randomUUID()));
+        super(DELETE_TASK_PATH, DELETE_TASK, new RequestVariable("taskId", UUID.randomUUID()));
     }
 
     @ParameterizedTest

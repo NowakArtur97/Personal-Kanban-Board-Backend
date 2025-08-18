@@ -1,7 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.common.BasicIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.TaskIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
@@ -15,7 +15,7 @@ import java.util.UUID;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.UPDATE_USER_ASSIGNED_TO_TASK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class UserAssignedToTaskUpdateMutationControllerTest extends BasicIntegrationTest {
+public class UserAssignedToTaskUpdateMutationControllerTest extends TaskIntegrationTest {
 
     private final static String UPDATE_USER_ASSIGNED_TO_TASK_PATH = "updateUserAssignedToTask";
 
@@ -124,7 +124,16 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends BasicIntegra
     }
 
     private void assertTaskEntity(TaskEntity taskEntity, TaskEntity taskEntityAfterUpdate, UUID assignedTo) {
-        assertBaseTaskEntity(taskEntity, taskEntityAfterUpdate, assignedTo);
+        assertThat(taskEntityAfterUpdate).isNotNull();
         assertThat(taskEntityAfterUpdate.getTaskId()).isEqualTo(taskEntity.getTaskId());
+        assertThat(taskEntityAfterUpdate.getTitle()).isEqualTo(taskEntity.getTitle());
+        assertThat(taskEntityAfterUpdate.getStatus()).isEqualTo(taskEntity.getStatus());
+        assertThat(taskEntityAfterUpdate.getPriority()).isEqualTo(taskEntity.getPriority());
+        assertThat(taskEntityAfterUpdate.getTargetEndDate()).isEqualTo(taskEntity.getTargetEndDate());
+        assertThat(taskEntityAfterUpdate.getAssignedTo()).isEqualTo(assignedTo);
+        assertThat(taskEntityAfterUpdate.getCreatedOn().toEpochMilli()).isEqualTo(taskEntity.getCreatedOn().toEpochMilli());
+        assertThat(taskEntityAfterUpdate.getCreatedBy()).isEqualTo(taskEntity.getCreatedBy());
+        assertThat(taskEntityAfterUpdate.getUpdatedOn()).isAfter(taskEntity.getUpdatedOn());
+        assertThat(taskEntityAfterUpdate.getUpdatedBy()).isEqualTo(taskEntity.getUpdatedBy());
     }
 }

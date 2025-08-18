@@ -1,6 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.common.BasicIntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.TaskIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import org.junit.jupiter.api.Test;
@@ -9,7 +9,7 @@ import org.springframework.graphql.test.tester.GraphQlTester;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_ALL_TASKS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class AllTasksDeletionMutationControllerTest extends BasicIntegrationTest {
+public class AllTasksDeletionMutationControllerTest extends TaskIntegrationTest {
 
     private final static String DELETE_ALL_TASKS_PATH = "deleteAllTasks";
 

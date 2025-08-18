@@ -1,7 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.subtask;
 
-import com.nowakartur97.personalkanbanboardbackend.common.BasicIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.TaskIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
@@ -16,7 +16,7 @@ import java.util.UUID;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_SUBTASK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class SubtaskDeletionMutationControllerTest extends BasicIntegrationTest {
+public class SubtaskDeletionMutationControllerTest extends TaskIntegrationTest {
 
     private final static String DELETE_SUBTASK_PATH = "deleteSubtask";
 

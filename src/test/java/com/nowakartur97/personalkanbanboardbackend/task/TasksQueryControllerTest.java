@@ -1,6 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.common.BasicIntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.TaskIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
@@ -13,7 +13,7 @@ import java.util.List;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.GET_TASKS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class TasksQueryControllerTest extends BasicIntegrationTest {
+public class TasksQueryControllerTest extends TaskIntegrationTest {
 
     private final static String TASKS_PATH = "tasks";
 
