@@ -4,7 +4,7 @@ import com.nowakartur97.personalkanbanboardbackend.common.BasicIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import org.junit.jupiter.api.Test;
-import org.springframework.graphql.ResponseError;
+import org.springframework.graphql.test.tester.GraphQlTester;
 
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_ALL_TASKS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -45,19 +45,14 @@ public class AllTasksDeletionMutationControllerTest extends BasicIntegrationTest
 
         UserEntity userEntity = createUser();
 
-        httpGraphQlTester
+        GraphQlTester.Errors errors = httpGraphQlTester
                 .mutate()
                 .headers(headers -> addAuthorizationHeader(headers, userEntity))
                 .build()
                 .document(DELETE_ALL_TASKS)
                 .execute()
-                .errors()
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            asserForbiddenErrorResponse(responseError, DELETE_ALL_TASKS_PATH, "Forbidden");
-                        });
+                .errors();
+        asserForbiddenErrorResponse(errors, DELETE_ALL_TASKS_PATH);
     }
 
     private void sendDeleteAllTasksRequest(UserEntity userEntity) {

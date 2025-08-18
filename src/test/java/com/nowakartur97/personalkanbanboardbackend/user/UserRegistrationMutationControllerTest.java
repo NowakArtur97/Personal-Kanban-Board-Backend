@@ -5,7 +5,6 @@ import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
@@ -44,18 +43,12 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
     @Test
     public void whenRegisterUserWithoutUserData_shouldReturnGraphQLErrorResponse() {
 
-        httpGraphQlTester
+        GraphQlTester.Errors errors = httpGraphQlTester
                 .document(REGISTER_USER)
                 .execute()
-                .errors()
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertValidationErrorResponse(responseError, new SourceLocation(1, 24),
-                                    "Variable 'userDTO' has an invalid value: Variable 'userDTO' has coerced Null value for NonNull type 'UserDTO!'"
-                            );
-                        });
+                .errors();
+        assertValidationErrorResponse(errors, new SourceLocation(1, 24),
+                "Variable 'userDTO' has an invalid value: Variable 'userDTO' has coerced Null value for NonNull type 'UserDTO!'");
     }
 
     @Test
@@ -64,13 +57,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
         UserEntity userEntity = createUser();
         UserDTO userDTO = new UserDTO(userEntity.getUsername(), "pass123", "email@domain.com");
 
-        sendRegisterUserRequestWithErrors(userDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertErrorResponse(responseError, "Username/email is already taken.");
-                        });
+        assertResponseErrors(sendRegisterUserRequestWithErrors(userDTO), REGISTER_USER_PATH, "Username/email is already taken.");
     }
 
     @ParameterizedTest
@@ -80,14 +67,8 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
         UserDTO userDTO = new UserDTO(username, password, email);
 
-        sendRegisterUserRequestWithErrors(userDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertValidationErrorResponse(responseError, new SourceLocation(1, 24),
-                                    "Variable 'userDTO' has an invalid value: Field '" + field + "' has coerced Null value for NonNull type 'String!'");
-                        });
+        assertValidationErrorResponse(sendRegisterUserRequestWithErrors(userDTO), new SourceLocation(1, 24),
+                "Variable 'userDTO' has an invalid value: Field '" + field + "' has coerced Null value for NonNull type 'String!'");
     }
 
     @Test
@@ -95,15 +76,8 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
         UserDTO userDTO = new UserDTO("", "pass123", "email@domain.com");
 
-        sendRegisterUserRequestWithErrors(userDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isEqualTo(2);
-                            ResponseError firstResponseError = responseErrors.getFirst();
-                            assertErrorResponse(firstResponseError, "Username cannot be empty.");
-                            ResponseError secondResponseError = responseErrors.getLast();
-                            assertErrorResponse(secondResponseError, "Username must be between 4 and 100 characters.");
-                        });
+        assertResponseErrors(sendRegisterUserRequestWithErrors(userDTO), REGISTER_USER_PATH,
+                "Username cannot be empty.", "Username must be between 4 and 100 characters.");
     }
 
     @Test
@@ -111,13 +85,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
         UserDTO userDTO = new UserDTO("u", "pass123", "email@domain.com");
 
-        sendRegisterUserRequestWithErrors(userDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertErrorResponse(responseError, "Username must be between 4 and 100 characters.");
-                        });
+        assertResponseErrors(sendRegisterUserRequestWithErrors(userDTO), REGISTER_USER_PATH, "Username must be between 4 and 100 characters.");
     }
 
     @Test
@@ -125,13 +93,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
         UserDTO userDTO = new UserDTO(StringUtils.repeat("u", 101), "pass123", "email@domain.com");
 
-        sendRegisterUserRequestWithErrors(userDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertErrorResponse(responseError, "Username must be between 4 and 100 characters.");
-                        });
+        assertResponseErrors(sendRegisterUserRequestWithErrors(userDTO), REGISTER_USER_PATH, "Username must be between 4 and 100 characters.");
     }
 
     @Test
@@ -139,13 +101,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
         UserDTO userDTO = new UserDTO("user", "", "email@domain.com");
 
-        sendRegisterUserRequestWithErrors(userDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertErrorResponse(responseError, "Password cannot be empty.");
-                        });
+        assertResponseErrors(sendRegisterUserRequestWithErrors(userDTO), REGISTER_USER_PATH, "Password cannot be empty.");
     }
 
     @Test
@@ -154,13 +110,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
         UserEntity userEntity = createUser();
         UserDTO userDTO = new UserDTO("user", "pass123", userEntity.getEmail());
 
-        sendRegisterUserRequestWithErrors(userDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertErrorResponse(responseError, "Username/email is already taken.");
-                        });
+        assertResponseErrors(sendRegisterUserRequestWithErrors(userDTO), REGISTER_USER_PATH, "Username/email is already taken.");
     }
 
     @Test
@@ -168,13 +118,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
         UserDTO userDTO = new UserDTO("user", "pass123", "");
 
-        sendRegisterUserRequestWithErrors(userDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertErrorResponse(responseError, "Email cannot be empty.");
-                        });
+        assertResponseErrors(sendRegisterUserRequestWithErrors(userDTO), REGISTER_USER_PATH, "Email cannot be empty.");
     }
 
     @Test
@@ -182,13 +126,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
 
         UserDTO userDTO = new UserDTO("user", "pass123", "invalid.com");
 
-        sendRegisterUserRequestWithErrors(userDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertErrorResponse(responseError, "Email must be a valid email address.");
-                        });
+        assertResponseErrors(sendRegisterUserRequestWithErrors(userDTO), REGISTER_USER_PATH, "Email must be a valid email address.");
     }
 
     private GraphQlTester.Errors sendRegisterUserRequestWithErrors(UserDTO userDTO) {
@@ -197,9 +135,5 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
                 .variable("userDTO", userDTO)
                 .execute()
                 .errors();
-    }
-
-    private void assertErrorResponse(ResponseError responseError, String message) {
-        assertErrorResponse(responseError, message, REGISTER_USER_PATH, new SourceLocation(2, 3));
     }
 }

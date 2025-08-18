@@ -8,7 +8,6 @@ import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.time.LocalDate;
@@ -83,13 +82,7 @@ public class TaskUpdateMutationControllerTest extends TaskMutationTest {
         UUID taskId = UUID.randomUUID();
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, UUID.randomUUID());
 
-        sendUpdateTaskRequestWithErrors(userEntity, taskId, taskDTO)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertNotFoundErrorResponse(responseError, UPDATE_TASK_PATH, "Task with taskId: '" + taskId + "' not found.");
-                        });
+        assertNotFoundErrorResponse(sendUpdateTaskRequestWithErrors(userEntity, taskId, taskDTO), path, "Task with taskId: '" + taskId + "' not found.");
     }
 
     @Test
@@ -98,22 +91,16 @@ public class TaskUpdateMutationControllerTest extends TaskMutationTest {
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
 
-        httpGraphQlTester
+        GraphQlTester.Errors errors = httpGraphQlTester
                 .mutate()
                 .headers(headers -> addAuthorizationHeader(headers, userEntity))
                 .build()
                 .document(UPDATE_TASK)
                 .variable("taskDTO", taskDTO)
                 .execute()
-                .errors()
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertValidationErrorResponse(responseError, new SourceLocation(1, 22),
-                                    "Variable 'taskId' has an invalid value: Variable 'taskId' has coerced Null value for NonNull type 'UUID!'"
-                            );
-                        });
+                .errors();
+        assertValidationErrorResponse(errors, new SourceLocation(1, 22),
+                "Variable 'taskId' has an invalid value: Variable 'taskId' has coerced Null value for NonNull type 'UUID!'");
     }
 
     private TaskResponse sendUpdateTaskRequest(UserEntity userEntity, UUID taskId, TaskDTO taskDTO) {
@@ -179,9 +166,5 @@ public class TaskUpdateMutationControllerTest extends TaskMutationTest {
         assertThat(taskEntity.getCreatedBy()).isEqualTo(createdBy);
         assertThat(taskEntity.getUpdatedOn()).isNotNull();
         assertThat(taskEntity.getUpdatedBy()).isEqualTo(updatedBy);
-    }
-
-    private void assertErrorResponse(ResponseError responseError, String message) {
-        assertErrorResponse(responseError, message, UPDATE_TASK_PATH, new SourceLocation(2, 3));
     }
 }

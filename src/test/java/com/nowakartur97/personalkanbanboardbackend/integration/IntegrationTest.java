@@ -42,7 +42,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @ActiveProfiles("h2")
 // TODO: test with Postgres test container
 //@ActiveProfiles("test-container")
-public class IntegrationTest {
+public abstract class IntegrationTest {
 
     @Autowired
     protected TaskRepository taskRepository;
@@ -208,7 +208,6 @@ public class IntegrationTest {
         assertThat(taskResponse.getUpdatedBy()).isEqualTo(updatedBy);
     }
 
-
     private void assertBaseTaskResponse(BaseTaskResponse taskResponse, BaseTaskEntity taskEntity,
                                         String assignedTo, String createdBy, String updatedBy) {
         assertThat(taskResponse).isNotNull();
@@ -239,32 +238,6 @@ public class IntegrationTest {
         assertBaseTaskResponse(subtaskResponse, subtaskEntity, createdBy, assignedTo, updatedBy);
         assertThat(subtaskResponse.getSubtaskId()).isEqualTo(subtaskEntity.getSubtaskId());
         assertThat(subtaskResponse.getTaskId()).isEqualTo(subtaskEntity.getTaskId());
-    }
-
-    protected void assertErrorResponse(ResponseError responseError, String message, String path, SourceLocation sourceLocation) {
-        assertThat(responseError.getMessage()).contains(message);
-        assertThat(responseError.getPath()).isEqualTo(path);
-        assertThat(responseError.getLocations()).isEqualTo(List.of(sourceLocation));
-    }
-
-    protected void assertValidationErrorResponse(ResponseError responseError, SourceLocation sourceLocation, String message) {
-        assertThat(responseError.getErrorType()).isEqualTo(graphql.ErrorType.ValidationError);
-        assertErrorResponse(responseError, message, "", sourceLocation);
-    }
-
-    protected void assertUnauthorizedErrorResponse(ResponseError responseError, String path, String message) {
-        assertThat(responseError.getErrorType()).isEqualTo(ErrorType.UNAUTHORIZED);
-        assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
-    }
-
-    protected void asserForbiddenErrorResponse(ResponseError responseError, String path, String message) {
-        assertThat(responseError.getErrorType()).isEqualTo(ErrorType.FORBIDDEN);
-        assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
-    }
-
-    protected void assertNotFoundErrorResponse(ResponseError responseError, String path, String message) {
-        assertThat(responseError.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
-        assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
     }
 
     protected void runTestForSendingRequestWithInvalidCredentials(String document, String path, String token, RequestVariable requestVariable) {
@@ -298,6 +271,79 @@ public class IntegrationTest {
 
         sendRequestWithErrors(invalidToken, document, path, requestVariable,
                 "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.");
+    }
+
+    protected void assertResponseErrors(GraphQlTester.Errors errors, String path, String message) {
+        errors.satisfy(
+                responseErrors -> {
+                    assertThat(responseErrors.size()).isOne();
+                    ResponseError responseError = responseErrors.getLast();
+                    assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
+                });
+    }
+
+    protected void assertResponseErrors(GraphQlTester.Errors errors, String path, String message, String message2) {
+        errors.satisfy(
+                responseErrors -> {
+                    assertThat(responseErrors.size()).isEqualTo(2);
+                    ResponseError firstResponseError = responseErrors.getFirst();
+                    assertErrorResponse(firstResponseError, message, path, new SourceLocation(2, 3));
+                    ResponseError secondResponseError = responseErrors.getLast();
+                    assertErrorResponse(secondResponseError, message2, path, new SourceLocation(2, 3));
+                });
+    }
+
+    private void assertErrorResponse(ResponseError responseError, String message, String path, SourceLocation sourceLocation) {
+        assertThat(responseError.getMessage()).contains(message);
+        assertThat(responseError.getPath()).isEqualTo(path);
+        assertThat(responseError.getLocations()).isEqualTo(List.of(sourceLocation));
+    }
+
+    protected void assertValidationErrorResponse(GraphQlTester.Errors errors, SourceLocation sourceLocation, String message) {
+        errors.satisfy(
+                responseErrors -> {
+                    assertThat(responseErrors.size()).isOne();
+                    ResponseError responseError = responseErrors.getFirst();
+                    assertValidationErrorResponse(responseError, sourceLocation, message);
+                });
+    }
+
+    private void assertValidationErrorResponse(ResponseError responseError, SourceLocation sourceLocation, String message) {
+        assertThat(responseError.getErrorType()).isEqualTo(graphql.ErrorType.ValidationError);
+        assertErrorResponse(responseError, message, "", sourceLocation);
+    }
+
+    private void assertUnauthorizedErrorResponse(ResponseError responseError, String path, String message) {
+        assertThat(responseError.getErrorType()).isEqualTo(ErrorType.UNAUTHORIZED);
+        assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
+    }
+
+    protected void asserForbiddenErrorResponse(GraphQlTester.Errors errors, String path) {
+        errors.satisfy(
+                responseErrors -> {
+                    assertThat(responseErrors.size()).isOne();
+                    ResponseError responseError = responseErrors.getFirst();
+                    asserForbiddenErrorResponse(responseError, path, "Forbidden");
+                });
+    }
+
+    private void asserForbiddenErrorResponse(ResponseError responseError, String path, String message) {
+        assertThat(responseError.getErrorType()).isEqualTo(ErrorType.FORBIDDEN);
+        assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
+    }
+
+    protected void assertNotFoundErrorResponse(GraphQlTester.Errors errors, String path, String message) {
+        errors.satisfy(
+                responseErrors -> {
+                    assertThat(responseErrors.size()).isOne();
+                    ResponseError responseError = responseErrors.getFirst();
+                    assertNotFoundErrorResponse(responseError, path, message);
+                });
+    }
+
+    private void assertNotFoundErrorResponse(ResponseError responseError, String path, String message) {
+        assertThat(responseError.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
+        assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
     }
 
     private void sendRequestWithErrors(String token, String document, String path, RequestVariable requestVariable, String message) {

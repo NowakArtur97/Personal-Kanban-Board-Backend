@@ -8,7 +8,6 @@ import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.util.UUID;
@@ -47,13 +46,8 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends BasicIntegra
         UserEntity userEntity = createUser();
         UUID taskId = UUID.randomUUID();
 
-        sendUpdateUserAssignedToTaskRequestWithErrors(userEntity, taskId, userEntity.getUserId())
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertNotFoundErrorResponse(responseError, UPDATE_USER_ASSIGNED_TO_TASK_PATH, "Task with taskId: '" + taskId + "' not found.");
-                        });
+        assertNotFoundErrorResponse(sendUpdateUserAssignedToTaskRequestWithErrors(userEntity, taskId, userEntity.getUserId()),
+                UPDATE_USER_ASSIGNED_TO_TASK_PATH, "Task with taskId: '" + taskId + "' not found.");
     }
 
     @Test
@@ -63,13 +57,8 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends BasicIntegra
         TaskEntity taskEntity = createTask(userEntity.getUserId());
         UUID assignedTo = UUID.randomUUID();
 
-        sendUpdateUserAssignedToTaskRequestWithErrors(userEntity, taskEntity.getTaskId(), assignedTo)
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertNotFoundErrorResponse(responseError, UPDATE_USER_ASSIGNED_TO_TASK_PATH, "User with userId: '" + assignedTo + "' not found.");
-                        });
+        assertNotFoundErrorResponse(sendUpdateUserAssignedToTaskRequestWithErrors(userEntity, taskEntity.getTaskId(), assignedTo),
+                UPDATE_USER_ASSIGNED_TO_TASK_PATH, "User with userId: '" + assignedTo + "' not found.");
     }
 
     @Test
@@ -77,22 +66,16 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends BasicIntegra
 
         UserEntity userEntity = createUser();
 
-        httpGraphQlTester
+        GraphQlTester.Errors errors = httpGraphQlTester
                 .mutate()
                 .headers(headers -> addAuthorizationHeader(headers, userEntity))
                 .build()
                 .document(UPDATE_USER_ASSIGNED_TO_TASK)
                 .variable("assignedToId", UUID.randomUUID())
                 .execute()
-                .errors()
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertValidationErrorResponse(responseError, new SourceLocation(1, 39),
-                                    "Variable 'taskId' has an invalid value: Variable 'taskId' has coerced Null value for NonNull type 'UUID!'"
-                            );
-                        });
+                .errors();
+        assertValidationErrorResponse(errors, new SourceLocation(1, 39),
+                "Variable 'taskId' has an invalid value: Variable 'taskId' has coerced Null value for NonNull type 'UUID!'");
     }
 
     @Test
@@ -100,22 +83,16 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends BasicIntegra
 
         UserEntity userEntity = createUser();
 
-        httpGraphQlTester
+        GraphQlTester.Errors errors = httpGraphQlTester
                 .mutate()
                 .headers(headers -> addAuthorizationHeader(headers, userEntity))
                 .build()
                 .document(UPDATE_USER_ASSIGNED_TO_TASK)
                 .variable("taskId", UUID.randomUUID())
                 .execute()
-                .errors()
-                .satisfy(
-                        responseErrors -> {
-                            assertThat(responseErrors.size()).isOne();
-                            ResponseError responseError = responseErrors.getFirst();
-                            assertValidationErrorResponse(responseError, new SourceLocation(1, 55),
-                                    "Variable 'assignedToId' has an invalid value: Variable 'assignedToId' has coerced Null value for NonNull type 'UUID!'"
-                            );
-                        });
+                .errors();
+        assertValidationErrorResponse(errors, new SourceLocation(1, 55),
+                "Variable 'assignedToId' has an invalid value: Variable 'assignedToId' has coerced Null value for NonNull type 'UUID!'");
     }
 
     private TaskResponse sendUpdateUserAssignedToTaskRequest(UserEntity userEntity, UUID taskId, UUID assignedToId) {
