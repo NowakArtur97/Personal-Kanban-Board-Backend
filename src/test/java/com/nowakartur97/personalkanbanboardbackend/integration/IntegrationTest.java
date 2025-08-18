@@ -140,11 +140,6 @@ public abstract class IntegrationTest {
                 .block();
     }
 
-    protected void addAuthorizationHeader(HttpHeaders headers, String token) {
-        String authHeader = jwtConfigurationProperties.getAuthorizationType() + " " + token;
-        headers.add(jwtConfigurationProperties.getAuthorizationHeader(), authHeader);
-    }
-
     protected void addAuthorizationHeader(HttpHeaders headers, UserEntity userEntity) {
         String token = jwtUtil.generateToken(userEntity.getUsername(), userEntity.getRole().name());
         String authHeader = jwtConfigurationProperties.getAuthorizationType() + " " + token;
@@ -242,26 +237,24 @@ public abstract class IntegrationTest {
 
     protected void runTestForSendingRequestWithInvalidCredentials(String document, String path, String token, RequestVariable requestVariable) {
 
-        sendRequestWithErrors(token, document, path, requestVariable, "Invalid login credentials.");
+        assertUnauthorizedErrorResponse(sendRequestWithErrors(token, document, requestVariable), path, "Invalid login credentials.");
     }
 
     protected void runTestForSendingRequestWithoutProvidingAuthorizationHeader(String document, String path, RequestVariable requestVariable) {
 
-        sendRequestWithErrors(null, document, path, requestVariable, "Unauthorized");
+        assertUnauthorizedErrorResponse(sendRequestWithErrors(null, document, requestVariable), path, "Unauthorized");
     }
 
     protected void runTestForSendingRequestWithExpiredToken(String document, String path, RequestVariable requestVariable) {
 
         String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidGVzdFVzZXIiLCJpYXQiOjE3MTEyNzg1ODAsImV4cCI6MTcxMTI3ODU4MH0.nouAgIkDaanTk0LX37HSRjM4SDZxqBqz1gDufnU2fzQ";
-
-        sendRequestWithErrors(expiredToken, document, path, requestVariable, "JWT expired");
+        assertUnauthorizedErrorResponse(sendRequestWithErrors(expiredToken, document, requestVariable), path, "JWT expired");
     }
 
     protected void runTestForSendingRequestWithInvalidToken(String document, String path, RequestVariable requestVariable) {
 
         String invalidToken = "invalid";
-
-        sendRequestWithErrors(invalidToken, document, path, requestVariable,
+        assertUnauthorizedErrorResponse(sendRequestWithErrors(invalidToken, document, requestVariable), path,
                 "Invalid compact JWT string: Compact JWSs must contain exactly 2 period characters, and compact JWEs must contain exactly 4.  Found: 0");
     }
 
@@ -269,7 +262,7 @@ public abstract class IntegrationTest {
 
         String invalidToken = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjpbIlVTRVIiXSwic3ViIjoidXNlciIsImlhdCI6MTcxMTIwOTEzMiwiZXhwIjoxNzExMjE5OTMyfQ.n-h8vIdov2voZhwNdqbmgiO44XjeCdAMzf7ddqufoXc";
 
-        sendRequestWithErrors(invalidToken, document, path, requestVariable,
+        assertUnauthorizedErrorResponse(sendRequestWithErrors(invalidToken, document, requestVariable), path,
                 "JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.");
     }
 
@@ -277,8 +270,8 @@ public abstract class IntegrationTest {
         errors.satisfy(
                 responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getLast();
-                    assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
+                    ResponseError responseError = responseErrors.getFirst();
+                    assertResponseError(responseError, message, path);
                 });
     }
 
@@ -287,13 +280,17 @@ public abstract class IntegrationTest {
                 responseErrors -> {
                     assertThat(responseErrors.size()).isEqualTo(2);
                     ResponseError firstResponseError = responseErrors.getFirst();
-                    assertErrorResponse(firstResponseError, message, path, new SourceLocation(2, 3));
+                    assertResponseError(firstResponseError, message, path);
                     ResponseError secondResponseError = responseErrors.getLast();
-                    assertErrorResponse(secondResponseError, message2, path, new SourceLocation(2, 3));
+                    assertResponseError(secondResponseError, message2, path);
                 });
     }
 
-    private void assertErrorResponse(ResponseError responseError, String message, String path, SourceLocation sourceLocation) {
+    private void assertResponseError(ResponseError responseError, String message, String path) {
+        assertResponseError(responseError, message, path, new SourceLocation(2, 3));
+    }
+
+    private void assertResponseError(ResponseError responseError, String message, String path, SourceLocation sourceLocation) {
         assertThat(responseError.getMessage()).contains(message);
         assertThat(responseError.getPath()).isEqualTo(path);
         assertThat(responseError.getLocations()).isEqualTo(List.of(sourceLocation));
@@ -304,54 +301,36 @@ public abstract class IntegrationTest {
                 responseErrors -> {
                     assertThat(responseErrors.size()).isOne();
                     ResponseError responseError = responseErrors.getFirst();
-                    assertValidationErrorResponse(responseError, sourceLocation, message);
+                    assertThat(responseError.getErrorType()).isEqualTo(graphql.ErrorType.ValidationError);
+                    assertResponseError(responseError, message, "", sourceLocation);
                 });
     }
 
-    private void assertValidationErrorResponse(ResponseError responseError, SourceLocation sourceLocation, String message) {
-        assertThat(responseError.getErrorType()).isEqualTo(graphql.ErrorType.ValidationError);
-        assertErrorResponse(responseError, message, "", sourceLocation);
-    }
-
-    private void assertUnauthorizedErrorResponse(ResponseError responseError, String path, String message) {
-        assertThat(responseError.getErrorType()).isEqualTo(ErrorType.UNAUTHORIZED);
-        assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
+    protected void assertUnauthorizedErrorResponse(GraphQlTester.Errors errors, String path, String message) {
+        errors.satisfy(responseErrors -> assertErrorResponse(path, message, responseErrors, ErrorType.UNAUTHORIZED));
     }
 
     protected void asserForbiddenErrorResponse(GraphQlTester.Errors errors, String path) {
-        errors.satisfy(
-                responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    asserForbiddenErrorResponse(responseError, path, "Forbidden");
-                });
-    }
-
-    private void asserForbiddenErrorResponse(ResponseError responseError, String path, String message) {
-        assertThat(responseError.getErrorType()).isEqualTo(ErrorType.FORBIDDEN);
-        assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
+        errors.satisfy(responseErrors -> assertErrorResponse(path, "Forbidden", responseErrors, ErrorType.FORBIDDEN));
     }
 
     protected void assertNotFoundErrorResponse(GraphQlTester.Errors errors, String path, String message) {
-        errors.satisfy(
-                responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertNotFoundErrorResponse(responseError, path, message);
-                });
+        errors.satisfy(responseErrors -> assertErrorResponse(path, message, responseErrors, ErrorType.NOT_FOUND));
     }
 
-    private void assertNotFoundErrorResponse(ResponseError responseError, String path, String message) {
-        assertThat(responseError.getErrorType()).isEqualTo(ErrorType.NOT_FOUND);
-        assertErrorResponse(responseError, message, path, new SourceLocation(2, 3));
+    private void assertErrorResponse(String path, String message, List<ResponseError> responseErrors, ErrorType errorType) {
+        assertThat(responseErrors.size()).isOne();
+        ResponseError responseError = responseErrors.getFirst();
+        assertThat(responseError.getErrorType()).isEqualTo(errorType);
+        assertResponseError(responseError, message, path);
     }
 
-    private void sendRequestWithErrors(String token, String document, String path, RequestVariable requestVariable, String message) {
-
+    protected GraphQlTester.Errors sendRequestWithErrors(String token, String document, RequestVariable requestVariable) {
         HttpGraphQlTester.Builder<?> builder = httpGraphQlTester
                 .mutate();
         if (StringUtils.isNotBlank(token)) {
-            builder = builder.headers(headers -> addAuthorizationHeader(headers, token));
+            String authHeader = jwtConfigurationProperties.getAuthorizationType() + " " + token;
+            builder.headers(headers -> headers.add(jwtConfigurationProperties.getAuthorizationHeader(), authHeader));
         }
         GraphQlTester.Request<?> requestDocument = builder.build().document(document);
         GraphQlTester.Request<?> requestVar = requestDocument;
@@ -364,12 +343,6 @@ public abstract class IntegrationTest {
             requestVar = requestDocument
                     .variable(requestVariable.getName(), requestVariable.getValue());
         }
-        requestVar.execute()
-                .errors()
-                .satisfy(responseErrors -> {
-                    assertThat(responseErrors.size()).isOne();
-                    ResponseError responseError = responseErrors.getFirst();
-                    assertUnauthorizedErrorResponse(responseError, path, message);
-                });
+        return requestVar.execute().errors();
     }
 }
