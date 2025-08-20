@@ -96,19 +96,8 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends TaskIntegrat
     }
 
     private TaskResponse sendUpdateUserAssignedToTaskRequest(UserEntity userEntity, UUID taskId, UUID assignedToId) {
-        return httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(UPDATE_USER_ASSIGNED_TO_TASK)
-                .variable("taskId", taskId)
-                .variable("assignedToId", assignedToId)
-                .execute()
-                .errors()
-                .verify()
-                .path(UPDATE_USER_ASSIGNED_TO_TASK_PATH)
-                .entity(TaskResponse.class)
-                .get();
+        DoubleRequestVariable doubleRequestVariable = new DoubleRequestVariable("taskId", taskId, "assignedToId", assignedToId);
+        return (TaskResponse) sendRequest(userEntity, document, path, doubleRequestVariable, TaskResponse.class, false);
     }
 
     private GraphQlTester.Errors sendUpdateUserAssignedToTaskRequestWithErrors(UserEntity userEntity, UUID taskId, UUID assignedToId) {

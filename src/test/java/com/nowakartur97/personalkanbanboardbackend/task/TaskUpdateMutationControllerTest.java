@@ -104,19 +104,8 @@ public class TaskUpdateMutationControllerTest extends TaskMutationTest {
     }
 
     private TaskResponse sendUpdateTaskRequest(UserEntity userEntity, UUID taskId, TaskDTO taskDTO) {
-        return httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(UPDATE_TASK)
-                .variable("taskId", taskId)
-                .variable("taskDTO", taskDTO)
-                .execute()
-                .errors()
-                .verify()
-                .path(UPDATE_TASK_PATH)
-                .entity(TaskResponse.class)
-                .get();
+        DoubleRequestVariable doubleRequestVariable = new DoubleRequestVariable("taskId", taskId, "taskDTO", taskDTO);
+        return (TaskResponse) sendRequest(userEntity, document, path, doubleRequestVariable, TaskResponse.class, false);
     }
 
     private GraphQlTester.Errors sendUpdateTaskRequestWithErrors(UserEntity userEntity, UUID taskId, TaskDTO taskDTO) {

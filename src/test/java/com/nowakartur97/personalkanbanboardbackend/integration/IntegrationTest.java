@@ -5,7 +5,6 @@ import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskRepository;
-import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRepository;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
@@ -204,7 +203,7 @@ public abstract class IntegrationTest {
                     .get();
         } else {
             return requestPath.
-                    entity(SubtaskResponse.class)
+                    entity(response)
                     .get();
         }
     }

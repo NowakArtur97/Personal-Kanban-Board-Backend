@@ -1,5 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.user;
 
+import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
@@ -19,16 +20,9 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
     public void whenRegisterUser_shouldReturnUserResponse() {
 
         UserDTO userDTO = new UserDTO("user123", "pass123", "user123@domain.com");
+        RequestVariable reqVariable = new RequestVariable("userDTO", userDTO);
 
-        UserResponse userResponse = httpGraphQlTester
-                .document(REGISTER_USER)
-                .variable("userDTO", userDTO)
-                .execute()
-                .errors()
-                .verify()
-                .path(REGISTER_USER_PATH)
-                .entity(UserResponse.class)
-                .get();
+        UserResponse userResponse = (UserResponse) sendRequest(null, REGISTER_USER, REGISTER_USER_PATH, reqVariable, UserResponse.class, false);
 
         assertThat(userResponse).isNotNull();
         assertThat(userResponse.userId()).isNotNull();

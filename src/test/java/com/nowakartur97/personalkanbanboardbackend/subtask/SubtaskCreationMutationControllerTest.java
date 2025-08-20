@@ -97,19 +97,8 @@ public class SubtaskCreationMutationControllerTest extends TaskMutationTest {
     }
 
     private SubtaskResponse sendCreateSubtaskRequest(UserEntity userEntity, UUID taskId, TaskDTO subtaskDTO) {
-        return httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(CREATE_SUBTASK)
-                .variable("taskId", taskId)
-                .variable("subtaskDTO", subtaskDTO)
-                .execute()
-                .errors()
-                .verify()
-                .path(CREATE_SUBTASK_PATH)
-                .entity(SubtaskResponse.class)
-                .get();
+        DoubleRequestVariable doubleRequestVariable = new DoubleRequestVariable("taskId", taskId, "subtaskDTO", subtaskDTO);
+        return (SubtaskResponse) sendRequest(userEntity, document, path, doubleRequestVariable, SubtaskResponse.class, false);
     }
 
     private void assertSubtaskResponse(SubtaskResponse subtaskResponse, UUID taskId, TaskDTO subtaskDTO, String createdBy) {

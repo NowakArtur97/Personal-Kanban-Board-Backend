@@ -1,5 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.user;
 
+import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
@@ -19,16 +20,9 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
 
         UserEntity userEntity = createUser();
         AuthenticationRequest authenticationRequest = new AuthenticationRequest(userEntity.getUsername(), "pass1");
+        RequestVariable requestVariable = new RequestVariable("authenticationRequest", authenticationRequest);
 
-        UserResponse userResponse = httpGraphQlTester
-                .document(AUTHENTICATE_USER)
-                .variable("authenticationRequest", authenticationRequest)
-                .execute()
-                .errors()
-                .verify()
-                .path(AUTHENTICATE_USER_PATH)
-                .entity(UserResponse.class)
-                .get();
+        UserResponse userResponse = (UserResponse) sendRequest(userEntity, AUTHENTICATE_USER, AUTHENTICATE_USER_PATH, requestVariable, UserResponse.class, false);
 
         assertThat(userResponse.userId()).isEqualTo(userEntity.getUserId());
         assertThat(userResponse.username()).isEqualTo(userEntity.getUsername());

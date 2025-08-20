@@ -52,18 +52,8 @@ public class TaskCreationMutationControllerTest extends TaskMutationTest {
     }
 
     private TaskResponse sendCreateTaskRequest(UserEntity userEntity, TaskDTO taskDTO) {
-        return httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(CREATE_TASK)
-                .variable("taskDTO", taskDTO)
-                .execute()
-                .errors()
-                .verify()
-                .path(CREATE_TASK_PATH)
-                .entity(TaskResponse.class)
-                .get();
+        RequestVariable reqVariable = new RequestVariable("taskDTO", taskDTO);
+        return (TaskResponse) sendRequest(userEntity, document, path, reqVariable, TaskResponse.class, false);
     }
 
     private void assertTaskResponse(TaskResponse taskResponse, TaskDTO taskDTO, String createdBy) {
