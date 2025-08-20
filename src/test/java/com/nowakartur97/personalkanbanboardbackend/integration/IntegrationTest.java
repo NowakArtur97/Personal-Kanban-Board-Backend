@@ -5,6 +5,7 @@ import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskRepository;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRepository;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
@@ -180,22 +181,43 @@ public abstract class IntegrationTest {
     }
 
     protected GraphQlTester.Errors sendRequestWithErrors(String token, String document, RequestVariable requestVariable) {
-        HttpGraphQlTester.Builder<?> builder = httpGraphQlTester
-                .mutate();
+        HttpGraphQlTester.Builder<?> builder = httpGraphQlTester.mutate();
         if (StringUtils.isNotBlank(token)) {
             String authHeader = jwtConfigurationProperties.getAuthorizationType() + " " + token;
             builder.headers(headers -> headers.add(jwtConfigurationProperties.getAuthorizationHeader(), authHeader));
         }
-        GraphQlTester.Request<?> requestDocument = builder.build().document(document);
-        GraphQlTester.Request<?> requestVar = requestDocument;
+        return prepareRequest(document, requestVariable, builder);
+    }
+
+    protected Object sendRequest(UserEntity userEntity, String document, String path, RequestVariable requestVariable,
+                                 Class response, boolean isEntityList) {
+        HttpGraphQlTester.Builder<?> builder = httpGraphQlTester.mutate();
+        if (userEntity != null) {
+            builder = builder.headers(headers -> addAuthorizationHeader(headers, userEntity));
+        }
+        GraphQlTester.Path requestPath = prepareRequest(document, requestVariable, builder)
+                .verify()
+                .path(path);
+        if (isEntityList) {
+            return requestPath
+                    .entityList(response)
+                    .get();
+        } else {
+            return requestPath.
+                    entity(SubtaskResponse.class)
+                    .get();
+        }
+    }
+
+    private GraphQlTester.Errors prepareRequest(String document, RequestVariable requestVariable, HttpGraphQlTester.Builder<?> builder) {
+        GraphQlTester.Request<?> requestVar = builder.build().document(document);
         if (requestVariable instanceof DoubleRequestVariable) {
             DoubleRequestVariable doubleRequestVariable = (DoubleRequestVariable) requestVariable;
-            requestVar = requestDocument
+            requestVar = requestVar
                     .variable(requestVariable.getName(), requestVariable.getValue())
                     .variable(doubleRequestVariable.getName2(), doubleRequestVariable.getValue2());
         } else if (requestVariable != null) {
-            requestVar = requestDocument
-                    .variable(requestVariable.getName(), requestVariable.getValue());
+            requestVar = requestVar.variable(requestVariable.getName(), requestVariable.getValue());
         }
         return requestVar.execute().errors();
     }

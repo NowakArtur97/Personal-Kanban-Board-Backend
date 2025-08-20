@@ -24,17 +24,7 @@ public class UserQueryControllerTest extends BasicIntegrationTest {
         UserEntity userEntity = createUser(role);
         UserEntity userEntity2 = createUser("developer", "developer@domain.com");
 
-        List<UserResponse> usersResponse = httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(FIND_ALL_USERS)
-                .execute()
-                .errors()
-                .verify()
-                .path(FIND_ALL_USERS_PATH)
-                .entityList(UserResponse.class)
-                .get();
+        List<UserResponse> usersResponse = (List<UserResponse>) sendRequest(userEntity, document, path, null, UserResponse.class, true);
 
         assertThat(usersResponse.size()).isEqualTo(2);
         UserResponse firstUserResponse = usersResponse.getFirst();

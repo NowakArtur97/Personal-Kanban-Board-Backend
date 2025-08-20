@@ -68,16 +68,6 @@ public class TasksQueryControllerTest extends TaskIntegrationTest {
     }
 
     private List<TaskResponse> sendGetTasksRequest(UserEntity userEntity) {
-        return httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(GET_TASKS)
-                .execute()
-                .errors()
-                .verify()
-                .path(TASKS_PATH)
-                .entityList(TaskResponse.class)
-                .get();
+        return (List<TaskResponse>) sendRequest(userEntity, document, path, null, TaskResponse.class, true);
     }
 }

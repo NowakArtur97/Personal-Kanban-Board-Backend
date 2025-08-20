@@ -97,17 +97,7 @@ public class TasksAssignedToQueryControllerTest extends TaskIntegrationTest {
     }
 
     private List<TaskResponse> sendGetAllTasksAssignedToUserRequest(UserEntity userEntity, UUID assignedToId) {
-        return httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(GET_TASKS_ASSIGNED_TO)
-                .variable("assignedToId", assignedToId)
-                .execute()
-                .errors()
-                .verify()
-                .path(TASKS_ASSIGNED_TO_PATH)
-                .entityList(TaskResponse.class)
-                .get();
+        RequestVariable reqVariable = new RequestVariable("assignedToId", assignedToId);
+        return (List<TaskResponse>) sendRequest(userEntity, document, path, reqVariable, TaskResponse.class, true);
     }
 }
