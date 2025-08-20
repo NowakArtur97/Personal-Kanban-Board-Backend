@@ -9,7 +9,6 @@ import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.util.UUID;
 
@@ -54,27 +53,12 @@ public class SubtaskDeletionMutationControllerTest extends TaskIntegrationTest {
 
         UserEntity userEntity = createUser();
 
-        GraphQlTester.Errors errors = httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(DELETE_SUBTASK)
-                .execute()
-                .errors();
-        assertValidationErrorResponse(errors, new SourceLocation(1, 25),
+        assertValidationErrorResponse(sendRequestWithErrors(userEntity, document, null), new SourceLocation(1, 25),
                 "Variable 'subtaskId' has an invalid value: Variable 'subtaskId' has coerced Null value for NonNull type 'UUID!'");
     }
 
     private void sendDeleteSubtaskRequest(UserEntity userEntity, UUID subtaskId) {
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(DELETE_SUBTASK)
-                .variable("subtaskId", subtaskId)
-                .execute()
-                .errors()
-                .verify()
-                .path(DELETE_SUBTASK_PATH);
+        RequestVariable reqVariable = new RequestVariable("subtaskId", subtaskId);
+        sendRequest(userEntity, document, path, reqVariable, null, false);
     }
 }

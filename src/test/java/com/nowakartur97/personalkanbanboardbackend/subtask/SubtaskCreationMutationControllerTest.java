@@ -1,6 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.subtask;
 
 import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.TaskMutationTest;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
@@ -12,7 +13,6 @@ import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -65,17 +65,9 @@ public class SubtaskCreationMutationControllerTest extends TaskMutationTest {
         UserEntity userEntity = createUser();
         UUID taskId = UUID.randomUUID();
         TaskDTO subtaskDTO = new TaskDTO("title", "description", null, null, null, UUID.randomUUID());
+        DoubleRequestVariable doubleRequestVariable = new DoubleRequestVariable("taskId", taskId, "subtaskDTO", subtaskDTO);
 
-        GraphQlTester.Errors errors = httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(CREATE_SUBTASK)
-                .variable("taskId", taskId)
-                .variable("subtaskDTO", subtaskDTO)
-                .execute()
-                .errors();
-        assertNotFoundErrorResponse(errors, path, "Task with taskId: '" + taskId + "' not found.");
+        assertNotFoundErrorResponse(sendRequestWithErrors(userEntity, document, doubleRequestVariable), path, "Task with taskId: '" + taskId + "' not found.");
     }
 
     @Test
@@ -83,16 +75,9 @@ public class SubtaskCreationMutationControllerTest extends TaskMutationTest {
 
         UserEntity userEntity = createUser();
         TaskDTO subtaskDTO = new TaskDTO("title", "description", null, null, null, null);
+        RequestVariable reqVariable = new RequestVariable("subtaskDTO", subtaskDTO);
 
-        GraphQlTester.Errors errors = httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(CREATE_SUBTASK)
-                .variable("taskDTO", subtaskDTO)
-                .execute()
-                .errors();
-        assertValidationErrorResponse(errors, new SourceLocation(1, 25),
+        assertValidationErrorResponse(sendRequestWithErrors(userEntity, document, reqVariable), new SourceLocation(1, 25),
                 "Variable 'taskId' has an invalid value: Variable 'taskId' has coerced Null value for NonNull type 'UUID!'");
     }
 

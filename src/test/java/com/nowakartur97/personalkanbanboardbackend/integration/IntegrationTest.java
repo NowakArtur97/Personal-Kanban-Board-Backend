@@ -96,7 +96,7 @@ public abstract class IntegrationTest {
 
     protected void runTestForSendingRequestWithoutProvidingAuthorizationHeader(String document, String path, RequestVariable requestVariable) {
 
-        assertUnauthorizedErrorResponse(sendRequestWithErrors(null, document, requestVariable), path, "Unauthorized");
+        assertUnauthorizedErrorResponse(sendRequestWithErrors(document, requestVariable), path, "Unauthorized");
     }
 
     protected void runTestForSendingRequestWithExpiredToken(String document, String path, RequestVariable requestVariable) {
@@ -179,24 +179,19 @@ public abstract class IntegrationTest {
         assertResponseError(responseError, message, path);
     }
 
-    protected GraphQlTester.Errors sendRequestWithErrors(String token, String document, RequestVariable requestVariable) {
-        HttpGraphQlTester.Builder<?> builder = httpGraphQlTester.mutate();
-        if (StringUtils.isNotBlank(token)) {
-            String authHeader = jwtConfigurationProperties.getAuthorizationType() + " " + token;
-            builder.headers(headers -> headers.add(jwtConfigurationProperties.getAuthorizationHeader(), authHeader));
-        }
-        return prepareRequest(document, requestVariable, builder);
-    }
-
     protected Object sendRequest(UserEntity userEntity, String document, String path, RequestVariable requestVariable,
                                  Class response, boolean isEntityList) {
         HttpGraphQlTester.Builder<?> builder = httpGraphQlTester.mutate();
         if (userEntity != null) {
             builder = builder.headers(headers -> addAuthorizationHeader(headers, userEntity));
         }
-        GraphQlTester.Path requestPath = prepareRequest(document, requestVariable, builder)
-                .verify()
+        GraphQlTester.Traversable verify = prepareRequest(document, requestVariable, builder)
+                .verify();
+        GraphQlTester.Path requestPath = verify
                 .path(path);
+        if (response == null) {
+            return null;
+        }
         if (isEntityList) {
             return requestPath
                     .entityList(response)
@@ -206,6 +201,24 @@ public abstract class IntegrationTest {
                     entity(response)
                     .get();
         }
+    }
+
+    protected GraphQlTester.Errors sendRequestWithErrors(String document, RequestVariable requestVariable) {
+        return prepareRequest(document, requestVariable, httpGraphQlTester.mutate());
+    }
+
+    protected GraphQlTester.Errors sendRequestWithErrors(String token, String document, RequestVariable requestVariable) {
+        HttpGraphQlTester.Builder<?> builder = httpGraphQlTester.mutate();
+        if (StringUtils.isNotBlank(token)) {
+            String authHeader = jwtConfigurationProperties.getAuthorizationType() + " " + token;
+            builder.headers(headers -> headers.add(jwtConfigurationProperties.getAuthorizationHeader(), authHeader));
+        }
+        return prepareRequest(document, requestVariable, builder);
+    }
+
+    protected GraphQlTester.Errors sendRequestWithErrors(UserEntity userEntity, String document, RequestVariable requestVariable) {
+        HttpGraphQlTester.Builder<?> builder = httpGraphQlTester.mutate().headers(headers -> addAuthorizationHeader(headers, userEntity));
+        return prepareRequest(document, requestVariable, builder);
     }
 
     private GraphQlTester.Errors prepareRequest(String document, RequestVariable requestVariable, HttpGraphQlTester.Builder<?> builder) {

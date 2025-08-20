@@ -1,6 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.TaskIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
@@ -31,8 +32,9 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends TaskIntegrat
         UserEntity userEntity = createUser(role);
         TaskEntity taskEntity = createTask(userEntity.getUserId(), userEntity.getUserId(), userEntity.getUserId());
         UserEntity assignedTo = createUser("developer", "developer@domain.com");
+        DoubleRequestVariable doubleRequestVariable = new DoubleRequestVariable("taskId", taskEntity.getTaskId(), "assignedToId", assignedTo.getUserId());
 
-        TaskResponse taskResponse = sendUpdateUserAssignedToTaskRequest(userEntity, taskEntity.getTaskId(), assignedTo.getUserId());
+        TaskResponse taskResponse = (TaskResponse) sendRequest(userEntity, document, path, doubleRequestVariable, TaskResponse.class, false);
 
         TaskEntity udatedTaskEntity = taskRepository.findAll().blockLast();
         assertTaskEntity(taskEntity, udatedTaskEntity, assignedTo.getUserId());
@@ -65,16 +67,9 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends TaskIntegrat
     public void whenUpdateUserAssignedToTaskWithoutTaskId_shouldReturnGraphQLErrorResponse() {
 
         UserEntity userEntity = createUser();
+        RequestVariable reqVariable = new RequestVariable("assignedToId", UUID.randomUUID());
 
-        GraphQlTester.Errors errors = httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(UPDATE_USER_ASSIGNED_TO_TASK)
-                .variable("assignedToId", UUID.randomUUID())
-                .execute()
-                .errors();
-        assertValidationErrorResponse(errors, new SourceLocation(1, 39),
+        assertValidationErrorResponse(sendRequestWithErrors(userEntity, document, reqVariable), new SourceLocation(1, 39),
                 "Variable 'taskId' has an invalid value: Variable 'taskId' has coerced Null value for NonNull type 'UUID!'");
     }
 
@@ -82,34 +77,15 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends TaskIntegrat
     public void whenUpdateUserAssignedToTaskWithoutAssignedToId_shouldReturnGraphQLErrorResponse() {
 
         UserEntity userEntity = createUser();
+        RequestVariable reqVariable = new RequestVariable("taskId", UUID.randomUUID());
 
-        GraphQlTester.Errors errors = httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(UPDATE_USER_ASSIGNED_TO_TASK)
-                .variable("taskId", UUID.randomUUID())
-                .execute()
-                .errors();
-        assertValidationErrorResponse(errors, new SourceLocation(1, 55),
+        assertValidationErrorResponse(sendRequestWithErrors(userEntity, document, reqVariable), new SourceLocation(1, 55),
                 "Variable 'assignedToId' has an invalid value: Variable 'assignedToId' has coerced Null value for NonNull type 'UUID!'");
     }
 
-    private TaskResponse sendUpdateUserAssignedToTaskRequest(UserEntity userEntity, UUID taskId, UUID assignedToId) {
-        DoubleRequestVariable doubleRequestVariable = new DoubleRequestVariable("taskId", taskId, "assignedToId", assignedToId);
-        return (TaskResponse) sendRequest(userEntity, document, path, doubleRequestVariable, TaskResponse.class, false);
-    }
-
     private GraphQlTester.Errors sendUpdateUserAssignedToTaskRequestWithErrors(UserEntity userEntity, UUID taskId, UUID assignedToId) {
-        return httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(UPDATE_USER_ASSIGNED_TO_TASK)
-                .variable("taskId", taskId)
-                .variable("assignedToId", assignedToId)
-                .execute()
-                .errors();
+        DoubleRequestVariable doubleRequestVariable = new DoubleRequestVariable("taskId", taskId, "assignedToId", assignedToId);
+        return sendRequestWithErrors(userEntity, document, doubleRequestVariable);
     }
 
     private void assertTaskEntity(TaskEntity taskEntity, TaskEntity taskEntityAfterUpdate, UUID assignedTo) {

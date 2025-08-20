@@ -8,7 +8,6 @@ import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.util.UUID;
 
@@ -64,27 +63,12 @@ public class TaskDeletionMutationControllerTest extends TaskIntegrationTest {
 
         UserEntity userEntity = createUser();
 
-        GraphQlTester.Errors errors = httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(DELETE_TASK)
-                .execute()
-                .errors();
-        assertValidationErrorResponse(errors, new SourceLocation(1, 22),
+        assertValidationErrorResponse(sendRequestWithErrors(userEntity, document, null), new SourceLocation(1, 22),
                 "Variable 'taskId' has an invalid value: Variable 'taskId' has coerced Null value for NonNull type 'UUID!'");
     }
 
     private void sendDeleteTaskRequest(UserEntity userEntity, UUID taskId) {
-        httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(DELETE_TASK)
-                .variable("taskId", taskId)
-                .execute()
-                .errors()
-                .verify()
-                .path(DELETE_TASK_PATH);
+        RequestVariable reqVariable = new RequestVariable("taskId", taskId);
+        sendRequest(userEntity, document, path, reqVariable, null, false);
     }
 }

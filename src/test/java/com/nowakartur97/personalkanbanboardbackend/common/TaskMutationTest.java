@@ -36,7 +36,7 @@ public abstract class TaskMutationTest extends TaskIntegrationTest {
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, assignedTo);
         TaskEntity taskEntity = createTask(userEntity.getUserId());
 
-        assertNotFoundErrorResponse(sendTaskRequestWithErrors(userEntity, taskDTO, taskEntity.getTaskId()), path, "User with userId: '" + assignedTo + "' not found.");
+        assertNotFoundErrorResponse(sendTaskRequestWithErrors(userEntity, taskEntity.getTaskId(), taskDTO), path, "User with userId: '" + assignedTo + "' not found.");
     }
 
     @Test
@@ -104,20 +104,12 @@ public abstract class TaskMutationTest extends TaskIntegrationTest {
     }
 
     private GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, TaskDTO taskDTO) {
-        return sendTaskRequestWithErrors(userEntity, taskDTO, UUID.randomUUID());
+        return sendTaskRequestWithErrors(userEntity, UUID.randomUUID(), taskDTO);
     }
 
-    private GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, TaskDTO taskDTO, UUID taskId) {
-        GraphQlTester.Request<?> request = httpGraphQlTester
-                .mutate()
-                .headers(headers -> addAuthorizationHeader(headers, userEntity))
-                .build()
-                .document(document)
-                .variable("taskId", taskId);
-        if (taskDTO != null) {
-            request = request.variable(taskDTOVariableName, taskDTO);
-        }
-        return request.execute().errors();
+    private GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, UUID taskId, TaskDTO taskDTO) {
+        RequestVariable reqVariable = new DoubleRequestVariable("taskId", taskId, taskDTOVariableName, taskDTO);
+        return sendRequestWithErrors(userEntity, document, reqVariable);
     }
 
     protected void assertBaseTaskEntity(BaseTaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo,

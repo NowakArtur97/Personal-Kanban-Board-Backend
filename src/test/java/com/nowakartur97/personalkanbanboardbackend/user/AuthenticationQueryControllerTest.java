@@ -6,7 +6,6 @@ import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.graphql.test.tester.GraphQlTester;
 
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.AUTHENTICATE_USER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -35,11 +34,7 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
     @Test
     public void whenLoginUserWithoutAuthenticationData_shouldReturnGraphQLErrorResponse() {
 
-        GraphQlTester.Errors errors = httpGraphQlTester
-                .document(AUTHENTICATE_USER)
-                .execute()
-                .errors();
-        assertValidationErrorResponse(errors, new SourceLocation(1, 25),
+        assertValidationErrorResponse(sendRequestWithErrors(AUTHENTICATE_USER, null), new SourceLocation(1, 25),
                 "Variable 'authenticationRequest' has an invalid value: Variable 'authenticationRequest' has coerced Null value for NonNull type 'AuthenticationRequest!'");
     }
 
@@ -47,13 +42,9 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
     public void whenLoginAsNotExistingUser_shouldReturnGraphQLErrorResponse() {
 
         AuthenticationRequest authenticationRequest = new AuthenticationRequest("notExistingUser", "pass1");
+        RequestVariable requestVariable = new RequestVariable("authenticationRequest", authenticationRequest);
 
-        GraphQlTester.Errors errors = httpGraphQlTester
-                .document(AUTHENTICATE_USER)
-                .variable("authenticationRequest", authenticationRequest)
-                .execute()
-                .errors();
-        assertNotFoundErrorResponse(errors, AUTHENTICATE_USER_PATH, "User with username/email: 'notExistingUser' not found.");
+        assertNotFoundErrorResponse(sendRequestWithErrors(AUTHENTICATE_USER, requestVariable), AUTHENTICATE_USER_PATH, "User with username/email: 'notExistingUser' not found.");
     }
 
     @ParameterizedTest
@@ -61,13 +52,9 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
     public void whenLoginWithNullValues_shouldReturnGraphQLErrorResponse(String username, String password, String field) {
 
         AuthenticationRequest authenticationRequest = new AuthenticationRequest(username, password);
+        RequestVariable requestVariable = new RequestVariable("authenticationRequest", authenticationRequest);
 
-        GraphQlTester.Errors errors = httpGraphQlTester
-                .document(AUTHENTICATE_USER)
-                .variable("authenticationRequest", authenticationRequest)
-                .execute()
-                .errors();
-        assertValidationErrorResponse(errors, new SourceLocation(1, 25),
+        assertValidationErrorResponse(sendRequestWithErrors(AUTHENTICATE_USER, requestVariable), new SourceLocation(1, 25),
                 "Variable 'authenticationRequest' has an invalid value: Field '" + field + "' has coerced Null value for NonNull type 'String!'");
     }
 }

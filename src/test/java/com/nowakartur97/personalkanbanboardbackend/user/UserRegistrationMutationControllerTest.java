@@ -37,11 +37,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
     @Test
     public void whenRegisterUserWithoutUserData_shouldReturnGraphQLErrorResponse() {
 
-        GraphQlTester.Errors errors = httpGraphQlTester
-                .document(REGISTER_USER)
-                .execute()
-                .errors();
-        assertValidationErrorResponse(errors, new SourceLocation(1, 24),
+        assertValidationErrorResponse(sendRequestWithErrors(REGISTER_USER, null), new SourceLocation(1, 24),
                 "Variable 'userDTO' has an invalid value: Variable 'userDTO' has coerced Null value for NonNull type 'UserDTO!'");
     }
 
@@ -124,10 +120,7 @@ public class UserRegistrationMutationControllerTest extends IntegrationTest {
     }
 
     private GraphQlTester.Errors sendRegisterUserRequestWithErrors(UserDTO userDTO) {
-        return httpGraphQlTester
-                .document(REGISTER_USER)
-                .variable("userDTO", userDTO)
-                .execute()
-                .errors();
+        RequestVariable requestVariable = new RequestVariable("userDTO", userDTO);
+        return sendRequestWithErrors(REGISTER_USER, requestVariable);
     }
 }
