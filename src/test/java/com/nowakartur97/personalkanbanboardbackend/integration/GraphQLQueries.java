@@ -149,6 +149,25 @@ public class GraphQLQueries {
             }
             """;
 
+    public static final String UPDATE_SUBTASK = """
+            mutation UPDATE_SUBTASK($subtaskId: UUID!, $subtaskDTO: TaskDTO!) {
+              updateSubtask(subtaskId: $subtaskId, subtaskDTO: $subtaskDTO) {
+                subtaskId
+                taskId
+                title
+                description
+                priority
+                status
+                targetEndDate
+                assignedTo
+                createdOn
+                createdBy
+                updatedOn
+                updatedBy
+              }
+            }
+            """;
+
     public static final String DELETE_SUBTASK = """
             mutation DELETE_SUBTASK($subtaskId: UUID!) {
               deleteSubtask(subtaskId: $subtaskId)
