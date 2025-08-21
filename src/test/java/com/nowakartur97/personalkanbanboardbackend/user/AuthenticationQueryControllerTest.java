@@ -47,6 +47,16 @@ public class AuthenticationQueryControllerTest extends IntegrationTest {
         assertNotFoundErrorResponse(sendRequestWithErrors(AUTHENTICATE_USER, requestVariable), AUTHENTICATE_USER_PATH, "User with username/email: 'notExistingUser' not found.");
     }
 
+    @Test
+    public void whenLoginUsingInvalidLoginCredentials_shouldReturnGraphQLErrorResponse() {
+
+        UserEntity userEntity = createUser();
+        AuthenticationRequest authenticationRequest = new AuthenticationRequest(userEntity.getUsername(), "incorrectPassword");
+        RequestVariable requestVariable = new RequestVariable("authenticationRequest", authenticationRequest);
+
+        assertUnauthorizedErrorResponse(sendRequestWithErrors(AUTHENTICATE_USER, requestVariable), AUTHENTICATE_USER_PATH, "Invalid login credentials.");
+    }
+
     @ParameterizedTest
     @CsvSource({",password,usernameOrEmail", "username,,password"})
     public void whenLoginWithNullValues_shouldReturnGraphQLErrorResponse(String username, String password, String field) {
