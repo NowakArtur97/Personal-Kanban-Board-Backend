@@ -9,6 +9,7 @@ import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -22,8 +23,8 @@ public class TaskUpdateMutationControllerTest extends TaskMutationTest {
 
     public TaskUpdateMutationControllerTest() {
         super(UPDATE_TASK_PATH, UPDATE_TASK,
-                new DoubleRequestVariable("taskId", UUID.randomUUID(), "taskDTO", new TaskDTO("title", "description", null, null, null, null)),
-                "taskDTO", 38);
+                new DoubleRequestVariable("taskDTO", new TaskDTO("title", "description", null, null, null, null),
+                        "taskId", UUID.randomUUID()), 38);
     }
 
     @ParameterizedTest
@@ -113,6 +114,7 @@ public class TaskUpdateMutationControllerTest extends TaskMutationTest {
     private void assertTaskResponse(TaskResponse taskResponse, TaskEntity taskEntity, TaskDTO taskDTO, String createdBy,
                                     String updatedBy, String assignedTo, TaskStatus status, TaskPriority priority) {
         assertBaseTaskResponse(taskResponse, taskEntity, taskDTO, createdBy, updatedBy, assignedTo, status, priority);
+        assertThat(taskResponse.getTaskId()).isEqualTo(taskEntity.getTaskId());
         assertThat(taskResponse.getSubtasks()).isNull();
     }
 
@@ -137,5 +139,12 @@ public class TaskUpdateMutationControllerTest extends TaskMutationTest {
         assertThat(taskEntity.getCreatedBy()).isEqualTo(createdBy);
         assertThat(taskEntity.getUpdatedOn()).isNotNull();
         assertThat(taskEntity.getUpdatedBy()).isEqualTo(updatedBy);
+    }
+
+    @Override
+    protected GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, TaskDTO taskDTO) {
+        UUID taskId = createTask(userEntity.getUserId()).getTaskId();
+        DoubleRequestVariable doubleRequestVariable = new DoubleRequestVariable(requestVariable.getName(), taskDTO, "taskId", taskId);
+        return sendRequestWithErrors(userEntity, document, doubleRequestVariable);
     }
 }

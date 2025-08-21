@@ -1,7 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.common;
 
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
-import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
@@ -18,13 +17,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public abstract class TaskMutationTest extends TaskIntegrationTest {
 
-    private final String taskDTOVariableName;
     private final int sourceLocationColumn;
 
-    protected TaskMutationTest(String path, String document, RequestVariable requestVariable,
-                               String taskDTOVariableName, int sourceLocationColumn) {
+    protected TaskMutationTest(String path, String document, RequestVariable requestVariable, int sourceLocationColumn) {
         super(path, document, requestVariable);
-        this.taskDTOVariableName = taskDTOVariableName;
         this.sourceLocationColumn = sourceLocationColumn;
     }
 
@@ -34,9 +30,8 @@ public abstract class TaskMutationTest extends TaskIntegrationTest {
         UserEntity userEntity = createUser();
         UUID assignedTo = UUID.randomUUID();
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, assignedTo);
-        TaskEntity taskEntity = createTask(userEntity.getUserId());
 
-        assertNotFoundErrorResponse(sendTaskRequestWithErrors(userEntity, taskEntity.getTaskId(), taskDTO), path, "User with userId: '" + assignedTo + "' not found.");
+        assertNotFoundErrorResponse(sendTaskRequestWithErrors(userEntity, taskDTO), path, "User with userId: '" + assignedTo + "' not found.");
     }
 
     @Test
@@ -45,7 +40,7 @@ public abstract class TaskMutationTest extends TaskIntegrationTest {
         UserEntity userEntity = createUser();
 
         assertValidationErrorResponse(sendTaskRequestWithErrors(userEntity, null), new SourceLocation(1, sourceLocationColumn),
-                "Variable '" + taskDTOVariableName + "' has an invalid value: Variable '" + taskDTOVariableName + "' has coerced Null value for NonNull type 'TaskDTO!'");
+                "Variable '" + requestVariable.getName() + "' has an invalid value: Variable '" + requestVariable.getName() + "' has coerced Null value for NonNull type 'TaskDTO!'");
     }
 
     @Test
@@ -55,7 +50,7 @@ public abstract class TaskMutationTest extends TaskIntegrationTest {
         TaskDTO taskDTO = new TaskDTO(null, null, null, null, null, null);
 
         assertValidationErrorResponse(sendTaskRequestWithErrors(userEntity, taskDTO), new SourceLocation(1, sourceLocationColumn),
-                "Variable '" + taskDTOVariableName + "' has an invalid value: Field 'title' has coerced Null value for NonNull type 'String!'");
+                "Variable '" + requestVariable.getName() + "' has an invalid value: Field 'title' has coerced Null value for NonNull type 'String!'");
     }
 
     @Test
@@ -103,14 +98,7 @@ public abstract class TaskMutationTest extends TaskIntegrationTest {
         assertResponseErrors(sendTaskRequestWithErrors(userEntity, taskDTO), path, "Target end date cannot be in the past.");
     }
 
-    private GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, TaskDTO taskDTO) {
-        return sendTaskRequestWithErrors(userEntity, UUID.randomUUID(), taskDTO);
-    }
-
-    private GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, UUID taskId, TaskDTO taskDTO) {
-        RequestVariable reqVariable = new DoubleRequestVariable("taskId", taskId, taskDTOVariableName, taskDTO);
-        return sendRequestWithErrors(userEntity, document, reqVariable);
-    }
+    protected abstract GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, TaskDTO taskDTO);
 
     protected void assertBaseTaskEntity(BaseTaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo,
                                         TaskStatus taskStatus, TaskPriority taskPriority) {
@@ -141,10 +129,9 @@ public abstract class TaskMutationTest extends TaskIntegrationTest {
         assertThat(taskResponse.getUpdatedBy()).isNull();
     }
 
-    protected void assertBaseTaskResponse(BaseTaskResponse taskResponse, TaskEntity taskEntity, TaskDTO taskDTO, String createdBy,
+    protected void assertBaseTaskResponse(BaseTaskResponse taskResponse, BaseTaskEntity taskEntity, TaskDTO taskDTO, String createdBy,
                                           String updatedBy, String assignedTo, TaskStatus status, TaskPriority priority) {
         assertThat(taskResponse).isNotNull();
-        assertThat(taskResponse.getTaskId()).isEqualTo(taskEntity.getTaskId());
         assertThat(taskResponse.getTitle()).isEqualTo(taskDTO.getTitle());
         assertThat(taskResponse.getStatus()).isEqualTo(status);
         assertThat(taskResponse.getPriority()).isEqualTo(priority);

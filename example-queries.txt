@@ -163,6 +163,34 @@ mutation CREATE_SUBTASK {
   }
 }
 
+mutation UPDATE_SUBTASK {
+  updateSubtask(
+    subtaskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af"
+    taskDTO: {
+      title: "Updated task"
+      description: "Updated description"
+      status: IN_PROGRESS
+      priority: HIGH
+      targetEndDate: "2024-08-20"
+      assignedTo: "7394e566-ad90-419b-916e-572f8ba66ac5"
+    }
+  ) {
+    subtaskId
+    taskId
+    title
+    description
+    priority
+    status
+    targetEndDate
+    assignedTo
+    createdOn
+    createdBy
+    updatedOn
+    updatedBy
+  }
+}
+
+
 mutation DELETE_SUBTASK {
   deleteSubtask(subtaskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af")
 }

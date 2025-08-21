@@ -13,6 +13,7 @@ import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -26,8 +27,8 @@ public class SubtaskCreationMutationControllerTest extends TaskMutationTest {
 
     public SubtaskCreationMutationControllerTest() {
         super(CREATE_SUBTASK_PATH, CREATE_SUBTASK,
-                new DoubleRequestVariable("taskId", UUID.randomUUID(), "subtaskDTO", new TaskDTO("title", "description", null, null, null, null)),
-                "subtaskDTO", 41);
+                new DoubleRequestVariable("subtaskDTO", new TaskDTO("title", "description", null, null, null, null),
+                        "taskId", UUID.randomUUID()), 41);
     }
 
     @ParameterizedTest
@@ -111,5 +112,12 @@ public class SubtaskCreationMutationControllerTest extends TaskMutationTest {
         assertBaseTaskEntity(subtaskEntity, subtaskDTO, createdBy, assignedTo, subtaskStatus, subtaskPriority);
         assertThat(subtaskEntity.getSubtaskId()).isNotNull();
         assertThat(subtaskEntity.getTaskId()).isEqualTo(taskId);
+    }
+
+    @Override
+    protected GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, TaskDTO taskDTO) {
+        UUID taskId = createTask(userEntity.getUserId()).getTaskId();
+        DoubleRequestVariable doubleRequestVariable = new DoubleRequestVariable(requestVariable.getName(), taskDTO, "taskId", taskId);
+        return sendRequestWithErrors(userEntity, document, doubleRequestVariable);
     }
 }

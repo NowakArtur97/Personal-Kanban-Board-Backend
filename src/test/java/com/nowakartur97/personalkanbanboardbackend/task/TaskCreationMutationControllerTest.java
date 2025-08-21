@@ -7,6 +7,7 @@ import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -21,7 +22,7 @@ public class TaskCreationMutationControllerTest extends TaskMutationTest {
     public TaskCreationMutationControllerTest() {
         super(CREATE_TASK_PATH, CREATE_TASK,
                 new RequestVariable("taskDTO", new TaskDTO("title", "description", null, null, null, null)),
-                "taskDTO", 22);
+                22);
     }
 
     @ParameterizedTest
@@ -79,5 +80,11 @@ public class TaskCreationMutationControllerTest extends TaskMutationTest {
                                   TaskStatus taskStatus, TaskPriority taskPriority) {
         assertBaseTaskEntity(taskEntity, taskDTO, createdBy, assignedTo, taskStatus, taskPriority);
         assertThat(taskEntity.getTaskId()).isNotNull();
+    }
+
+    @Override
+    protected GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, TaskDTO taskDTO) {
+        RequestVariable reqVariable = new RequestVariable(requestVariable.getName(), taskDTO);
+        return sendRequestWithErrors(userEntity, document, reqVariable);
     }
 }
