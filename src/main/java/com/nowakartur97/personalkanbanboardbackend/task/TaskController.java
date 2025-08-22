@@ -3,7 +3,6 @@ package com.nowakartur97.personalkanbanboardbackend.task;
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskController;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskValidator;
-import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import graphql.schema.DataFetchingEnvironment;
 import jakarta.validation.Valid;
@@ -17,8 +16,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.UUID;
-
-import static com.nowakartur97.personalkanbanboardbackend.auth.AuthorizationHeaderInterceptor.TOKEN_IN_CONTEXT;
 
 @Controller
 @PreAuthorize("hasAuthority('USER')")
@@ -60,16 +57,7 @@ public class TaskController extends BaseTaskController<TaskEntity, TaskResponse>
     @MutationMapping
     // TODO: Add subtasks to response?
     public Mono<TaskResponse> updateUserAssignedToTask(@Argument UUID taskId, @Argument UUID assignedToId, DataFetchingEnvironment env) {
-        String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
-        Mono<TaskEntity> taskById = taskService.findById(taskId);
-        Mono<UserEntity> createdBy = taskById.map(TaskEntity::getCreatedBy)
-                .flatMap(userService::findById);
-        Mono<UserEntity> updatedBy = userService.findByUsername(username);
-        Mono<UserEntity> assignedTo = userService.findById(assignedToId);
-        return Mono.zip(taskById, createdBy, updatedBy, assignedTo)
-                .flatMap(tuple -> Mono.just(taskMapper.updateUserAssignedToEntity(tuple.getT1(), tuple.getT3().getUserId(), tuple.getT4().getUserId()))
-                        .flatMap(taskService::updateAssignedTo)
-                        .map(task -> taskMapper.mapToResponse(task, tuple.getT2().getUsername(), tuple.getT3().getUsername(), tuple.getT4().getUsername())));
+        return updateUserAssignedTo(taskId, assignedToId, env);
     }
 
     @MutationMapping

@@ -89,6 +89,19 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
                         .map(task -> mapper.mapToResponse(task, tuple.getT2().getUsername(), tuple.getT3().getUsername(), tuple.getT4().getUsername())));
     }
 
+    protected Mono<R> updateUserAssignedTo(UUID taskId, UUID assignedToId, DataFetchingEnvironment env) {
+        String username = jwtUtil.extractUsername(env.getGraphQlContext().get(TOKEN_IN_CONTEXT));
+        Mono<E> taskById = service.findById(taskId);
+        Mono<UserEntity> createdBy = taskById.map(E::getCreatedBy)
+                .flatMap(userService::findById);
+        Mono<UserEntity> updatedBy = userService.findByUsername(username);
+        Mono<UserEntity> assignedTo = userService.findById(assignedToId);
+        return Mono.zip(taskById, createdBy, updatedBy, assignedTo)
+                .flatMap(tuple -> Mono.just(mapper.updateUserAssignedToEntity(tuple.getT1(), tuple.getT3().getUserId(), tuple.getT4().getUserId()))
+                        .flatMap(service::updateAssignedTo)
+                        .map(task -> mapper.mapToResponse(task, tuple.getT2().getUsername(), tuple.getT3().getUsername(), tuple.getT4().getUsername())));
+    }
+
     protected List<UUID> getUuidsFromTasksByProperty(List<E> tasks, Function<E, UUID> byProperty) {
         return tasks.stream()
                 .map(byProperty)

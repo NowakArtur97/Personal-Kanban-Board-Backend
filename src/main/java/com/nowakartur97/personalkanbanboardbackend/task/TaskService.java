@@ -66,7 +66,8 @@ public class TaskService extends BaseTaskService<TaskEntity> {
         return taskRepository.save(task);
     }
 
-    Mono<TaskEntity> updateAssignedTo(TaskEntity task) {
+    @Override
+    public Mono<TaskEntity> updateAssignedTo(TaskEntity task) {
 
         log.info("Updating user assigned to task: {}", task);
 

@@ -15,4 +15,6 @@ public abstract class BaseTaskService<E extends BaseTaskEntity> {
     public abstract Mono<E> save(E task);
 
     public abstract Mono<E> update(E task);
+
+    public abstract Mono<E> updateAssignedTo(E task);
 }

@@ -190,6 +190,26 @@ mutation UPDATE_SUBTASK {
   }
 }
 
+mutation UPDATE_USER_ASSIGNED_TO_SUBTASK {
+  updateUserAssignedToSubtask(
+    subtaskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af"
+    assignedToId: "7394e566-ad90-419b-916e-572f8ba66ac5"
+  ) {
+    subtaskId
+    taskId
+    title
+    description
+    priority
+    status
+    targetEndDate
+    assignedTo
+    createdOn
+    createdBy
+    updatedOn
+    updatedBy
+  }
+}
+
 mutation DELETE_SUBTASK {
   deleteSubtask(subtaskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af")
 }

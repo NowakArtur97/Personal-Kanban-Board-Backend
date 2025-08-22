@@ -52,6 +52,14 @@ public class SubtaskService extends BaseTaskService<SubtaskEntity> {
         return subtaskRepository.save(subtask);
     }
 
+    @Override
+    public Mono<SubtaskEntity> updateAssignedTo(SubtaskEntity subtask) {
+
+        log.info("Updating user assigned to subtask: {}", subtask);
+
+        return subtaskRepository.save(subtask);
+    }
+
     Mono<Void> deleteById(UUID subtaskId) {
 
         log.info("Deleting subtask by id: '{}'", subtaskId);

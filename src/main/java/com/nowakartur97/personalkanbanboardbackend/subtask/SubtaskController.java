@@ -47,6 +47,11 @@ public class SubtaskController extends BaseTaskController<SubtaskEntity, Subtask
     }
 
     @MutationMapping
+    public Mono<SubtaskResponse> updateUserAssignedToSubtask(@Argument UUID subtaskId, @Argument UUID assignedToId, DataFetchingEnvironment env) {
+        return updateUserAssignedTo(subtaskId, assignedToId, env);
+    }
+
+    @MutationMapping
     public Mono<Void> deleteSubtask(@Argument UUID subtaskId) {
         return subtaskService.deleteById(subtaskId);
     }
