@@ -9,6 +9,7 @@ type Mutation {
 
     createSubtask(taskId: UUID, subtaskDTO: TaskDTO): SubtaskResponse
     updateSubtask(subtaskId: UUID, subtaskDTO: TaskDTO): SubtaskResponse
+    updateUserAssignedToSubtask(subtaskId: UUID, assignedToId: UUID): SubtaskResponse
     deleteSubtask(subtaskId: UUID): UUID
     deleteAllSubtasksByTaskId(taskId: UUID): UUID
 }
