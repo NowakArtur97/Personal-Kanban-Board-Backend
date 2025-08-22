@@ -190,9 +190,12 @@ mutation UPDATE_SUBTASK {
   }
 }
 
-
 mutation DELETE_SUBTASK {
   deleteSubtask(subtaskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af")
+}
+
+mutation DELETE_ALL_SUBTASKS_BY_TASK_ID {
+  deleteAllSubtasksByTaskId(taskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af")
 }
 
 mutation REGISTER_USER {
