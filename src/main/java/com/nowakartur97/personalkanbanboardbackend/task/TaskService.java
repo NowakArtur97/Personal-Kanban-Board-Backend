@@ -75,7 +75,7 @@ public class TaskService extends BaseTaskService<TaskEntity> {
 
     Mono<Void> deleteById(UUID taskId) {
 
-        log.info("Deleting task: by id: '{}'", taskId);
+        log.info("Deleting task by id: '{}'", taskId);
 
         return taskRepository.deleteById(taskId);
     }

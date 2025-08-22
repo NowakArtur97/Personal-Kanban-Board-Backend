@@ -54,8 +54,15 @@ public class SubtaskService extends BaseTaskService<SubtaskEntity> {
 
     Mono<Void> deleteById(UUID subtaskId) {
 
-        log.info("Deleting subtask: by id: '{}'", subtaskId);
+        log.info("Deleting subtask by id: '{}'", subtaskId);
 
         return subtaskRepository.deleteById(subtaskId);
+    }
+
+    Mono<Void> deleteAllByTaskId(UUID taskId) {
+
+        log.info("Deleting all subtasks by taskId: '{}'", taskId);
+
+        return subtaskRepository.deleteAllByTaskId(taskId);
     }
 }
