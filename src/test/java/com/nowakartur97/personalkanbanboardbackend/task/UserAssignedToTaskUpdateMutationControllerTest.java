@@ -38,7 +38,6 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends TaskIntegrat
 
         TaskEntity udatedTaskEntity = taskRepository.findAll().blockLast();
         assertTaskEntity(taskEntity, udatedTaskEntity, assignedTo.getUserId());
-        assertThat(udatedTaskEntity.getTaskId()).isEqualTo(taskEntity.getTaskId());
         assertTaskResponse(taskResponse, udatedTaskEntity, assignedTo.getUsername(), userEntity.getUsername(), userEntity.getUsername());
     }
 
@@ -89,16 +88,7 @@ public class UserAssignedToTaskUpdateMutationControllerTest extends TaskIntegrat
     }
 
     private void assertTaskEntity(TaskEntity taskEntity, TaskEntity taskEntityAfterUpdate, UUID assignedTo) {
-        assertThat(taskEntityAfterUpdate).isNotNull();
+        assertBaseTaskEntity(taskEntity, taskEntityAfterUpdate, assignedTo);
         assertThat(taskEntityAfterUpdate.getTaskId()).isEqualTo(taskEntity.getTaskId());
-        assertThat(taskEntityAfterUpdate.getTitle()).isEqualTo(taskEntity.getTitle());
-        assertThat(taskEntityAfterUpdate.getStatus()).isEqualTo(taskEntity.getStatus());
-        assertThat(taskEntityAfterUpdate.getPriority()).isEqualTo(taskEntity.getPriority());
-        assertThat(taskEntityAfterUpdate.getTargetEndDate()).isEqualTo(taskEntity.getTargetEndDate());
-        assertThat(taskEntityAfterUpdate.getAssignedTo()).isEqualTo(assignedTo);
-        assertThat(taskEntityAfterUpdate.getCreatedOn().toEpochMilli()).isEqualTo(taskEntity.getCreatedOn().toEpochMilli());
-        assertThat(taskEntityAfterUpdate.getCreatedBy()).isEqualTo(taskEntity.getCreatedBy());
-        assertThat(taskEntityAfterUpdate.getUpdatedOn()).isAfter(taskEntity.getUpdatedOn());
-        assertThat(taskEntityAfterUpdate.getUpdatedBy()).isEqualTo(taskEntity.getUpdatedBy());
     }
 }

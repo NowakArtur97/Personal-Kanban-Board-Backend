@@ -37,11 +37,11 @@ public abstract class TaskIntegrationTest extends BasicIntegrationTest {
     protected TaskEntity createTask(UUID authorId, UUID assignedToId, UUID updatedById) {
         return taskRepository.save(TaskEntity.builder()
                         .title("testTask")
-                        .description("test")
+                        .description("test task")
                         .assignedTo(authorId)
-                        .status(TaskStatus.READY_TO_START)
-                        .priority(TaskPriority.LOW)
-                        .targetEndDate(LocalDate.now().plusDays(7))
+                        .status(TaskStatus.IN_PROGRESS)
+                        .priority(TaskPriority.MEDIUM)
+                        .targetEndDate(LocalDate.now().plusDays(14))
                         .createdOn(Instant.now())
                         .createdBy(assignedToId)
                         .updatedOn(updatedById != null ? Instant.now() : null)
@@ -57,8 +57,8 @@ public abstract class TaskIntegrationTest extends BasicIntegrationTest {
     protected SubtaskEntity createSubtask(UUID taskId, UUID authorId, UUID assignedToId, UUID updatedById) {
         return subtaskRepository.save(SubtaskEntity.builder()
                         .taskId(taskId)
-                        .title("testTask")
-                        .description("test")
+                        .title("testSubtask")
+                        .description("test subtask")
                         .assignedTo(authorId)
                         .status(TaskStatus.READY_TO_START)
                         .priority(TaskPriority.LOW)
@@ -101,5 +101,18 @@ public abstract class TaskIntegrationTest extends BasicIntegrationTest {
             assertThat(taskResponse.getUpdatedOn()).isNull();
         }
         assertThat(taskResponse.getUpdatedBy()).isEqualTo(updatedBy);
+    }
+
+    protected void assertBaseTaskEntity(BaseTaskEntity taskEntity, BaseTaskEntity taskEntityAfterUpdate, UUID assignedTo) {
+        assertThat(taskEntityAfterUpdate).isNotNull();
+        assertThat(taskEntityAfterUpdate.getTitle()).isEqualTo(taskEntity.getTitle());
+        assertThat(taskEntityAfterUpdate.getStatus()).isEqualTo(taskEntity.getStatus());
+        assertThat(taskEntityAfterUpdate.getPriority()).isEqualTo(taskEntity.getPriority());
+        assertThat(taskEntityAfterUpdate.getTargetEndDate()).isEqualTo(taskEntity.getTargetEndDate());
+        assertThat(taskEntityAfterUpdate.getAssignedTo()).isEqualTo(assignedTo);
+        assertThat(taskEntityAfterUpdate.getCreatedOn().toEpochMilli()).isEqualTo(taskEntity.getCreatedOn().toEpochMilli());
+        assertThat(taskEntityAfterUpdate.getCreatedBy()).isEqualTo(taskEntity.getCreatedBy());
+        assertThat(taskEntityAfterUpdate.getUpdatedOn()).isAfter(taskEntity.getUpdatedOn());
+        assertThat(taskEntityAfterUpdate.getUpdatedBy()).isEqualTo(taskEntity.getUpdatedBy());
     }
 }

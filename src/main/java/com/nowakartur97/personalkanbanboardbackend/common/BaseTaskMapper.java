@@ -55,7 +55,6 @@ public abstract class BaseTaskMapper<E extends BaseTaskEntity, R extends BaseTas
     }
 
     public final E updateUserAssignedToEntity(E taskEntity, UUID updatedBy, UUID assignedTo) {
-        taskEntity.setAssignedTo(assignedTo);
         // TODO: Check in Postgres to see if the date is auto-populated
         taskEntity.setAssignedTo(assignedTo);
         taskEntity.setUpdatedBy(updatedBy);
