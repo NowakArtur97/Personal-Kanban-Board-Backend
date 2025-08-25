@@ -1,6 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.common;
 
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskRepository;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
@@ -20,6 +21,9 @@ public abstract class TaskIntegrationTest extends BasicIntegrationTest {
 
     @Autowired
     protected TaskRepository taskRepository;
+
+    @Autowired
+    protected SubtaskRepository subtaskRepository;
 
     public TaskIntegrationTest(String path, String document, RequestVariable requestVariable) {
         super(path, document, requestVariable);

@@ -4,7 +4,6 @@ import com.nowakartur97.personalkanbanboardbackend.auth.JWTConfigurationProperti
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
-import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskRepository;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRepository;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
@@ -31,8 +30,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 //@ActiveProfiles("test-container")
 public abstract class IntegrationTest {
 
-    @Autowired
-    protected SubtaskRepository subtaskRepository;
     @Autowired
     protected UserRepository userRepository;
     @Autowired
