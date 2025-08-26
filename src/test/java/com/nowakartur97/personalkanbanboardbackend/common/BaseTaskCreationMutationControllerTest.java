@@ -18,8 +18,8 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
     @Setter
     private BaseTaskRepository<E> repository;
 
-    protected BaseTaskCreationMutationControllerTest(String path, String document, RequestVariable requestVariable, int sourceLocationColumn) {
-        super(path, document, requestVariable, sourceLocationColumn);
+    protected BaseTaskCreationMutationControllerTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn) {
+        super(path, document, requestVariable, validationErrorSourceLocationColumn);
     }
 
     @ParameterizedTest

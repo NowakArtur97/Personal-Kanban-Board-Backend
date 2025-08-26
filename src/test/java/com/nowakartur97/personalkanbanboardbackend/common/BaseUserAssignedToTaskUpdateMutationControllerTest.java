@@ -14,7 +14,7 @@ import java.util.UUID;
 public abstract class BaseUserAssignedToTaskUpdateMutationControllerTest<E extends BaseTaskEntity, R extends BaseTaskResponse> extends TaskIntegrationTest {
 
     private final String className;
-    private final String idFiledName;
+    private final String idFieldName;
     private final int taskIdErrorSourceLocationColumn;
     private final int assignedToIdErrorSourceLocationColumn;
 
@@ -22,11 +22,11 @@ public abstract class BaseUserAssignedToTaskUpdateMutationControllerTest<E exten
     private BaseTaskRepository<E> repository;
 
     public BaseUserAssignedToTaskUpdateMutationControllerTest(String path, String document, RequestVariable requestVariable,
-                                                              String className, String idFiledName,
+                                                              String className, String idFieldName,
                                                               int taskIdErrorSourceLocationColumn, int assignedToIdErrorSourceLocationColumn) {
         super(path, document, requestVariable);
         this.className = className;
-        this.idFiledName = idFiledName;
+        this.idFieldName = idFieldName;
         this.taskIdErrorSourceLocationColumn = taskIdErrorSourceLocationColumn;
         this.assignedToIdErrorSourceLocationColumn = assignedToIdErrorSourceLocationColumn;
     }
@@ -53,7 +53,7 @@ public abstract class BaseUserAssignedToTaskUpdateMutationControllerTest<E exten
         UUID taskId = UUID.randomUUID();
 
         assertNotFoundErrorResponse(sendUpdateUserAssignedToTaskRequestWithErrors(userEntity, taskId, userEntity.getUserId()),
-                path, className + " with " + idFiledName + ": '" + taskId + "' not found.");
+                path, className + " with " + idFieldName + ": '" + taskId + "' not found.");
     }
 
     @Test
@@ -92,7 +92,7 @@ public abstract class BaseUserAssignedToTaskUpdateMutationControllerTest<E exten
     protected abstract R sendUpdateUserAssignedToTaskRequest(UserEntity userEntity, E taskEntity, UUID assignedToId);
 
     protected GraphQlTester.Errors sendUpdateUserAssignedToTaskRequestWithErrors(UserEntity userEntity, UUID taskId, UUID assignedToId) {
-        DoubleRequestVariable doubleRequestVariable = new DoubleRequestVariable(requestVariable.getName(), taskId, "assignedToId", assignedToId);
+        DoubleRequestVariable doubleRequestVariable = new DoubleRequestVariable(idFieldName, taskId, "assignedToId", assignedToId);
         return sendRequestWithErrors(userEntity, document, doubleRequestVariable);
     }
 

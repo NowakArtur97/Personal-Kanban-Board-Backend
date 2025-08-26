@@ -17,11 +17,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public abstract class TaskMutationTest extends TaskIntegrationTest {
 
-    private final int errorSourceLocationColumn;
+    private final int validationErrorSourceLocationColumn;
 
-    protected TaskMutationTest(String path, String document, RequestVariable requestVariable, int errorSourceLocationColumn) {
+    protected TaskMutationTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn) {
         super(path, document, requestVariable);
-        this.errorSourceLocationColumn = errorSourceLocationColumn;
+        this.validationErrorSourceLocationColumn = validationErrorSourceLocationColumn;
     }
 
     @Test
@@ -39,7 +39,7 @@ public abstract class TaskMutationTest extends TaskIntegrationTest {
 
         UserEntity userEntity = createUser();
 
-        assertValidationErrorResponse(sendTaskRequestWithErrors(userEntity, null), new SourceLocation(1, errorSourceLocationColumn),
+        assertValidationErrorResponse(sendTaskRequestWithErrors(userEntity, null), new SourceLocation(1, validationErrorSourceLocationColumn),
                 "Variable '" + requestVariable.getName() + "' has an invalid value: Variable '" + requestVariable.getName() + "' has coerced Null value for NonNull type 'TaskDTO!'");
     }
 
@@ -49,7 +49,7 @@ public abstract class TaskMutationTest extends TaskIntegrationTest {
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO(null, null, null, null, null, null);
 
-        assertValidationErrorResponse(sendTaskRequestWithErrors(userEntity, taskDTO), new SourceLocation(1, errorSourceLocationColumn),
+        assertValidationErrorResponse(sendTaskRequestWithErrors(userEntity, taskDTO), new SourceLocation(1, validationErrorSourceLocationColumn),
                 "Variable '" + requestVariable.getName() + "' has an invalid value: Field 'title' has coerced Null value for NonNull type 'String!'");
     }
 

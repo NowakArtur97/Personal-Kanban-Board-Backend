@@ -14,11 +14,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public abstract class BaseTaskDeletionMutationControllerTest<E extends TaskEntity> extends TaskIntegrationTest {
 
-    private final int errorSourceLocationColumn;
+    private final int taskIdErrorSourceLocationColumn;
 
-    public BaseTaskDeletionMutationControllerTest(String path, String document, RequestVariable requestVariable, int errorSourceLocationColumn) {
+    public BaseTaskDeletionMutationControllerTest(String path, String document, RequestVariable requestVariable, int taskIdErrorSourceLocationColumn) {
         super(path, document, requestVariable);
-        this.errorSourceLocationColumn = errorSourceLocationColumn;
+        this.taskIdErrorSourceLocationColumn = taskIdErrorSourceLocationColumn;
     }
 
     @ParameterizedTest
@@ -47,7 +47,7 @@ public abstract class BaseTaskDeletionMutationControllerTest<E extends TaskEntit
 
         UserEntity userEntity = createUser();
 
-        assertValidationErrorResponse(sendRequestWithErrors(userEntity, document, null), new SourceLocation(1, errorSourceLocationColumn),
+        assertValidationErrorResponse(sendRequestWithErrors(userEntity, document, null), new SourceLocation(1, taskIdErrorSourceLocationColumn),
                 "Variable '" + requestVariable.getName() + "' has an invalid value: Variable '" + requestVariable.getName() + "' has coerced Null value for NonNull type 'UUID!'");
     }
 
