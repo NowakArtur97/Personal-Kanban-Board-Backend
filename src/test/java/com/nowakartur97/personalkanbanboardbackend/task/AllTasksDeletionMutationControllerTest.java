@@ -20,8 +20,8 @@ public class AllTasksDeletionMutationControllerTest extends TaskIntegrationTest 
     public void whenDeleteAllTasksByAdmin_shouldReturnEmptyResponse() {
 
         UserEntity admin = createUser("admin", "admin@domain.com", UserRole.ADMIN);
-        createTask(admin.getUserId());
         UserEntity userEntity = createUser("developer", "developer@domain.com");
+        createTask(admin.getUserId());
         createTask(userEntity.getUserId());
 
         sendDeleteAllTasksRequest(admin);
