@@ -22,13 +22,11 @@ import java.util.UUID;
 public class TaskController extends BaseTaskController<TaskEntity, TaskResponse> {
 
     private final TaskService taskService;
-    private final TaskMapper taskMapper;
 
-    public TaskController(TaskService taskService, UserService userService, JWTUtil jwtUtil, TaskMapper taskMapper,
-                          BaseTaskValidator baseTaskValidator) {
+    public TaskController(TaskService taskService, UserService userService, JWTUtil jwtUtil,
+                          TaskMapper taskMapper, BaseTaskValidator baseTaskValidator) {
         super(taskService, userService, jwtUtil, taskMapper, baseTaskValidator);
         this.taskService = taskService;
-        this.taskMapper = taskMapper;
     }
 
     @QueryMapping
@@ -62,7 +60,7 @@ public class TaskController extends BaseTaskController<TaskEntity, TaskResponse>
 
     @MutationMapping
     public Mono<Void> deleteTask(@Argument UUID taskId) {
-        return taskService.deleteById(taskId);
+        return deleteById(taskId);
     }
 
     @MutationMapping

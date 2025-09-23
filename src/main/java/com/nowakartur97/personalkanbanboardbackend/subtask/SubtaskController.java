@@ -53,7 +53,7 @@ public class SubtaskController extends BaseTaskController<SubtaskEntity, Subtask
 
     @MutationMapping
     public Mono<Void> deleteSubtask(@Argument UUID subtaskId) {
-        return subtaskService.deleteById(subtaskId);
+        return deleteById(subtaskId);
     }
 
     @MutationMapping

@@ -22,8 +22,8 @@ import static com.nowakartur97.personalkanbanboardbackend.auth.AuthorizationHead
 public abstract class BaseTaskController<E extends BaseTaskEntity, R extends BaseTaskResponse> {
 
     private final BaseTaskService<E> service;
-    protected final UserService userService;
-    protected final JWTUtil jwtUtil;
+    private final UserService userService;
+    private final JWTUtil jwtUtil;
     private final BaseTaskMapper<E, R> mapper;
     private final BaseTaskValidator validator;
 
@@ -100,6 +100,10 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
                 .flatMap(tuple -> Mono.just(mapper.updateUserAssignedToEntity(tuple.getT1(), tuple.getT3().getUserId(), tuple.getT4().getUserId()))
                         .flatMap(service::updateAssignedTo)
                         .map(task -> mapper.mapToResponse(task, tuple.getT2().getUsername(), tuple.getT3().getUsername(), tuple.getT4().getUsername())));
+    }
+
+    protected Mono<Void> deleteById(UUID taskId) {
+        return service.deleteById(taskId);
     }
 
     protected List<UUID> getUuidsFromTasksByProperty(List<E> tasks, Function<E, UUID> byProperty) {

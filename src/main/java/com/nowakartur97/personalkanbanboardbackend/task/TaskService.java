@@ -74,7 +74,8 @@ public class TaskService extends BaseTaskService<TaskEntity> {
         return taskRepository.save(task);
     }
 
-    Mono<Void> deleteById(UUID taskId) {
+    @Override
+    public Mono<Void> deleteById(UUID taskId) {
 
         log.info("Deleting task by id: '{}'", taskId);
 

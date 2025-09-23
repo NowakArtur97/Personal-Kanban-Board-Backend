@@ -60,7 +60,8 @@ public class SubtaskService extends BaseTaskService<SubtaskEntity> {
         return subtaskRepository.save(subtask);
     }
 
-    Mono<Void> deleteById(UUID subtaskId) {
+    @Override
+    public Mono<Void> deleteById(UUID subtaskId) {
 
         log.info("Deleting subtask by id: '{}'", subtaskId);
 
