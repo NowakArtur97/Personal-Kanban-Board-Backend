@@ -58,6 +58,36 @@ query FIND_ALL_TASKS_ASSIGNED_TO {
   }
 }
 
+subscription TASK_EVENT {
+  taskEvent {
+    taskId
+    title
+    description
+    status
+    priority
+    targetEndDate
+    assignedTo
+    createdBy
+    createdOn
+    updatedBy
+    updatedOn
+    subtasks {
+      subtaskId
+      taskId
+      title
+      description
+      status
+      priority
+      targetEndDate
+      assignedTo
+      createdBy
+      createdOn
+      updatedBy
+      updatedOn
+    }
+  }
+}
+
 mutation CREATE_TASK {
   createTask(
     taskDTO: {
