@@ -6,7 +6,7 @@ import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskValidator;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import graphql.schema.DataFetchingEnvironment;
 import jakarta.validation.Valid;
-import org.reactivestreams.Publisher;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -17,11 +17,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
 @Controller
 @PreAuthorize("hasAuthority('USER')")
+@Slf4j
 public class TaskController extends BaseTaskController<TaskEntity, TaskResponse> {
 
     private final TaskService taskService;
@@ -47,8 +49,17 @@ public class TaskController extends BaseTaskController<TaskEntity, TaskResponse>
     }
 
     @SubscriptionMapping
-    public Publisher<TaskResponse> taskEvent() {
+    public Flux<TaskResponse> taskEvent() {
         return sink.asFlux();
+    }
+
+    @SubscriptionMapping
+    public Flux<TestMessage> test() {
+        return Flux.interval(Duration.ofSeconds(1))
+                .map(i -> new TestMessage("Hello " + i))
+                .doOnSubscribe(sub -> log.info("doOnSubscribe"))
+                .doOnNext(v -> log.info("doOnNext " + v))
+                .doOnCancel(() -> log.info("cancel"));
     }
 
     @MutationMapping
