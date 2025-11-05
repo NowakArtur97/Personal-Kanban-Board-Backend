@@ -44,6 +44,10 @@ public class JWTUtil {
         return serverWebExchange.getRequest().getHeaders().getFirst(jwtConfigurationProperties.getAuthorizationHeader());
     }
 
+    Object getAuthorizationHeader(Map<String, Object> connectionInitPayload) {
+        return connectionInitPayload.get(jwtConfigurationProperties.getAuthorizationHeader());
+    }
+
     boolean isBearerTypeAuthorization(String authorizationHeader) {
         return authorizationHeader != null
                 && authorizationHeader.startsWith(jwtConfigurationProperties.getAuthorizationType())
