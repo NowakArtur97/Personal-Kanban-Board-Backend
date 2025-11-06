@@ -2,7 +2,10 @@ package com.nowakartur97.personalkanbanboardbackend.auth;
 
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.graphql.server.WebGraphQlRequest;
+import org.springframework.graphql.server.WebGraphQlResponse;
 import org.springframework.graphql.server.WebSocketGraphQlInterceptor;
+import org.springframework.graphql.server.WebSocketGraphQlRequest;
 import org.springframework.graphql.server.WebSocketSessionInfo;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,8 +21,24 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class JWTWebSocketInterceptor implements WebSocketGraphQlInterceptor {
 
+    private final static String AUTHENTICATION_ATTRIBUTE = "authentication";
+
     private final JWTUtil jwtUtil;
     private final UserService userService;
+
+
+    @Override
+    public Mono<WebGraphQlResponse> intercept(WebGraphQlRequest request, Chain chain) {
+        if (request instanceof WebSocketGraphQlRequest webSocketGraphQlRequest) {
+            Authentication auth = (Authentication) webSocketGraphQlRequest.getSessionInfo()
+                    .getAttributes()
+                    .get(AUTHENTICATION_ATTRIBUTE);
+            if (auth != null) {
+                return chain.next(request).contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth));
+            }
+        }
+        return chain.next(request);
+    }
 
     @Override
     public Mono<Object> handleConnectionInitialization(WebSocketSessionInfo sessionInfo,
@@ -29,12 +48,12 @@ public class JWTWebSocketInterceptor implements WebSocketGraphQlInterceptor {
             String authToken = jwtUtil.getJWTFromHeader(authHeader);
             String username = jwtUtil.extractUsername(authToken);
             return userService.findByUsernameForAuthentication(username)
-                    .flatMap(user -> {
+                    .doOnNext(user -> {
                         Authentication auth = new UsernamePasswordAuthenticationToken(user.getUsername(), authToken,
                                 List.of(new SimpleGrantedAuthority(user.getRole().name())));
-                        return Mono.just(connectionInitPayload)
-                                .contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth));
-                    });
+                        sessionInfo.getAttributes().put(AUTHENTICATION_ATTRIBUTE, auth);
+                    })
+                    .thenReturn(connectionInitPayload);
         }
         return Mono.just(connectionInitPayload);
     }
