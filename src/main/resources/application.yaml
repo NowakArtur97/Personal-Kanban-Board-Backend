@@ -6,9 +6,6 @@ spring:
       enabled: true
     websocket:
       path: /graphql
-  #    cors:
-  #        allowed-origins: http://localhost:4200
-  #        allowed-methods: GET,PUT,POST,DELETE,OPTIONS
   r2dbc:
     username: ${DB_USERNAME:postgress}
     password: ${DB_PASSWORD:postgress}
@@ -22,7 +19,6 @@ spring:
     allow-bean-definition-overriding: true
 
 #logging.file.path: .
-logging.level.org.springframework.graphql: DEBUG
 
 app:
   jwt:
