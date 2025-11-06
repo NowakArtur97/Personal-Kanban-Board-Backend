@@ -44,7 +44,7 @@ public class WebSecurityConfiguration {
                         .pathMatchers(HttpMethod.OPTIONS).permitAll()
                         .pathMatchers("/api/v1/user-data-validator").permitAll()
                         .pathMatchers("/graphiql").permitAll()
-                        .pathMatchers("/graphql").permitAll() // TODO: Remove
+                        .pathMatchers("/graphql").permitAll()
                         .anyExchange().authenticated())
                 .build();
     }

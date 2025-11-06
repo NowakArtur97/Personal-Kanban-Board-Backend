@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.server.WebSocketGraphQlInterceptor;
 import org.springframework.graphql.server.WebSocketSessionInfo;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -27,12 +28,14 @@ public class JWTWebSocketInterceptor implements WebSocketGraphQlInterceptor {
         if (jwtUtil.isBearerTypeAuthorization(authHeader)) {
             String authToken = jwtUtil.getJWTFromHeader(authHeader);
             String username = jwtUtil.extractUsername(authToken);
-            return userService.findByUsernameForAuthentication(username).flatMap(user ->
-                            Mono.just(new UsernamePasswordAuthenticationToken(user.getUsername(), authToken,
-                                    List.of(new SimpleGrantedAuthority(user.getRole().name())))))
-                    .map(auth -> Mono.just(authToken)
-                            .contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth)));
+            return userService.findByUsernameForAuthentication(username)
+                    .flatMap(user -> {
+                        Authentication auth = new UsernamePasswordAuthenticationToken(user.getUsername(), authToken,
+                                List.of(new SimpleGrantedAuthority(user.getRole().name())));
+                        return Mono.just(connectionInitPayload)
+                                .contextWrite(ReactiveSecurityContextHolder.withAuthentication(auth));
+                    });
         }
-        return Mono.empty();
+        return Mono.just(connectionInitPayload);
     }
 }

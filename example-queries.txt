@@ -95,7 +95,7 @@ mutation CREATE_TASK {
       description: "Example description"
       status: READY_TO_START
       priority: MEDIUM
-      targetEndDate: "2024-08-12"
+      targetEndDate: "2025-08-12"
       assignedTo: "14698c1e-1ef5-45ac-b8e1-e2ee121e9f75"
     }
   ) {
@@ -121,7 +121,7 @@ mutation UPDATE_TASK {
       description: "Updated description"
       status: IN_PROGRESS
       priority: HIGH
-      targetEndDate: "2024-08-20"
+      targetEndDate: "2025-12-20"
       assignedTo: "7394e566-ad90-419b-916e-572f8ba66ac5"
     }
   ) {
@@ -174,7 +174,7 @@ mutation CREATE_SUBTASK {
       description: "Updated description"
       status: IN_PROGRESS
       priority: HIGH
-      targetEndDate: "2024-08-20"
+      targetEndDate: "2025-12-20"
       assignedTo: "7394e566-ad90-419b-916e-572f8ba66ac5"
     }
   ) {
@@ -201,7 +201,7 @@ mutation UPDATE_SUBTASK {
       description: "Updated description"
       status: IN_PROGRESS
       priority: HIGH
-      targetEndDate: "2024-08-20"
+      targetEndDate: "2025-12-20"
       assignedTo: "7394e566-ad90-419b-916e-572f8ba66ac5"
     }
   ) {
