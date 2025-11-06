@@ -32,7 +32,7 @@ public class TaskController extends BaseTaskController<TaskEntity, TaskResponse>
                           TaskMapper taskMapper, BaseTaskValidator baseTaskValidator) {
         super(taskService, userService, jwtUtil, taskMapper, baseTaskValidator);
         this.taskService = taskService;
-        sink = Sinks.many().multicast().onBackpressureBuffer();
+        sink = Sinks.many().multicast().directAllOrNothing();
     }
 
     @QueryMapping
