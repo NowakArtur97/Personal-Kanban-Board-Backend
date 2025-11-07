@@ -58,36 +58,6 @@ query FIND_ALL_TASKS_ASSIGNED_TO {
   }
 }
 
-subscription TASK_EVENT {
-  taskEvent {
-    taskId
-    title
-    description
-    status
-    priority
-    targetEndDate
-    assignedTo
-    createdBy
-    createdOn
-    updatedBy
-    updatedOn
-    subtasks {
-      subtaskId
-      taskId
-      title
-      description
-      status
-      priority
-      targetEndDate
-      assignedTo
-      createdBy
-      createdOn
-      updatedBy
-      updatedOn
-    }
-  }
-}
-
 mutation CREATE_TASK {
   createTask(
     taskDTO: {
@@ -166,9 +136,42 @@ mutation DELETE_ALL_TASKS {
   deleteAllTasks
 }
 
+subscription TASK_EVENT {
+  taskEvent {
+     task {
+       taskId
+       title
+       description
+       status
+       priority
+       targetEndDate
+       assignedTo
+       createdBy
+       createdOn
+       updatedBy
+       updatedOn
+       subtasks {
+         subtaskId
+         taskId
+         title
+         description
+         status
+         priority
+         targetEndDate
+         assignedTo
+         createdBy
+         createdOn
+         updatedBy
+         updatedOn
+       }
+     }
+     taskEventType
+  }
+}
+
 mutation CREATE_SUBTASK {
   createSubtask(
-    taskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af"
+    taskId: "fc6034e1-d33f-4c5b-8718-ed6d85db84b7"
     subtaskDTO: {
       title: "Updated task"
       description: "Updated description"
@@ -246,6 +249,26 @@ mutation DELETE_SUBTASK {
 
 mutation DELETE_ALL_SUBTASKS_BY_TASK_ID {
   deleteAllSubtasksByTaskId(taskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af")
+}
+
+subscription SUBTASK_EVENT {
+  subtaskEvent {
+     task {
+        subtaskId
+        taskId
+        title
+        description
+        priority
+        status
+        targetEndDate
+        assignedTo
+        createdOn
+        createdBy
+        updatedOn
+        updatedBy
+     }
+     taskEventType
+  }
 }
 
 mutation REGISTER_USER {
