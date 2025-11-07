@@ -2,6 +2,7 @@ package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskController;
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEvent;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskValidator;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import graphql.schema.DataFetchingEnvironment;
@@ -15,7 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.Sinks;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,13 +26,11 @@ import java.util.UUID;
 public class TaskController extends BaseTaskController<TaskEntity, TaskResponse> {
 
     private final TaskService taskService;
-    private final Sinks.Many<TaskResponse> sink;
 
     public TaskController(TaskService taskService, UserService userService, JWTUtil jwtUtil,
                           TaskMapper taskMapper, BaseTaskValidator baseTaskValidator) {
         super(taskService, userService, jwtUtil, taskMapper, baseTaskValidator);
         this.taskService = taskService;
-        sink = Sinks.many().multicast().directAllOrNothing();
     }
 
     @QueryMapping
@@ -49,8 +47,7 @@ public class TaskController extends BaseTaskController<TaskEntity, TaskResponse>
 
     @MutationMapping
     public Mono<TaskResponse> createTask(@Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
-        return create(null, taskDTO, env)
-                .doOnNext(sink::tryEmitNext);
+        return create(null, taskDTO, env);
     }
 
     @MutationMapping
@@ -77,7 +74,7 @@ public class TaskController extends BaseTaskController<TaskEntity, TaskResponse>
     }
 
     @SubscriptionMapping
-    public Flux<TaskResponse> taskEvent() {
+    public Flux<BaseTaskEvent<TaskResponse>> taskEvent() {
         return sink.asFlux();
     }
 }

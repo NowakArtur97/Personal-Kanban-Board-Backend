@@ -2,6 +2,7 @@ package com.nowakartur97.personalkanbanboardbackend.subtask;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskController;
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEvent;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
@@ -10,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.graphql.data.method.annotation.SubscriptionMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Flux;
@@ -59,5 +61,10 @@ public class SubtaskController extends BaseTaskController<SubtaskEntity, Subtask
     @MutationMapping
     public Mono<Void> deleteAllSubtasksByTaskId(@Argument UUID taskId) {
         return subtaskService.deleteAllByTaskId(taskId);
+    }
+
+    @SubscriptionMapping
+    public Flux<BaseTaskEvent<SubtaskResponse>> subtaskEvent() {
+        return sink.asFlux();
     }
 }

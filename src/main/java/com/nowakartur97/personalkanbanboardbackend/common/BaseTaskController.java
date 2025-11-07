@@ -8,6 +8,7 @@ import graphql.schema.DataFetchingEnvironment;
 import org.springframework.beans.factory.annotation.Qualifier;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,6 +27,7 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
     private final JWTUtil jwtUtil;
     private final BaseTaskMapper<E, R> mapper;
     private final BaseTaskValidator validator;
+    protected final Sinks.Many<BaseTaskEvent<R>> sink;
 
     public BaseTaskController(BaseTaskService<E> service, UserService userService, JWTUtil
             jwtUtil, BaseTaskMapper<E, R> mapper, @Qualifier("BaseTaskValidator") BaseTaskValidator validator) {
@@ -34,6 +36,7 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
         this.jwtUtil = jwtUtil;
         this.mapper = mapper;
         this.validator = validator;
+        sink = Sinks.many().multicast().directAllOrNothing();
     }
 
     protected Flux<R> mapToTasksResponse(Mono<List<E>> tasksList) {
@@ -60,14 +63,16 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
                     .flatMap(__ -> createdBy)
                     .flatMap(user -> Mono.just(mapper.mapToEntity(taskId, taskDTO, user.getUserId()))
                             .flatMap(service::save)
-                            .map(subtask -> mapper.mapToResponse(subtask, user.getUsername())));
+                            .map(subtask -> mapper.mapToResponse(subtask, user.getUsername())))
+                    .doOnNext(task -> sink.tryEmitNext(new BaseTaskEvent<>(task, TaskEventType.CREATE)));
         }
         Mono<UserEntity> assignedTo = userService.findById(taskDTO.getAssignedTo());
         return validator.validate(taskId)
                 .flatMap(__ -> Mono.zip(createdBy, assignedTo))
                 .flatMap(tuple -> Mono.just(mapper.mapToEntity(taskId, taskDTO, tuple.getT1().getUserId(), tuple.getT2().getUserId()))
                         .flatMap(service::save)
-                        .map(subtask -> mapper.mapToResponse(subtask, tuple.getT1().getUsername(), tuple.getT2().getUsername())));
+                        .map(subtask -> mapper.mapToResponse(subtask, tuple.getT1().getUsername(), tuple.getT2().getUsername())))
+                .doOnNext(task -> sink.tryEmitNext(new BaseTaskEvent<>(task, TaskEventType.CREATE)));
     }
 
     protected Mono<R> update(UUID taskId, TaskDTO taskDTO, DataFetchingEnvironment env) {
@@ -80,13 +85,15 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
             return Mono.zip(taskById, createdBy, updatedBy)
                     .flatMap(tuple -> Mono.just(mapper.updateEntity(tuple.getT1(), taskDTO, tuple.getT3().getUserId()))
                             .flatMap(service::update)
-                            .map(task -> mapper.mapToResponse(task, username, tuple.getT2().getUsername(), tuple.getT3().getUsername())));
+                            .map(task -> mapper.mapToResponse(task, username, tuple.getT2().getUsername(), tuple.getT3().getUsername())))
+                    .doOnNext(task -> sink.tryEmitNext(new BaseTaskEvent<>(task, TaskEventType.UPDATE)));
         }
         Mono<UserEntity> assignedTo = userService.findById(taskDTO.getAssignedTo());
         return Mono.zip(taskById, createdBy, updatedBy, assignedTo)
                 .flatMap(tuple -> Mono.just(mapper.updateEntity(tuple.getT1(), taskDTO, tuple.getT3().getUserId(), tuple.getT4().getUserId()))
                         .flatMap(service::update)
-                        .map(task -> mapper.mapToResponse(task, tuple.getT2().getUsername(), tuple.getT3().getUsername(), tuple.getT4().getUsername())));
+                        .map(task -> mapper.mapToResponse(task, tuple.getT2().getUsername(), tuple.getT3().getUsername(), tuple.getT4().getUsername())))
+                .doOnNext(task -> sink.tryEmitNext(new BaseTaskEvent<>(task, TaskEventType.UPDATE)));
     }
 
     protected Mono<R> updateUserAssignedTo(UUID taskId, UUID assignedToId, DataFetchingEnvironment env) {
