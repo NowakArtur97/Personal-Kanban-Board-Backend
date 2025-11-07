@@ -1,8 +1,4 @@
 type Subscription  {
-    taskEvent: TaskResponse
-    test: TestMessage
-}
-
-type TestMessage{
-    message: String!
+    taskEvent: TaskEvent
+    subtaskEvent: SubtaskEvent
 }

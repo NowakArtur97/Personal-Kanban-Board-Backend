@@ -1,0 +1,19 @@
+interface BaseTaskEvent {
+    taskEventType: TaskEventType!
+}
+
+type TaskEvent implements  BaseTaskEvent{
+    task: TaskResponse!
+    taskEventType: TaskEventType!
+}
+
+type SubtaskEvent implements  BaseTaskEvent{
+    task: SubtaskResponse!
+    taskEventType: TaskEventType!
+}
+
+enum TaskEventType {
+    CREATE
+    UPDATE
+    DELETE
+}
