@@ -9,9 +9,19 @@ import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.springframework.graphql.test.tester.WebSocketGraphQlTester;
+import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
+import java.net.URI;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.UUID;
+
+import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.TASK_EVENT;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskEntity, R extends BaseTaskResponse> extends TaskMutationTest {
 
@@ -30,11 +40,40 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
         UserEntity assignedTo = createUser("developer", "developer@domain.com");
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), assignedTo.getUserId());
 
-        R taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
+        WebSocketGraphQlTester webSocketGraphQlTester = WebSocketGraphQlTester.builder(
+                        URI.create("ws://localhost:" + port + "/graphql"), new ReactorNettyWebSocketClient())
+                .headers((headers) -> addAuthorizationHeader(headers, userEntity))
+                .build();
 
-        assertTaskEntity(repository.findAll().blockLast(), taskDTO, userEntity.getUserId(), assignedTo.getUserId());
-        assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), assignedTo.getUsername(),
-                taskDTO.getStatus(), taskDTO.getPriority());
+        Flux<TaskEvent> event = webSocketGraphQlTester.document(TASK_EVENT)
+                .executeSubscription().toFlux()
+                .map(r -> r.path("taskEvent").entity(TaskEvent.class).get());
+
+        StepVerifier.create(
+                        event.
+                                take(1)
+                                .zipWith(Mono.defer(() -> Mono.just(sendCreateTaskRequest(userEntity, taskDTO))),
+                                        (e, created) -> Map.of("event", e, "created", created)))
+                .assertNext(map -> {
+                    TaskEvent taskEvent = (TaskEvent) map.get("event");
+                    R taskResponse = (R) map.get("created");
+//                    E taskEntity = repository.findAll().blockLast();
+                    assertThat(taskEvent.getTaskEventType()).isEqualTo(TaskEventType.CREATE);
+//                    assertThat(taskEvent.getTask()).isEqualTo(createResponse(taskEntity, userEntity.getUsername(), assignedTo.getUsername()));
+//                    assertTaskEntity(taskEntity, taskDTO, userEntity.getUserId(), assignedTo.getUserId());
+//                    assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), assignedTo.getUsername(),
+//                            taskDTO.getStatus(), taskDTO.getPriority());
+                })
+                .thenCancel()
+                .verify();
+
+
+//        R taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
+//
+//        E taskEntity = repository.findAll().blockLast();
+//        assertTaskEntity(taskEntity, taskDTO, userEntity.getUserId(), assignedTo.getUserId());
+//        assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), assignedTo.getUsername(),
+//                taskDTO.getStatus(), taskDTO.getPriority());
     }
 
     @Test

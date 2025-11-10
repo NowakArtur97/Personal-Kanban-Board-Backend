@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.List;
 import java.util.UUID;
 
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.GET_TASKS_ASSIGNED_TO;
+import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.FIND_ALL_TASKS_ASSIGNED_TO;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class TasksAssignedToQueryControllerTest extends TaskIntegrationTest {
@@ -22,7 +22,7 @@ public class TasksAssignedToQueryControllerTest extends TaskIntegrationTest {
     private final static String TASKS_ASSIGNED_TO_PATH = "tasksAssignedTo";
 
     public TasksAssignedToQueryControllerTest() {
-        super(TASKS_ASSIGNED_TO_PATH, GET_TASKS_ASSIGNED_TO, new RequestVariable("assignedToId", UUID.randomUUID()));
+        super(TASKS_ASSIGNED_TO_PATH, FIND_ALL_TASKS_ASSIGNED_TO, new RequestVariable("assignedToId", UUID.randomUUID()));
     }
 
     @ParameterizedTest

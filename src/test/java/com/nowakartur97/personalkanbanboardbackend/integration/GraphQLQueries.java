@@ -2,7 +2,7 @@ package com.nowakartur97.personalkanbanboardbackend.integration;
 
 public class GraphQLQueries {
 
-    public static final String GET_TASKS = """
+    public static final String FIND_ALL_TASKS = """
             query TASKS {
               tasks {
                 taskId
@@ -34,7 +34,7 @@ public class GraphQLQueries {
             }
             """;
 
-    public static final String GET_TASKS_ASSIGNED_TO = """
+    public static final String FIND_ALL_TASKS_ASSIGNED_TO = """
             query TASKS_ASSIGNED_TO($assignedToId: UUID!) {
               tasksAssignedTo(assignedToId: $assignedToId) {
                 taskId
@@ -130,6 +130,42 @@ public class GraphQLQueries {
               deleteAllTasks
             }
             """;
+
+    public static final String TASK_EVENT = """
+            subscription TASK_EVENT {
+              taskEvent {
+                 task {
+                   taskId
+                   title
+                   description
+                   status
+                   priority
+                   targetEndDate
+                   assignedTo
+                   createdBy
+                   createdOn
+                   updatedBy
+                   updatedOn
+                   subtasks {
+                     subtaskId
+                     taskId
+                     title
+                     description
+                     status
+                     priority
+                     targetEndDate
+                     assignedTo
+                     createdBy
+                     createdOn
+                     updatedBy
+                     updatedOn
+                   }
+                 }
+                 taskEventType
+              }
+            }
+            """;
+
     public static final String CREATE_SUBTASK = """
             mutation CREATE_SUBTASK($taskId: UUID!, $subtaskDTO: TaskDTO!) {
               createSubtask(taskId: $taskId, subtaskDTO: $subtaskDTO) {
@@ -150,7 +186,7 @@ public class GraphQLQueries {
             """;
 
     public static final String UPDATE_SUBTASK = """
-            mutation UPDATE_SUBTASK($subtaskId: UUID!, $subtaskDTO: TaskDTO!) {
+            mutation UPDATE_SUBTASK($subtaskId: UUID!, $subtaskDTO:TaskDTO!) {
               updateSubtask(subtaskId: $subtaskId, subtaskDTO: $subtaskDTO) {
                 subtaskId
                 taskId
@@ -199,8 +235,30 @@ public class GraphQLQueries {
             }
             """;
 
+    public static final String SUBTASK_EVENT = """
+            subscription SUBTASK_EVENT {
+              subtaskEvent {
+                 task {
+                    subtaskId
+                    taskId
+                    title
+                    description
+                    priority
+                    status
+                    targetEndDate
+                    assignedTo
+                    createdOn
+                    createdBy
+                    updatedOn
+                    updatedBy
+                 }
+                 taskEventType
+              }
+            }
+            """;
+
     public static final String REGISTER_USER = """
-            mutation REGISTER_USER($userDTO: UserDTO!) {
+            mutation REGISTER_USER($userDTO:UserDTO!) {
               registerUser(userDTO: $userDTO) {
                 userId
                 username
@@ -213,7 +271,7 @@ public class GraphQLQueries {
             """;
 
     public static final String AUTHENTICATE_USER = """
-            query AUTHENTICATE_USER($authenticationRequest: AuthenticationRequest!) {
+            query AUTHENTICATE_USER($authenticationRequest:AuthenticationRequest!) {
               loginUser(authenticationRequest: $authenticationRequest) {
                 userId
                 username

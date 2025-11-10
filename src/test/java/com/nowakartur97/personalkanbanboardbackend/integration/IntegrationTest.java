@@ -12,6 +12,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.execution.ErrorType;
 import org.springframework.graphql.test.tester.GraphQlTester;
@@ -40,6 +41,8 @@ public abstract class IntegrationTest {
     protected JWTConfigurationProperties jwtConfigurationProperties;
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+    @LocalServerPort
+    protected int port;
 
     // TODO: Setup testcontainers
 //    @BeforeAll
@@ -218,10 +221,10 @@ public abstract class IntegrationTest {
         return prepareRequest(document, requestVariable, builder);
     }
 
-    private GraphQlTester.Errors prepareRequest(String document, RequestVariable requestVariable, HttpGraphQlTester.Builder<?> builder) {
+    // TODO: Change to private
+    protected GraphQlTester.Errors prepareRequest(String document, RequestVariable requestVariable, HttpGraphQlTester.Builder<?> builder) {
         GraphQlTester.Request<?> requestVar = builder.build().document(document);
-        if (requestVariable instanceof DoubleRequestVariable) {
-            DoubleRequestVariable doubleRequestVariable = (DoubleRequestVariable) requestVariable;
+        if (requestVariable instanceof DoubleRequestVariable doubleRequestVariable) {
             requestVar = requestVar
                     .variable(requestVariable.getName(), requestVariable.getValue())
                     .variable(doubleRequestVariable.getName2(), doubleRequestVariable.getValue2());
