@@ -9,18 +9,14 @@ import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.springframework.graphql.test.tester.WebSocketGraphQlTester;
-import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.net.URI;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.UUID;
 
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.TASK_EVENT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskEntity, R extends BaseTaskResponse> extends TaskMutationTest {
@@ -28,8 +24,10 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
     @Setter
     private BaseTaskRepository<E> repository;
 
-    protected BaseTaskCreationMutationControllerTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn) {
-        super(path, document, requestVariable, validationErrorSourceLocationColumn);
+    protected BaseTaskCreationMutationControllerTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn,
+                                                     String subscriptionDocument, String subscriptionPath,
+                                                     Class<? extends BaseTaskEvent<? extends BaseTaskResponse>> subscriptionEntityType) {
+        super(path, document, requestVariable, validationErrorSourceLocationColumn, subscriptionDocument, subscriptionPath, subscriptionEntityType);
     }
 
     @ParameterizedTest
@@ -40,40 +38,30 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
         UserEntity assignedTo = createUser("developer", "developer@domain.com");
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), assignedTo.getUserId());
 
-        WebSocketGraphQlTester webSocketGraphQlTester = WebSocketGraphQlTester.builder(
-                        URI.create("ws://localhost:" + port + "/graphql"), new ReactorNettyWebSocketClient())
-                .headers((headers) -> addAuthorizationHeader(headers, userEntity))
-                .build();
-
-        Flux<TaskEvent> event = webSocketGraphQlTester.document(TASK_EVENT)
+        Flux<BaseTaskEvent> event = createWebSocketGraphQlTester(userEntity)
+                .document(subscriptionDocument)
                 .executeSubscription().toFlux()
-                .map(r -> r.path("taskEvent").entity(TaskEvent.class).get());
+                .map(r -> r.path(subscriptionPath).entity(subscriptionEntityType).get());
 
-        StepVerifier.create(
-                        event.
-                                take(1)
-                                .zipWith(Mono.defer(() -> Mono.just(sendCreateTaskRequest(userEntity, taskDTO))),
-                                        (e, created) -> Map.of("event", e, "created", created)))
+        Flux<Map<String, Object>> combined = event
+                .take(1)
+                .zipWith(Mono.defer(() -> Mono.just(sendCreateTaskRequest(userEntity, taskDTO))))
+                .flatMap(tuple -> repository.findById(tuple.getT2().getId())
+                        .map(entity -> Map.of("event", tuple.getT1(), "response", tuple.getT2(), "entity", entity)));
+
+        StepVerifier.create(combined)
                 .assertNext(map -> {
-                    TaskEvent taskEvent = (TaskEvent) map.get("event");
-                    R taskResponse = (R) map.get("created");
-//                    E taskEntity = repository.findAll().blockLast();
+                    BaseTaskEvent<R> taskEvent = (BaseTaskEvent<R>) map.get("event");
+                    R taskResponse = (R) map.get("response");
+                    E taskEntity = (E) map.get("entity");
+                    assertTaskEntity(taskEntity, taskDTO, userEntity.getUserId(), assignedTo.getUserId());
+                    assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), assignedTo.getUsername(),
+                            taskDTO.getStatus(), taskDTO.getPriority());
                     assertThat(taskEvent.getTaskEventType()).isEqualTo(TaskEventType.CREATE);
-//                    assertThat(taskEvent.getTask()).isEqualTo(createResponse(taskEntity, userEntity.getUsername(), assignedTo.getUsername()));
-//                    assertTaskEntity(taskEntity, taskDTO, userEntity.getUserId(), assignedTo.getUserId());
-//                    assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), assignedTo.getUsername(),
-//                            taskDTO.getStatus(), taskDTO.getPriority());
+                    assertTaskEventResponse(taskEvent.getTask(), createExpectedSubscriptionResponse(taskEntity, userEntity.getUsername(), assignedTo.getUsername()));
                 })
                 .thenCancel()
                 .verify();
-
-
-//        R taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
-//
-//        E taskEntity = repository.findAll().blockLast();
-//        assertTaskEntity(taskEntity, taskDTO, userEntity.getUserId(), assignedTo.getUserId());
-//        assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), assignedTo.getUsername(),
-//                taskDTO.getStatus(), taskDTO.getPriority());
     }
 
     @Test
@@ -90,12 +78,16 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
 
     protected abstract R sendCreateTaskRequest(UserEntity userEntity, TaskDTO taskDTO);
 
+    protected abstract R createExpectedSubscriptionResponse(E taskEntity, String createdBy, String assignedTo);
+
     protected void assertTaskResponse(R taskResponse, TaskDTO taskDTO, String createdBy) {
         assertTaskResponse(taskResponse, taskDTO, createdBy, createdBy, TaskStatus.READY_TO_START, TaskPriority.LOW);
     }
 
     protected abstract void assertTaskResponse(R taskResponse, TaskDTO taskDTO, String createdBy, String assignedTo,
                                                TaskStatus status, TaskPriority priority);
+
+    protected abstract void assertTaskEventResponse(R mutationTaskResponse, R subscriptionTaskResponse);
 
     protected void assertTaskEntity(E taskEntity, TaskDTO taskDTO, UUID createdBy) {
         assertTaskEntity(taskEntity, taskDTO, createdBy, createdBy, TaskStatus.READY_TO_START, TaskPriority.LOW);

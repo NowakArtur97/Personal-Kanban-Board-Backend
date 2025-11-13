@@ -23,4 +23,6 @@ public abstract class BaseTaskResponse {
     private final String updatedBy;
     private final String updatedOn;
     private final String assignedTo;
+
+    public abstract UUID getId();
 }

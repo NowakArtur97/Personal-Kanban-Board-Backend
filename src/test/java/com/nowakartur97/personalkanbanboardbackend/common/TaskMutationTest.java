@@ -18,10 +18,17 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 public abstract class TaskMutationTest extends TaskIntegrationTest {
 
     private final int validationErrorSourceLocationColumn;
+    protected final String subscriptionDocument;
+    protected final String subscriptionPath;
+    protected final Class<? extends BaseTaskEvent<? extends BaseTaskResponse>> subscriptionEntityType;
 
-    protected TaskMutationTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn) {
+    protected TaskMutationTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn,
+                               String subscriptionDocument, String subscriptionPath, Class<? extends BaseTaskEvent<? extends BaseTaskResponse>> subscriptionEntityType) {
         super(path, document, requestVariable);
         this.validationErrorSourceLocationColumn = validationErrorSourceLocationColumn;
+        this.subscriptionDocument = subscriptionDocument;
+        this.subscriptionPath = subscriptionPath;
+        this.subscriptionEntityType = subscriptionEntityType;
     }
 
     @Test
@@ -141,5 +148,23 @@ public abstract class TaskMutationTest extends TaskIntegrationTest {
         assertThat(taskResponse.getCreatedBy()).isEqualTo(createdBy);
         assertThat(Instant.parse(taskResponse.getUpdatedOn()).toEpochMilli()).isEqualTo(taskEntity.getUpdatedOn().toEpochMilli());
         assertThat(taskResponse.getUpdatedBy()).isEqualTo(updatedBy);
+    }
+
+    protected void assertBaseTaskResponse(BaseTaskResponse mutationTaskResponse, BaseTaskResponse subscriptionTaskResponse) {
+        assertThat(subscriptionTaskResponse).isNotNull();
+        assertThat(subscriptionTaskResponse.getTaskId()).isEqualTo(mutationTaskResponse.getTaskId());
+        assertThat(subscriptionTaskResponse.getTitle()).isEqualTo(mutationTaskResponse.getTitle());
+        assertThat(subscriptionTaskResponse.getStatus()).isEqualTo(mutationTaskResponse.getStatus());
+        assertThat(subscriptionTaskResponse.getPriority()).isEqualTo(mutationTaskResponse.getPriority());
+        assertThat(subscriptionTaskResponse.getTargetEndDate()).isEqualTo(mutationTaskResponse.getTargetEndDate());
+        assertThat(subscriptionTaskResponse.getAssignedTo()).isEqualTo(mutationTaskResponse.getAssignedTo());
+        assertThat(Instant.parse(subscriptionTaskResponse.getCreatedOn()).toEpochMilli()).isEqualTo(Instant.parse(mutationTaskResponse.getCreatedOn()).toEpochMilli());
+        assertThat(subscriptionTaskResponse.getCreatedBy()).isEqualTo(mutationTaskResponse.getCreatedBy());
+        if (subscriptionTaskResponse.getUpdatedBy() != null) {
+            assertThat(Instant.parse(subscriptionTaskResponse.getUpdatedOn()).toEpochMilli()).isEqualTo(Instant.parse(mutationTaskResponse.getUpdatedOn()).toEpochMilli());
+        } else {
+            assertThat(subscriptionTaskResponse.getUpdatedOn()).isNull();
+        }
+        assertThat(subscriptionTaskResponse.getUpdatedBy()).isEqualTo(subscriptionTaskResponse.getUpdatedBy());
     }
 }

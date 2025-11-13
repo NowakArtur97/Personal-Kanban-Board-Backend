@@ -27,7 +27,8 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
 
     protected BaseTaskUpdateMutationControllerTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn,
                                                    String className, String idFieldName, int taskIdErrorSourceLocationColumn) {
-        super(path, document, requestVariable, validationErrorSourceLocationColumn);
+        // TODO: Add subscription to test scope
+        super(path, document, requestVariable, validationErrorSourceLocationColumn, null, null, null);
         this.className = className;
         this.idFieldName = idFieldName;
         this.taskIdErrorSourceLocationColumn = taskIdErrorSourceLocationColumn;
@@ -106,6 +107,8 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
     protected abstract E createTask(UserEntity userEntity);
 
     protected abstract R sendUpdateTaskRequest(UserEntity userEntity, E taskEntity, TaskDTO taskDTO);
+
+//    protected abstract R createExpectedSubscriptionResponse(E taskEntity, String createdBy, String updatedBy, String assignedTo);
 
     protected abstract void assertTaskId(E updatedTaskEntity, E taskEntity);
 

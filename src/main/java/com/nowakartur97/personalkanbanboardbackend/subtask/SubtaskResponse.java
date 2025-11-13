@@ -19,4 +19,9 @@ public class SubtaskResponse extends BaseTaskResponse {
         super(taskId, title, description, status, priority, targetEndDate, createdBy, createdOn, updatedBy, updatedOn, assignedTo);
         this.subtaskId = subtaskId;
     }
+
+    @Override
+    public UUID getId() {
+        return getSubtaskId();
+    }
 }

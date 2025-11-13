@@ -30,7 +30,7 @@ public abstract class TaskIntegrationTest extends BasicIntegrationTest {
     }
 
     @AfterEach
-    public void cleanUpTables() {
+    public void cleanUpTaskTable() {
         taskRepository.deleteAll().block();
     }
 

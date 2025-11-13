@@ -17,10 +17,13 @@ import org.springframework.graphql.ResponseError;
 import org.springframework.graphql.execution.ErrorType;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.graphql.test.tester.HttpGraphQlTester;
+import org.springframework.graphql.test.tester.WebSocketGraphQlTester;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
 
+import java.net.URI;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -221,8 +224,7 @@ public abstract class IntegrationTest {
         return prepareRequest(document, requestVariable, builder);
     }
 
-    // TODO: Change to private
-    protected GraphQlTester.Errors prepareRequest(String document, RequestVariable requestVariable, HttpGraphQlTester.Builder<?> builder) {
+    private GraphQlTester.Errors prepareRequest(String document, RequestVariable requestVariable, HttpGraphQlTester.Builder<?> builder) {
         GraphQlTester.Request<?> requestVar = builder.build().document(document);
         if (requestVariable instanceof DoubleRequestVariable doubleRequestVariable) {
             requestVar = requestVar
@@ -232,5 +234,12 @@ public abstract class IntegrationTest {
             requestVar = requestVar.variable(requestVariable.getName(), requestVariable.getValue());
         }
         return requestVar.execute().errors();
+    }
+
+    protected WebSocketGraphQlTester createWebSocketGraphQlTester(UserEntity userEntity) {
+        return WebSocketGraphQlTester.builder(
+                        URI.create("ws://localhost:" + port + "/graphql"), new ReactorNettyWebSocketClient())
+                .headers((headers) -> addAuthorizationHeader(headers, userEntity))
+                .build();
     }
 }

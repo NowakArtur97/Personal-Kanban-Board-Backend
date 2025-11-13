@@ -3,6 +3,7 @@ package com.nowakartur97.personalkanbanboardbackend.subtask;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskCreationMutationControllerTest;
 import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.SubtaskEvent;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
@@ -15,6 +16,7 @@ import org.springframework.graphql.test.tester.GraphQlTester;
 import java.util.UUID;
 
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.CREATE_SUBTASK;
+import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.SUBTASK_EVENT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class SubtaskCreationMutationControllerTest extends BaseTaskCreationMutationControllerTest<SubtaskEntity, SubtaskResponse> {
@@ -25,7 +27,8 @@ public class SubtaskCreationMutationControllerTest extends BaseTaskCreationMutat
     public SubtaskCreationMutationControllerTest() {
         super(CREATE_SUBTASK_PATH, CREATE_SUBTASK,
                 new DoubleRequestVariable("subtaskDTO", new TaskDTO("title", "description", null, null, null, null),
-                        "taskId", UUID.randomUUID()), 41);
+                        "taskId", UUID.randomUUID()), 41,
+                SUBTASK_EVENT, "subtaskEvent", SubtaskEvent.class);
     }
 
     @BeforeEach
@@ -72,6 +75,12 @@ public class SubtaskCreationMutationControllerTest extends BaseTaskCreationMutat
     }
 
     @Override
+    protected void assertTaskEventResponse(SubtaskResponse mutationSubtaskResponse, SubtaskResponse subscriptionSubtaskResponse) {
+        assertBaseTaskResponse(mutationSubtaskResponse, subscriptionSubtaskResponse);
+        assertThat(subscriptionSubtaskResponse.getTaskId()).isEqualTo(mutationSubtaskResponse.getTaskId());
+    }
+
+    @Override
     protected void assertTaskEntity(SubtaskEntity subtaskEntity, TaskDTO subTaskDTO, UUID createdBy, UUID assignedTo,
                                     TaskStatus taskStatus, TaskPriority taskPriority) {
         assertBaseTaskEntity(subtaskEntity, subTaskDTO, createdBy, assignedTo, taskStatus, taskPriority);
@@ -84,5 +93,23 @@ public class SubtaskCreationMutationControllerTest extends BaseTaskCreationMutat
         UUID taskId = createTask(userEntity.getUserId()).getTaskId();
         DoubleRequestVariable doubleRequestVariable = new DoubleRequestVariable(requestVariable.getName(), subTaskDTO, "taskId", taskId);
         return sendRequestWithErrors(userEntity, document, doubleRequestVariable);
+    }
+
+    @Override
+    protected SubtaskResponse createExpectedSubscriptionResponse(SubtaskEntity subtaskEntity, String createdBy, String assignedTo) {
+        return new SubtaskResponse(
+                subtaskEntity.getSubtaskId(),
+                subtaskEntity.getTaskId(),
+                subtaskEntity.getTitle(),
+                subtaskEntity.getDescription(),
+                subtaskEntity.getStatus(),
+                subtaskEntity.getPriority(),
+                subtaskEntity.getTargetEndDate(),
+                createdBy,
+                subtaskEntity.getCreatedOn().toString(),
+                null,
+                subtaskEntity.getUpdatedOn() != null ? subtaskEntity.getUpdatedOn().toString() : null,
+                assignedTo
+        );
     }
 }
