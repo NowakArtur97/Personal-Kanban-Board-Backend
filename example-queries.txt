@@ -169,6 +169,11 @@ subscription TASK_EVENT {
   }
 }
 
+subscription DELETE_TASK_EVENT {
+  deleteTaskEvent {
+  }
+}
+
 mutation CREATE_SUBTASK {
   createSubtask(
     taskId: "fc6034e1-d33f-4c5b-8718-ed6d85db84b7"
@@ -269,6 +274,10 @@ subscription SUBTASK_EVENT {
      }
      taskEventType
   }
+}
+
+subscription DELETE_SUBTASK_EVENT {
+  deleteSubtaskEvent
 }
 
 mutation REGISTER_USER {

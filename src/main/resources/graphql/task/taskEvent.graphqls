@@ -17,3 +17,7 @@ enum TaskEventType {
     UPDATE
     DELETE
 }
+
+type DeleteTaskEvent {
+    taskId: UUID
+}
