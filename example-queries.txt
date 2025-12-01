@@ -170,8 +170,7 @@ subscription TASK_EVENT {
 }
 
 subscription DELETE_TASK_EVENT {
-  deleteTaskEvent {
-  }
+  deleteTaskEvent
 }
 
 mutation CREATE_SUBTASK {

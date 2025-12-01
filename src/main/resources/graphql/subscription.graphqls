@@ -1,7 +1,7 @@
 type Subscription  {
     taskEvent: TaskEvent
-    deleteTaskEvent: DeleteTaskEvent
+    deleteTaskEvent: UUID
 
     subtaskEvent: SubtaskEvent
-    deleteSubtaskEvent: DeleteTaskEvent
+    deleteSubtaskEvent: UUID
 }
