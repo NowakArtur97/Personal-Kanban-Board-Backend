@@ -28,6 +28,7 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
     private final BaseTaskMapper<E, R> mapper;
     private final BaseTaskValidator validator;
     protected final Sinks.Many<BaseTaskEvent<R>> sink;
+    protected final Sinks.Many<UUID> deleteTaskSink;
 
     public BaseTaskController(BaseTaskService<E> service, UserService userService, JWTUtil
             jwtUtil, BaseTaskMapper<E, R> mapper, @Qualifier("BaseTaskValidator") BaseTaskValidator validator) {
@@ -37,6 +38,7 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
         this.mapper = mapper;
         this.validator = validator;
         sink = Sinks.many().multicast().directAllOrNothing();
+        deleteTaskSink = Sinks.many().multicast().directAllOrNothing();
     }
 
     protected Flux<R> mapToTasksResponse(Mono<List<E>> tasksList) {
@@ -110,7 +112,8 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
     }
 
     protected Mono<Void> deleteById(UUID taskId) {
-        return service.deleteById(taskId);
+        return service.deleteById(taskId)
+                .then(Mono.fromRunnable(() -> deleteTaskSink.tryEmitNext(taskId)));
     }
 
     protected List<UUID> getUuidsFromTasksByProperty(List<E> tasks, Function<E, UUID> byProperty) {

@@ -77,4 +77,9 @@ public class TaskController extends BaseTaskController<TaskEntity, TaskResponse>
     public Flux<BaseTaskEvent<TaskResponse>> taskEvent() {
         return sink.asFlux();
     }
+
+    @SubscriptionMapping
+    public Flux<UUID> deleteTaskEvent() {
+        return deleteTaskSink.asFlux();
+    }
 }
