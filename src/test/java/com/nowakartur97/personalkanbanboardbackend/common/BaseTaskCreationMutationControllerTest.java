@@ -7,12 +7,12 @@ import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.api.Timeout;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.UUID;
@@ -30,9 +30,19 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
         super(path, document, requestVariable, validationErrorSourceLocationColumn, subscriptionDocument, subscriptionPath, subscriptionEntityType);
     }
 
-    @ParameterizedTest
-    @EnumSource(value = UserRole.class)
-    public void whenCreateTask_shouldReturnTaskResponse(UserRole role) {
+    @Test
+    @Timeout(10)
+    public void whenCreateTaskByUser_shouldReturnTaskResponse() {
+        whenCreateTask_shouldReturnTaskResponse(UserRole.USER);
+    }
+
+    @Test
+    @Timeout(10)
+    public void whenCreateTaskByAdmin_shouldReturnTaskResponse() {
+        whenCreateTask_shouldReturnTaskResponse(UserRole.ADMIN);
+    }
+
+    private void whenCreateTask_shouldReturnTaskResponse(UserRole role) {
 
         UserEntity userEntity = createUser(role);
         UserEntity assignedTo = createUser("developer", "developer@domain.com");
@@ -61,7 +71,7 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
                     assertTaskEventResponse(taskEvent.getTask(), createExpectedSubscriptionResponse(taskEntity, userEntity.getUsername(), assignedTo.getUsername()));
                 })
                 .thenCancel()
-                .verify();
+                .verify(Duration.ofSeconds(15));
     }
 
     @Test

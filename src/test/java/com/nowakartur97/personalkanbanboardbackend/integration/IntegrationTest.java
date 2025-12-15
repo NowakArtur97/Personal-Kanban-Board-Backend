@@ -22,6 +22,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
+import reactor.core.publisher.Hooks;
+import reactor.core.scheduler.Schedulers;
 
 import java.net.URI;
 import java.util.List;
@@ -46,6 +48,12 @@ public abstract class IntegrationTest {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     @LocalServerPort
     protected int port;
+
+    @AfterEach
+    public void closeWebSockets() {
+        Hooks.resetOnEachOperator();
+        Schedulers.shutdownNow();
+    }
 
     // TODO: Setup testcontainers
 //    @BeforeAll
