@@ -108,7 +108,8 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
         return Mono.zip(taskById, createdBy, updatedBy, assignedTo)
                 .flatMap(tuple -> Mono.just(mapper.updateUserAssignedToEntity(tuple.getT1(), tuple.getT3().getUserId(), tuple.getT4().getUserId()))
                         .flatMap(service::updateAssignedTo)
-                        .map(task -> mapper.mapToResponse(task, tuple.getT2().getUsername(), tuple.getT3().getUsername(), tuple.getT4().getUsername())));
+                        .map(task -> mapper.mapToResponse(task, tuple.getT2().getUsername(), tuple.getT3().getUsername(), tuple.getT4().getUsername())))
+                .doOnNext(task -> sink.tryEmitNext(new BaseTaskEvent<>(task, TaskEventType.UPDATE)));
     }
 
     protected Mono<Void> deleteById(UUID taskId) {
