@@ -4,6 +4,7 @@ import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskController;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEvent;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskValidator;
+import com.nowakartur97.personalkanbanboardbackend.common.TaskEventPublisher;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import graphql.schema.DataFetchingEnvironment;
 import jakarta.validation.Valid;
@@ -28,8 +29,9 @@ public class TaskController extends BaseTaskController<TaskEntity, TaskResponse>
     private final TaskService taskService;
 
     public TaskController(TaskService taskService, UserService userService, JWTUtil jwtUtil,
-                          TaskMapper taskMapper, BaseTaskValidator baseTaskValidator) {
-        super(taskService, userService, jwtUtil, taskMapper, baseTaskValidator);
+                          TaskMapper taskMapper, BaseTaskValidator baseTaskValidator,
+                          TaskEventPublisher<TaskResponse> taskEventPublisher) {
+        super(taskService, userService, jwtUtil, taskMapper, baseTaskValidator, taskEventPublisher);
         this.taskService = taskService;
     }
 
@@ -75,11 +77,11 @@ public class TaskController extends BaseTaskController<TaskEntity, TaskResponse>
 
     @SubscriptionMapping
     public Flux<BaseTaskEvent<TaskResponse>> taskEvent() {
-        return sink.asFlux();
+        return taskEventPublisher.tasksEvents();
     }
 
     @SubscriptionMapping
     public Flux<UUID> deleteTaskEvent() {
-        return deleteTaskSink.asFlux();
+        return taskEventPublisher.deleteTasksEvents();
     }
 }

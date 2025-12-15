@@ -1,0 +1,35 @@
+package com.nowakartur97.personalkanbanboardbackend.common;
+
+import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
+
+import java.util.UUID;
+
+@Component
+public class TaskEventPublisher<R extends BaseTaskResponse> {
+
+    private Sinks.Many<BaseTaskEvent<R>> sink = Sinks.many().multicast().directAllOrNothing();
+    private Sinks.Many<UUID> deleteTaskSink = Sinks.many().multicast().directAllOrNothing();
+
+    public Flux<BaseTaskEvent<R>> tasksEvents() {
+        return sink.asFlux();
+    }
+
+    public Flux<UUID> deleteTasksEvents() {
+        return deleteTaskSink.asFlux();
+    }
+
+    public void emitTaskEvent(R task, TaskEventType taskEventType) {
+        sink.tryEmitNext(new BaseTaskEvent<>(task, taskEventType));
+    }
+
+    public void emitDeleteTaskEvent(UUID taskId) {
+        deleteTaskSink.tryEmitNext(taskId);
+    }
+
+    public void resetSink() {
+        sink = Sinks.many().multicast().directAllOrNothing();
+        deleteTaskSink = Sinks.many().multicast().directAllOrNothing();
+    }
+}

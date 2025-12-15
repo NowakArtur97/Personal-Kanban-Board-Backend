@@ -3,6 +3,7 @@ package com.nowakartur97.personalkanbanboardbackend.subtask;
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskController;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEvent;
+import com.nowakartur97.personalkanbanboardbackend.common.TaskEventPublisher;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
@@ -27,8 +28,9 @@ public class SubtaskController extends BaseTaskController<SubtaskEntity, Subtask
     private final SubtaskService subtaskService;
 
     public SubtaskController(SubtaskService subtaskService, UserService userService, JWTUtil jwtUtil,
-                             SubtaskMapper subtaskMapper, SubtaskValidator subtaskValidator) {
-        super(subtaskService, userService, jwtUtil, subtaskMapper, subtaskValidator);
+                             SubtaskMapper subtaskMapper, SubtaskValidator subtaskValidator,
+                             TaskEventPublisher<SubtaskResponse> subtaskEventPublisher) {
+        super(subtaskService, userService, jwtUtil, subtaskMapper, subtaskValidator, subtaskEventPublisher);
         this.subtaskService = subtaskService;
     }
 
@@ -65,11 +67,11 @@ public class SubtaskController extends BaseTaskController<SubtaskEntity, Subtask
 
     @SubscriptionMapping
     public Flux<BaseTaskEvent<SubtaskResponse>> subtaskEvent() {
-        return sink.asFlux();
+        return taskEventPublisher.tasksEvents();
     }
 
     @SubscriptionMapping
     public Flux<UUID> deleteSubtaskEvent() {
-        return deleteTaskSink.asFlux();
+        return taskEventPublisher.deleteTasksEvents();
     }
 }
