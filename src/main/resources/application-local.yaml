@@ -27,6 +27,9 @@ spring:
 
 logging.level.org.springframework.graphql: DEBUG
 
+server:
+  shutdown: immediate # disable graceful shutdown
+
 app:
   h2:
     port:

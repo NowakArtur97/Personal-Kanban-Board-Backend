@@ -8,7 +8,6 @@ import com.nowakartur97.personalkanbanboardbackend.common.TaskEventPublisher;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import graphql.schema.DataFetchingEnvironment;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -23,7 +22,6 @@ import java.util.UUID;
 
 @Controller
 @PreAuthorize("hasAuthority('USER')")
-@Slf4j
 public class TaskController extends BaseTaskController<TaskEntity, TaskResponse> {
 
     private final TaskService taskService;
@@ -77,7 +75,8 @@ public class TaskController extends BaseTaskController<TaskEntity, TaskResponse>
 
     @SubscriptionMapping
     public Flux<BaseTaskEvent<TaskResponse>> taskEvent() {
-        return taskEventPublisher.tasksEvents();
+        return taskEventPublisher.tasksEvents()
+                .filter(e -> e.getTask().getClass() == TaskResponse.class);
     }
 
     @SubscriptionMapping
