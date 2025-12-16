@@ -1,5 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.common;
 
+import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
@@ -9,8 +10,14 @@ import java.util.UUID;
 @Component
 public class TaskEventPublisher<R extends BaseTaskResponse> {
 
-    private Sinks.Many<BaseTaskEvent<R>> sink = Sinks.many().multicast().directAllOrNothing();
-    private Sinks.Many<UUID> deleteTaskSink = Sinks.many().multicast().directAllOrNothing();
+    private Sinks.Many<BaseTaskEvent<R>> sink = Sinks.many().replay().limit(1);
+    private Sinks.Many<UUID> deleteTaskSink = Sinks.many().replay().limit(1);
+
+    @PreDestroy
+    public void shutdown() {
+        sink.tryEmitComplete();
+        deleteTaskSink.tryEmitComplete();
+    }
 
     public Flux<BaseTaskEvent<R>> tasksEvents() {
         return sink.asFlux();
@@ -29,7 +36,7 @@ public class TaskEventPublisher<R extends BaseTaskResponse> {
     }
 
     public void resetSink() {
-        sink = Sinks.many().multicast().directAllOrNothing();
-        deleteTaskSink = Sinks.many().multicast().directAllOrNothing();
+        sink = Sinks.many().replay().limit(1);
+        deleteTaskSink = Sinks.many().replay().limit(1);
     }
 }

@@ -6,16 +6,18 @@ import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import lombok.Setter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -23,6 +25,8 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
 
     @Setter
     private BaseTaskRepository<E> repository;
+    @Autowired
+    public TaskEventPublisher<R> taskEventPublisher;
 
     protected BaseTaskCreationMutationControllerTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn,
                                                      String subscriptionDocument, String subscriptionPath,
@@ -30,40 +34,37 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
         super(path, document, requestVariable, validationErrorSourceLocationColumn, subscriptionDocument, subscriptionPath, subscriptionEntityType);
     }
 
-    @Test
-    @Timeout(10)
-    public void whenCreateTaskByUser_shouldReturnTaskResponse() {
-        whenCreateTask_shouldReturnTaskResponse(UserRole.USER);
+    @BeforeEach
+    public void resetSink() {
+        taskEventPublisher.resetSink();
     }
 
-    @Test
-    @Timeout(10)
-    public void whenCreateTaskByAdmin_shouldReturnTaskResponse() {
-        whenCreateTask_shouldReturnTaskResponse(UserRole.ADMIN);
-    }
-
-    private void whenCreateTask_shouldReturnTaskResponse(UserRole role) {
+    @ParameterizedTest
+    @EnumSource(value = UserRole.class)
+    public void whenCreateTask_shouldReturnTaskResponse(UserRole role) {
 
         UserEntity userEntity = createUser(role);
         UserEntity assignedTo = createUser("developer", "developer@domain.com");
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), assignedTo.getUserId());
 
-        Flux<BaseTaskEvent> event = createWebSocketGraphQlTester(userEntity)
+        Flux<BaseTaskEvent<R>> eventFlux = createWebSocketGraphQlTester(userEntity)
                 .document(subscriptionDocument)
                 .executeSubscription().toFlux()
-                .map(r -> r.path(subscriptionPath).entity(subscriptionEntityType).get());
+                .map(r -> (BaseTaskEvent<R>) r.path(subscriptionPath).entity(subscriptionEntityType).get());
 
-        Flux<Map<String, Object>> combined = event
-                .take(1)
-                .zipWith(Mono.defer(() -> Mono.just(sendCreateTaskRequest(userEntity, taskDTO))))
-                .flatMap(tuple -> repository.findById(tuple.getT2().getId())
-                        .map(entity -> Map.of("event", tuple.getT1(), "response", tuple.getT2(), "entity", entity)));
+        AtomicReference<E> entityRef = new AtomicReference<>();
+        AtomicReference<R> responseRef = new AtomicReference<>();
 
-        StepVerifier.create(combined)
-                .assertNext(map -> {
-                    BaseTaskEvent<R> taskEvent = (BaseTaskEvent<R>) map.get("event");
-                    R taskResponse = (R) map.get("response");
-                    E taskEntity = (E) map.get("entity");
+        StepVerifier.create(eventFlux)
+                .then(() -> {
+                    R response = sendCreateTaskRequest(userEntity, taskDTO);
+                    responseRef.set(response);
+                    E entity = repository.findById(response.getId()).block();
+                    entityRef.set(entity);
+                })
+                .assertNext(taskEvent -> {
+                    E taskEntity = entityRef.get();
+                    R taskResponse = responseRef.get();
                     assertTaskEntity(taskEntity, taskDTO, userEntity.getUserId(), assignedTo.getUserId());
                     assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), assignedTo.getUsername(),
                             taskDTO.getStatus(), taskDTO.getPriority());
@@ -71,7 +72,7 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
                     assertTaskEventResponse(taskEvent.getTask(), createExpectedSubscriptionResponse(taskEntity, userEntity.getUsername(), assignedTo.getUsername()));
                 })
                 .thenCancel()
-                .verify(Duration.ofSeconds(15));
+                .verify(Duration.ofSeconds(5));
     }
 
     @Test

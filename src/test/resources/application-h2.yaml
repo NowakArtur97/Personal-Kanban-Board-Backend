@@ -20,6 +20,9 @@ spring:
       enabled: true
       path: /h2
 
+server:
+  shutdown: immediate # disable graceful shutdown
+
 app:
   h2:
     port:
