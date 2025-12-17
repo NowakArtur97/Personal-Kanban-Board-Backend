@@ -9,6 +9,7 @@ import com.nowakartur97.personalkanbanboardbackend.user.UserRepository;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -49,20 +50,14 @@ public abstract class IntegrationTest {
     @LocalServerPort
     protected int port;
 
-    @AfterEach
-    public void closeWebSockets() {
-        Hooks.resetOnEachOperator();
-        Schedulers.shutdownNow();
-    }
-
     // TODO: Setup testcontainers
 //    @BeforeAll
 //    public static void startContainer() {
 //        postgresContainer.start();
 //    }
 
-    @AfterEach
-    public void cleanUpUserTable() {
+    @BeforeEach
+    public void cleanUpTables() {
         userRepository.deleteAll().block();
     }
 
@@ -71,6 +66,12 @@ public abstract class IntegrationTest {
 //    public static void stopContainer() {
 //        postgresContainer.stop();
 //    }
+
+    @AfterEach
+    public void closeWebSockets() {
+        Hooks.resetOnEachOperator();
+        Schedulers.shutdownNow();
+    }
 
     protected UserEntity createUser() {
         return userRepository.save(createUser("testUser", "testUser@domain.com")).block();

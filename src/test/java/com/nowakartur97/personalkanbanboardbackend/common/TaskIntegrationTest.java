@@ -8,7 +8,7 @@ import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskRepository;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
@@ -29,9 +29,12 @@ public abstract class TaskIntegrationTest extends BasicIntegrationTest {
         super(path, document, requestVariable);
     }
 
-    @AfterEach
-    public void cleanUpTaskTable() {
+    @Override
+    @BeforeEach
+    public void cleanUpTables() {
+        subtaskRepository.deleteAll().block();
         taskRepository.deleteAll().block();
+        super.cleanUpTables();
     }
 
     protected TaskEntity createTask(UUID authorId) {

@@ -12,12 +12,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import reactor.util.function.Tuple3;
+import reactor.util.function.Tuples;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -52,19 +54,21 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
                 .executeSubscription().toFlux()
                 .map(r -> (BaseTaskEvent<R>) r.path(subscriptionPath).entity(subscriptionEntityType).get());
 
-        AtomicReference<E> entityRef = new AtomicReference<>();
-        AtomicReference<R> responseRef = new AtomicReference<>();
+        Mono<R> mutationMono = Mono.fromCallable(() -> sendCreateTaskRequest(userEntity, taskDTO));
 
-        StepVerifier.create(eventFlux)
-                .then(() -> {
-                    R response = sendCreateTaskRequest(userEntity, taskDTO);
-                    responseRef.set(response);
-                    E entity = repository.findById(response.getId()).block();
-                    entityRef.set(entity);
-                })
-                .assertNext(taskEvent -> {
-                    E taskEntity = entityRef.get();
-                    R taskResponse = responseRef.get();
+        Flux<Tuple3<BaseTaskEvent<R>, R, E>> combined = eventFlux
+                .take(1)
+                .zipWith(mutationMono)
+                .flatMap(tuple ->
+                        repository.findById(tuple.getT2().getId())
+                                .map(entity -> Tuples.of(tuple.getT1(), tuple.getT2(), entity))
+                );
+
+        StepVerifier.create(combined)
+                .assertNext(tuple -> {
+                    BaseTaskEvent<R> taskEvent = tuple.getT1();
+                    R taskResponse = tuple.getT2();
+                    E taskEntity = tuple.getT3();
                     assertTaskEntity(taskEntity, taskDTO, userEntity.getUserId(), assignedTo.getUserId());
                     assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), assignedTo.getUsername(),
                             taskDTO.getStatus(), taskDTO.getPriority());

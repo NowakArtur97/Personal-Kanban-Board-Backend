@@ -63,7 +63,7 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
                     .flatMap(__ -> createdBy)
                     .flatMap(user -> Mono.just(mapper.mapToEntity(taskId, taskDTO, user.getUserId()))
                             .flatMap(service::save)
-                            .map(subtask -> mapper.mapToResponse(subtask, user.getUsername())))
+                            .map(task -> mapper.mapToResponse(task, user.getUsername())))
                     .doOnNext(task -> taskEventPublisher.emitTaskEvent(task, TaskEventType.CREATE));
         }
         Mono<UserEntity> assignedTo = userService.findById(taskDTO.getAssignedTo());
@@ -71,7 +71,7 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
                 .flatMap(__ -> Mono.zip(createdBy, assignedTo))
                 .flatMap(tuple -> Mono.just(mapper.mapToEntity(taskId, taskDTO, tuple.getT1().getUserId(), tuple.getT2().getUserId()))
                         .flatMap(service::save)
-                        .map(subtask -> mapper.mapToResponse(subtask, tuple.getT1().getUsername(), tuple.getT2().getUsername())))
+                        .map(task -> mapper.mapToResponse(task, tuple.getT1().getUsername(), tuple.getT2().getUsername())))
                 .doOnNext(task -> taskEventPublisher.emitTaskEvent(task, TaskEventType.CREATE));
     }
 
