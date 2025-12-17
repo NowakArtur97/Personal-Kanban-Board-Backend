@@ -107,12 +107,11 @@ public abstract class TaskMutationTest extends TaskIntegrationTest {
 
     protected abstract GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, TaskDTO taskDTO);
 
-    protected void assertBaseTaskEntity(BaseTaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo,
-                                        TaskStatus taskStatus, TaskPriority taskPriority) {
+    protected void assertBaseTaskEntity(BaseTaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
         assertThat(taskEntity).isNotNull();
         assertThat(taskEntity.getTitle()).isEqualTo(taskDTO.getTitle());
-        assertThat(taskEntity.getStatus()).isEqualTo(taskStatus);
-        assertThat(taskEntity.getPriority()).isEqualTo(taskPriority);
+        assertThat(taskEntity.getStatus()).isEqualTo(taskDTO.getStatus() != null ? taskDTO.getStatus() : TaskStatus.READY_TO_START);
+        assertThat(taskEntity.getPriority()).isEqualTo(taskDTO.getPriority() != null ? taskDTO.getPriority() : TaskPriority.LOW);
         assertThat(taskEntity.getTargetEndDate()).isEqualTo(taskDTO.getTargetEndDate());
         assertThat(taskEntity.getAssignedTo()).isEqualTo(assignedTo);
         assertThat(taskEntity.getCreatedOn()).isNotNull();
@@ -121,13 +120,12 @@ public abstract class TaskMutationTest extends TaskIntegrationTest {
         assertThat(taskEntity.getUpdatedBy()).isNull();
     }
 
-    protected void assertBaseTaskResponse(BaseTaskResponse taskResponse, TaskDTO taskDTO, String createdBy, String assignedTo,
-                                          TaskStatus status, TaskPriority priority) {
+    protected void assertBaseTaskResponse(BaseTaskResponse taskResponse, TaskDTO taskDTO, String createdBy, String assignedTo) {
         assertThat(taskResponse).isNotNull();
         assertThat(taskResponse.getTaskId()).isNotNull();
         assertThat(taskResponse.getTitle()).isEqualTo(taskDTO.getTitle());
-        assertThat(taskResponse.getStatus()).isEqualTo(status);
-        assertThat(taskResponse.getPriority()).isEqualTo(priority);
+        assertThat(taskResponse.getStatus()).isEqualTo(taskDTO.getStatus() != null ? taskDTO.getStatus() : TaskStatus.READY_TO_START);
+        assertThat(taskResponse.getPriority()).isEqualTo(taskDTO.getPriority() != null ? taskDTO.getPriority() : TaskPriority.LOW);
         assertThat(taskResponse.getTargetEndDate()).isEqualTo(taskDTO.getTargetEndDate());
         assertThat(taskResponse.getAssignedTo()).isEqualTo(assignedTo);
         assertThat(taskResponse.getCreatedOn()).isNotNull();
@@ -136,12 +134,12 @@ public abstract class TaskMutationTest extends TaskIntegrationTest {
         assertThat(taskResponse.getUpdatedBy()).isNull();
     }
 
-    protected void assertBaseTaskResponse(BaseTaskResponse taskResponse, BaseTaskEntity taskEntity, TaskDTO taskDTO, String createdBy,
-                                          String updatedBy, String assignedTo, TaskStatus status, TaskPriority priority) {
+    protected void assertBaseTaskResponse(BaseTaskResponse taskResponse, BaseTaskEntity taskEntity, TaskDTO taskDTO,
+                                          String createdBy, String updatedBy, String assignedTo) {
         assertThat(taskResponse).isNotNull();
         assertThat(taskResponse.getTitle()).isEqualTo(taskDTO.getTitle());
-        assertThat(taskResponse.getStatus()).isEqualTo(status);
-        assertThat(taskResponse.getPriority()).isEqualTo(priority);
+        assertThat(taskResponse.getStatus()).isEqualTo(taskDTO.getStatus() != null ? taskDTO.getStatus() : TaskStatus.READY_TO_START);
+        assertThat(taskResponse.getPriority()).isEqualTo(taskDTO.getPriority() != null ? taskDTO.getPriority() : TaskPriority.LOW);
         assertThat(taskResponse.getTargetEndDate()).isEqualTo(taskDTO.getTargetEndDate());
         assertThat(taskResponse.getAssignedTo()).isEqualTo(assignedTo);
         assertThat(Instant.parse(taskResponse.getCreatedOn()).toEpochMilli()).isEqualTo(taskEntity.getCreatedOn().toEpochMilli());

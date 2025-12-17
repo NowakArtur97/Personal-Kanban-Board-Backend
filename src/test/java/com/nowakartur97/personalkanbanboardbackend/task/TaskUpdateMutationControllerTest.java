@@ -51,8 +51,8 @@ public class TaskUpdateMutationControllerTest extends BaseTaskUpdateMutationCont
 
     @Override
     protected void assertTaskResponse(TaskResponse taskResponse, TaskEntity taskEntity, TaskDTO taskDTO, String createdBy,
-                                      String updatedBy, String assignedTo, TaskStatus status, TaskPriority priority) {
-        assertBaseTaskResponse(taskResponse, taskEntity, taskDTO, createdBy, updatedBy, assignedTo, status, priority);
+                                      String updatedBy, String assignedTo) {
+        assertBaseTaskResponse(taskResponse, taskEntity, taskDTO, createdBy, updatedBy, assignedTo);
         assertThat(taskResponse.getTaskId()).isEqualTo(taskEntity.getTaskId());
         assertThat(taskResponse.getSubtasks()).isNull();
     }

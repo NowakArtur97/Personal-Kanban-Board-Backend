@@ -4,12 +4,13 @@ import com.nowakartur97.personalkanbanboardbackend.auth.JWTConfigurationProperti
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskRepository;
+import com.nowakartur97.personalkanbanboardbackend.task.TaskRepository;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRepository;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +41,10 @@ public abstract class IntegrationTest {
     @Autowired
     protected UserRepository userRepository;
     @Autowired
+    protected TaskRepository taskRepository;
+    @Autowired
+    protected SubtaskRepository subtaskRepository;
+    @Autowired
     protected HttpGraphQlTester httpGraphQlTester;
     @Autowired
     protected JWTUtil jwtUtil;
@@ -56,8 +61,10 @@ public abstract class IntegrationTest {
 //        postgresContainer.start();
 //    }
 
-    @BeforeEach
+    @AfterEach
     public void cleanUpTables() {
+        taskRepository.deleteAll().block();
+        subtaskRepository.deleteAll().block();
         userRepository.deleteAll().block();
     }
 

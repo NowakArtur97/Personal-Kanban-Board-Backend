@@ -108,6 +108,7 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
 
     protected abstract R sendUpdateTaskRequest(UserEntity userEntity, E taskEntity, TaskDTO taskDTO);
 
+    // TODO: Remove
 //    protected abstract R createExpectedSubscriptionResponse(E taskEntity, String createdBy, String updatedBy, String assignedTo);
 
     protected abstract void assertTaskId(E updatedTaskEntity, E taskEntity);
@@ -117,19 +118,14 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
     }
 
     private void assertTaskEntity(E taskEntity, TaskDTO taskDTO, UUID createdBy) {
-        assertTaskEntity(taskEntity, taskDTO, createdBy, createdBy, createdBy, TaskStatus.READY_TO_START, TaskPriority.LOW);
+        assertTaskEntity(taskEntity, taskDTO, createdBy, createdBy, createdBy);
     }
 
     private void assertTaskEntity(E taskEntity, TaskDTO taskDTO, UUID createdBy, UUID updatedBy, UUID assignedTo) {
-        assertTaskEntity(taskEntity, taskDTO, createdBy, updatedBy, assignedTo, taskDTO.getStatus(), taskDTO.getPriority());
-    }
-
-    private void assertTaskEntity(E taskEntity, TaskDTO taskDTO, UUID createdBy, UUID updatedBy, UUID assignedTo,
-                                  TaskStatus taskStatus, TaskPriority taskPriority) {
         assertThat(taskEntity).isNotNull();
         assertThat(taskEntity.getTitle()).isEqualTo(taskDTO.getTitle());
-        assertThat(taskEntity.getStatus()).isEqualTo(taskStatus);
-        assertThat(taskEntity.getPriority()).isEqualTo(taskPriority);
+        assertThat(taskEntity.getStatus()).isEqualTo(taskDTO.getStatus() != null ? taskDTO.getStatus() : TaskStatus.READY_TO_START);
+        assertThat(taskEntity.getPriority()).isEqualTo(taskDTO.getPriority() != null ? taskDTO.getPriority() : TaskPriority.LOW);
         assertThat(taskEntity.getTargetEndDate()).isEqualTo(taskDTO.getTargetEndDate());
         assertThat(taskEntity.getAssignedTo()).isEqualTo(assignedTo);
         assertThat(taskEntity.getCreatedOn()).isEqualTo(taskEntity.getCreatedOn());
@@ -139,17 +135,13 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
     }
 
     private void assertTaskResponse(R taskResponse, E taskEntity, TaskDTO taskDTO, String createdBy) {
-        assertTaskResponse(taskResponse, taskEntity, taskDTO, createdBy, createdBy, createdBy, taskDTO.getStatus(), taskDTO.getPriority());
+        assertTaskResponse(taskResponse, taskEntity, taskDTO, createdBy, createdBy, createdBy);
     }
 
     private void assertTaskResponse(R taskResponse, E taskEntity, TaskDTO taskDTO, String createdBy, String updatedBy) {
-        assertTaskResponse(taskResponse, taskEntity, taskDTO, createdBy, updatedBy, updatedBy, TaskStatus.READY_TO_START, TaskPriority.LOW);
+        assertTaskResponse(taskResponse, taskEntity, taskDTO, createdBy, updatedBy, updatedBy);
     }
 
-    private void assertTaskResponse(R taskResponse, E updatedTaskEntity, TaskDTO taskDTO, String createdBy, String updatedBy, String assignedTo) {
-        assertTaskResponse(taskResponse, updatedTaskEntity, taskDTO, createdBy, updatedBy, assignedTo, taskDTO.getStatus(), taskDTO.getPriority());
-    }
-
-    protected abstract void assertTaskResponse(R taskResponse, E taskEntity, TaskDTO taskDTO, String createdBy,
-                                               String updatedBy, String assignedTo, TaskStatus status, TaskPriority priority);
+    protected abstract void assertTaskResponse(R taskResponse, E taskEntity, TaskDTO taskDTO,
+                                               String createdBy, String updatedBy, String assignedTo);
 }

@@ -1,15 +1,11 @@
 package com.nowakartur97.personalkanbanboardbackend.common;
 
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
-import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskRepository;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
-import com.nowakartur97.personalkanbanboardbackend.task.TaskRepository;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -19,22 +15,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public abstract class TaskIntegrationTest extends BasicIntegrationTest {
 
-    @Autowired
-    protected TaskRepository taskRepository;
-
-    @Autowired
-    protected SubtaskRepository subtaskRepository;
-
     public TaskIntegrationTest(String path, String document, RequestVariable requestVariable) {
         super(path, document, requestVariable);
-    }
-
-    @Override
-    @BeforeEach
-    public void cleanUpTables() {
-        subtaskRepository.deleteAll().block();
-        taskRepository.deleteAll().block();
-        super.cleanUpTables();
     }
 
     protected TaskEntity createTask(UUID authorId) {

@@ -37,9 +37,8 @@ public class TaskCreationMutationControllerTest extends BaseTaskCreationMutation
     }
 
     @Override
-    protected void assertTaskResponse(TaskResponse taskResponse, TaskDTO taskDTO, String createdBy, String assignedTo,
-                                      TaskStatus status, TaskPriority priority) {
-        assertBaseTaskResponse(taskResponse, taskDTO, createdBy, assignedTo, status, priority);
+    protected void assertTaskResponse(TaskResponse taskResponse, TaskDTO taskDTO, String createdBy, String assignedTo) {
+        assertBaseTaskResponse(taskResponse, taskDTO, createdBy, assignedTo);
         assertThat(taskResponse.getTaskId()).isNotNull();
         assertThat(taskResponse.getSubtasks()).isNull();
     }
@@ -51,9 +50,8 @@ public class TaskCreationMutationControllerTest extends BaseTaskCreationMutation
     }
 
     @Override
-    protected void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo,
-                                    TaskStatus taskStatus, TaskPriority taskPriority) {
-        assertBaseTaskEntity(taskEntity, taskDTO, createdBy, assignedTo, taskStatus, taskPriority);
+    protected void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
+        assertBaseTaskEntity(taskEntity, taskDTO, createdBy, assignedTo);
         assertThat(taskEntity.getTaskId()).isNotNull();
     }
 

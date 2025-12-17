@@ -5,8 +5,6 @@ import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.SubtaskEvent;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
-import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
-import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,10 +64,8 @@ public class SubtaskCreationMutationControllerTest extends BaseTaskCreationMutat
     }
 
     @Override
-    protected void assertTaskResponse(SubtaskResponse subtaskResponse, TaskDTO subTaskDTO,
-                                      String createdBy, String assignedTo,
-                                      TaskStatus status, TaskPriority priority) {
-        assertBaseTaskResponse(subtaskResponse, subTaskDTO, createdBy, assignedTo, status, priority);
+    protected void assertTaskResponse(SubtaskResponse subtaskResponse, TaskDTO subTaskDTO, String createdBy, String assignedTo) {
+        assertBaseTaskResponse(subtaskResponse, subTaskDTO, createdBy, assignedTo);
         assertThat(subtaskResponse.getSubtaskId()).isNotNull();
         assertThat(subtaskResponse.getTaskId()).isEqualTo(taskId);
     }
@@ -81,9 +77,8 @@ public class SubtaskCreationMutationControllerTest extends BaseTaskCreationMutat
     }
 
     @Override
-    protected void assertTaskEntity(SubtaskEntity subtaskEntity, TaskDTO subTaskDTO, UUID createdBy, UUID assignedTo,
-                                    TaskStatus taskStatus, TaskPriority taskPriority) {
-        assertBaseTaskEntity(subtaskEntity, subTaskDTO, createdBy, assignedTo, taskStatus, taskPriority);
+    protected void assertTaskEntity(SubtaskEntity subtaskEntity, TaskDTO subTaskDTO, UUID createdBy, UUID assignedTo) {
+        assertBaseTaskEntity(subtaskEntity, subTaskDTO, createdBy, assignedTo);
         assertThat(subtaskEntity.getSubtaskId()).isNotNull();
         assertThat(subtaskEntity.getTaskId()).isEqualTo(taskId);
     }

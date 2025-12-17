@@ -5,8 +5,6 @@ import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
-import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
-import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.graphql.test.tester.GraphQlTester;
@@ -58,9 +56,9 @@ public class SubtaskUpdateMutationControllerTest extends BaseTaskUpdateMutationC
     }
 
     @Override
-    protected void assertTaskResponse(SubtaskResponse subtaskResponse, SubtaskEntity subtaskEntity, TaskDTO subtaskDTO, String createdBy,
-                                      String updatedBy, String assignedTo, TaskStatus status, TaskPriority priority) {
-        assertBaseTaskResponse(subtaskResponse, subtaskEntity, subtaskDTO, createdBy, updatedBy, assignedTo, status, priority);
+    protected void assertTaskResponse(SubtaskResponse subtaskResponse, SubtaskEntity subtaskEntity, TaskDTO subtaskDTO,
+                                      String createdBy, String updatedBy, String assignedTo) {
+        assertBaseTaskResponse(subtaskResponse, subtaskEntity, subtaskDTO, createdBy, updatedBy, assignedTo);
         assertThat(subtaskResponse.getSubtaskId()).isEqualTo(subtaskEntity.getSubtaskId());
         assertThat(subtaskResponse.getTaskId()).isEqualTo(subtaskEntity.getTaskId());
     }

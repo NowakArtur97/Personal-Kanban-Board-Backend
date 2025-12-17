@@ -49,6 +49,19 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
         UserEntity assignedTo = createUser("developer", "developer@domain.com");
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), assignedTo.getUserId());
 
+        assertMutationAndSubscription(userEntity, assignedTo, taskDTO);
+    }
+
+    @Test
+    public void whenCreateTask_shouldCreateTaskWithDefaultValuesAndReturnTaskResponse() {
+
+        UserEntity userEntity = createUser();
+        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
+
+        assertMutationAndSubscription(userEntity, userEntity, taskDTO);
+    }
+
+    private void assertMutationAndSubscription(UserEntity userEntity, UserEntity assignedTo, TaskDTO taskDTO) {
         Flux<BaseTaskEvent<R>> eventFlux = createWebSocketGraphQlTester(userEntity)
                 .document(subscriptionDocument)
                 .executeSubscription().toFlux()
@@ -70,8 +83,7 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
                     R taskResponse = tuple.getT2();
                     E taskEntity = tuple.getT3();
                     assertTaskEntity(taskEntity, taskDTO, userEntity.getUserId(), assignedTo.getUserId());
-                    assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), assignedTo.getUsername(),
-                            taskDTO.getStatus(), taskDTO.getPriority());
+                    assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), assignedTo.getUsername());
                     assertThat(taskEvent.getTaskEventType()).isEqualTo(TaskEventType.CREATE);
                     assertTaskEventResponse(taskEvent.getTask(), createExpectedSubscriptionResponse(taskEntity, userEntity.getUsername(), assignedTo.getUsername()));
                 })
@@ -79,39 +91,13 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
                 .verify(Duration.ofSeconds(5));
     }
 
-    @Test
-    public void whenCreateTask_shouldCreateTaskWithDefaultValuesAndReturnTaskResponse() {
-
-        UserEntity userEntity = createUser();
-        TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
-
-        R taskResponse = sendCreateTaskRequest(userEntity, taskDTO);
-
-        assertTaskEntity(repository.findAll().blockLast(), taskDTO, userEntity.getUserId());
-        assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername());
-    }
-
     protected abstract R sendCreateTaskRequest(UserEntity userEntity, TaskDTO taskDTO);
 
     protected abstract R createExpectedSubscriptionResponse(E taskEntity, String createdBy, String assignedTo);
 
-    protected void assertTaskResponse(R taskResponse, TaskDTO taskDTO, String createdBy) {
-        assertTaskResponse(taskResponse, taskDTO, createdBy, createdBy, TaskStatus.READY_TO_START, TaskPriority.LOW);
-    }
-
-    protected abstract void assertTaskResponse(R taskResponse, TaskDTO taskDTO, String createdBy, String assignedTo,
-                                               TaskStatus status, TaskPriority priority);
+    protected abstract void assertTaskResponse(R taskResponse, TaskDTO taskDTO, String createdBy, String assignedTo);
 
     protected abstract void assertTaskEventResponse(R mutationTaskResponse, R subscriptionTaskResponse);
 
-    protected void assertTaskEntity(E taskEntity, TaskDTO taskDTO, UUID createdBy) {
-        assertTaskEntity(taskEntity, taskDTO, createdBy, createdBy, TaskStatus.READY_TO_START, TaskPriority.LOW);
-    }
-
-    protected void assertTaskEntity(E taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
-        assertTaskEntity(taskEntity, taskDTO, createdBy, assignedTo, taskDTO.getStatus(), taskDTO.getPriority());
-    }
-
-    protected abstract void assertTaskEntity(E taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo,
-                                             TaskStatus taskStatus, TaskPriority taskPriority);
+    protected abstract void assertTaskEntity(E taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo);
 }
