@@ -7,6 +7,7 @@ import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
 import lombok.Setter;
+import org.apache.logging.log4j.util.TriConsumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -35,7 +36,6 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
                                                    String subscriptionDocument, String subscriptionPath,
                                                    Class<? extends BaseTaskEvent<? extends BaseTaskResponse>> subscriptionEntityTyp,
                                                    String className, String idFieldName, int taskIdErrorSourceLocationColumn) {
-        // TODO: Add subscription to test scope
         super(path, document, requestVariable, validationErrorSourceLocationColumn, subscriptionDocument, subscriptionPath, subscriptionEntityTyp);
         this.className = className;
         this.idFieldName = idFieldName;
@@ -52,7 +52,13 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
         UserEntity assignedTo = createUser("developer", "developer@domain.com");
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), assignedTo.getUserId());
 
-        assertTaskMutationAndSubscription(author, updatedBy, assignedTo, taskEntity, taskDTO);
+        assertTaskMutationAndSubscription(author, sendUpdateTaskRequest(updatedBy, taskEntity, taskDTO),
+                (updatedTaskEntity, taskResponse, taskEvent) -> {
+                    assertTaskEntity(updatedTaskEntity, taskDTO, author, updatedBy, assignedTo);
+                    assertTaskId(updatedTaskEntity, taskEntity);
+                    assertTaskResponse(taskResponse, updatedTaskEntity, taskDTO, author.getUsername(), updatedBy.getUsername(), assignedTo.getUsername());
+                    assertTaskEventResponse(taskEvent.getTask(), createExpectedSubscriptionResponse(updatedTaskEntity, taskDTO, author.getUsername(), updatedBy.getUsername(), assignedTo.getUsername()));
+                });
     }
 
     @Test
@@ -62,7 +68,13 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
         E taskEntity = createTask(userEntity);
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), userEntity.getUserId());
 
-        assertTaskMutationAndSubscription(userEntity, userEntity, userEntity, taskEntity, taskDTO);
+        assertTaskMutationAndSubscription(userEntity, sendUpdateTaskRequest(userEntity, taskEntity, taskDTO),
+                (updatedTaskEntity, taskResponse, taskEvent) -> {
+                    assertTaskEntity(updatedTaskEntity, taskDTO, userEntity, userEntity, userEntity);
+                    assertTaskId(updatedTaskEntity, taskEntity);
+                    assertTaskResponse(taskResponse, updatedTaskEntity, taskDTO, userEntity.getUsername(), userEntity.getUsername(), userEntity.getUsername());
+                    assertTaskEventResponse(taskEvent.getTask(), createExpectedSubscriptionResponse(updatedTaskEntity, taskDTO, userEntity.getUsername(), userEntity.getUsername(), userEntity.getUsername()));
+                });
     }
 
     @Test
@@ -72,7 +84,13 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
         E taskEntity = createTask(userEntity);
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
 
-        assertTaskMutationAndSubscription(userEntity, userEntity, userEntity, taskEntity, taskDTO);
+        assertTaskMutationAndSubscription(userEntity, sendUpdateTaskRequest(userEntity, taskEntity, taskDTO),
+                (updatedTaskEntity, taskResponse, taskEvent) -> {
+                    assertTaskEntity(updatedTaskEntity, taskDTO, userEntity, userEntity, userEntity);
+                    assertTaskId(updatedTaskEntity, taskEntity);
+                    assertTaskResponse(taskResponse, updatedTaskEntity, taskDTO, userEntity.getUsername(), userEntity.getUsername(), userEntity.getUsername());
+                    assertTaskEventResponse(taskEvent.getTask(), createExpectedSubscriptionResponse(updatedTaskEntity, taskDTO, userEntity.getUsername(), userEntity.getUsername(), userEntity.getUsername()));
+                });
     }
 
     @Test
@@ -97,13 +115,13 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
                 "Variable '" + idFieldName + "' has an invalid value: Variable '" + idFieldName + "' has coerced Null value for NonNull type 'UUID!'");
     }
 
-    private void assertTaskMutationAndSubscription(UserEntity author, UserEntity updatedBy, UserEntity assignedTo, E taskEntity, TaskDTO taskDTO) {
-        Flux<BaseTaskEvent<R>> eventFlux = createWebSocketGraphQlTester(updatedBy)
+    private void assertTaskMutationAndSubscription(UserEntity userEntity, R request, TriConsumer<E, R, BaseTaskEvent<R>> assertions) {
+        Flux<BaseTaskEvent<R>> eventFlux = createWebSocketGraphQlTester(userEntity)
                 .document(subscriptionDocument)
                 .executeSubscription().toFlux()
                 .map(r -> (BaseTaskEvent<R>) r.path(subscriptionPath).entity(subscriptionEntityType).get());
 
-        Mono<R> mutationMono = Mono.fromCallable(() -> sendUpdateTaskRequest(updatedBy, taskEntity, taskDTO));
+        Mono<R> mutationMono = Mono.fromCallable(() -> request);
 
         Flux<Tuple3<BaseTaskEvent<R>, R, E>> combined = eventFlux
                 .take(1)
@@ -117,11 +135,8 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
                     BaseTaskEvent<R> taskEvent = tuple.getT1();
                     R taskResponse = tuple.getT2();
                     E updatedTaskEntity = tuple.getT3();
-                    assertTaskEntity(updatedTaskEntity, taskDTO, author, updatedBy, assignedTo);
-                    assertTaskId(updatedTaskEntity, taskEntity);
-                    assertTaskResponse(taskResponse, updatedTaskEntity, taskDTO, author.getUsername(), updatedBy.getUsername(), assignedTo.getUsername());
                     assertThat(taskEvent.getTaskEventType()).isEqualTo(TaskEventType.UPDATE);
-                    assertTaskEventResponse(taskEvent.getTask(), createExpectedSubscriptionResponse(updatedTaskEntity, taskDTO, author.getUsername(), updatedBy.getUsername(), assignedTo.getUsername()));
+                    assertions.accept(updatedTaskEntity, taskResponse, taskEvent);
                 })
                 .thenCancel()
                 .verify(Duration.ofSeconds(5));
