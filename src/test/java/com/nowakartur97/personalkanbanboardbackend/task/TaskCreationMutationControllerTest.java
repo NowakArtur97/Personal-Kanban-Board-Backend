@@ -4,7 +4,6 @@ import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskCreationMutati
 import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.TaskEvent;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.util.Collections;
@@ -23,11 +22,6 @@ public class TaskCreationMutationControllerTest extends BaseTaskCreationMutation
         super(CREATE_TASK_PATH, CREATE_TASK,
                 new RequestVariable("taskDTO", new TaskDTO("title", "description", null, null, null, null)),
                 22, TASK_EVENT, "taskEvent", TaskEvent.class);
-    }
-
-    @BeforeEach
-    public void setRepository() {
-        setRepository(taskRepository);
     }
 
     @Override

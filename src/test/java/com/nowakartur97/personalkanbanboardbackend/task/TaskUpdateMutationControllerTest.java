@@ -4,7 +4,6 @@ import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskUpdateMutation
 import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.TaskEvent;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.util.Collections;
@@ -24,11 +23,6 @@ public class TaskUpdateMutationControllerTest extends BaseTaskUpdateMutationCont
                 new DoubleRequestVariable("taskDTO", new TaskDTO("title", "description", null, null, null, null), "taskId", UUID.randomUUID()),
                 38, TASK_EVENT, "taskEvent", TaskEvent.class,
                 "Task", "taskId", 22);
-    }
-
-    @BeforeEach
-    public void setRepository() {
-        setRepository(taskRepository);
     }
 
     @Override

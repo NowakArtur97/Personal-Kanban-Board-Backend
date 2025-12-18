@@ -7,7 +7,6 @@ import com.nowakartur97.personalkanbanboardbackend.common.SubtaskEvent;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import graphql.language.SourceLocation;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.graphql.test.tester.GraphQlTester;
 
@@ -27,11 +26,6 @@ public class SubtaskCreationMutationControllerTest extends BaseTaskCreationMutat
                 new DoubleRequestVariable("subtaskDTO", new TaskDTO("title", "description", null, null, null, null),
                         "taskId", UUID.randomUUID()), 41,
                 SUBTASK_EVENT, "subtaskEvent", SubtaskEvent.class);
-    }
-
-    @BeforeEach
-    public void setRepository() {
-        setRepository(subtaskRepository);
     }
 
     @Test

@@ -6,31 +6,20 @@ import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
-import lombok.Setter;
-import org.apache.logging.log4j.util.TriConsumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-import reactor.util.function.Tuple3;
-import reactor.util.function.Tuples;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEntity, R extends BaseTaskResponse> extends TaskMutationTest {
+public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEntity, R extends BaseTaskResponse> extends TaskMutationTest<E, R> {
 
     private final String className;
     protected final String idFieldName;
     private final int taskIdErrorSourceLocationColumn;
-
-    @Setter
-    private BaseTaskRepository<E> repository;
 
     protected BaseTaskUpdateMutationControllerTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn,
                                                    String subscriptionDocument, String subscriptionPath,
@@ -52,7 +41,7 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
         UserEntity assignedTo = createUser("developer", "developer@domain.com");
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), assignedTo.getUserId());
 
-        assertTaskMutationAndSubscription(author, sendUpdateTaskRequest(updatedBy, taskEntity, taskDTO),
+        assertTaskMutationAndSubscription(author, sendUpdateTaskRequest(updatedBy, taskEntity, taskDTO), TaskEventType.UPDATE,
                 (updatedTaskEntity, taskResponse, taskEvent) -> {
                     assertTaskEntity(updatedTaskEntity, taskDTO, author, updatedBy, assignedTo);
                     assertTaskId(updatedTaskEntity, taskEntity);
@@ -68,7 +57,7 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
         E taskEntity = createTask(userEntity);
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), userEntity.getUserId());
 
-        assertTaskMutationAndSubscription(userEntity, sendUpdateTaskRequest(userEntity, taskEntity, taskDTO),
+        assertTaskMutationAndSubscription(userEntity, sendUpdateTaskRequest(userEntity, taskEntity, taskDTO), TaskEventType.UPDATE,
                 (updatedTaskEntity, taskResponse, taskEvent) -> {
                     assertTaskEntity(updatedTaskEntity, taskDTO, userEntity, userEntity, userEntity);
                     assertTaskId(updatedTaskEntity, taskEntity);
@@ -84,7 +73,7 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
         E taskEntity = createTask(userEntity);
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
 
-        assertTaskMutationAndSubscription(userEntity, sendUpdateTaskRequest(userEntity, taskEntity, taskDTO),
+        assertTaskMutationAndSubscription(userEntity, sendUpdateTaskRequest(userEntity, taskEntity, taskDTO), TaskEventType.UPDATE,
                 (updatedTaskEntity, taskResponse, taskEvent) -> {
                     assertTaskEntity(updatedTaskEntity, taskDTO, userEntity, userEntity, userEntity);
                     assertTaskId(updatedTaskEntity, taskEntity);
@@ -113,33 +102,6 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
 
         assertValidationErrorResponse(sendRequestWithErrors(userEntity, document, reqVariable), new SourceLocation(1, taskIdErrorSourceLocationColumn),
                 "Variable '" + idFieldName + "' has an invalid value: Variable '" + idFieldName + "' has coerced Null value for NonNull type 'UUID!'");
-    }
-
-    private void assertTaskMutationAndSubscription(UserEntity userEntity, R request, TriConsumer<E, R, BaseTaskEvent<R>> assertions) {
-        Flux<BaseTaskEvent<R>> eventFlux = createWebSocketGraphQlTester(userEntity)
-                .document(subscriptionDocument)
-                .executeSubscription().toFlux()
-                .map(r -> (BaseTaskEvent<R>) r.path(subscriptionPath).entity(subscriptionEntityType).get());
-
-        Mono<R> mutationMono = Mono.fromCallable(() -> request);
-
-        Flux<Tuple3<BaseTaskEvent<R>, R, E>> combined = eventFlux
-                .take(1)
-                .zipWith(mutationMono)
-                .flatMap(tuple ->
-                        repository.findById(tuple.getT2().getId())
-                                .map(entity -> Tuples.of(tuple.getT1(), tuple.getT2(), entity))
-                );
-        StepVerifier.create(combined)
-                .assertNext(tuple -> {
-                    BaseTaskEvent<R> taskEvent = tuple.getT1();
-                    R taskResponse = tuple.getT2();
-                    E updatedTaskEntity = tuple.getT3();
-                    assertThat(taskEvent.getTaskEventType()).isEqualTo(TaskEventType.UPDATE);
-                    assertions.accept(updatedTaskEntity, taskResponse, taskEvent);
-                })
-                .thenCancel()
-                .verify(Duration.ofSeconds(5));
     }
 
     protected abstract E createTask(UserEntity userEntity);

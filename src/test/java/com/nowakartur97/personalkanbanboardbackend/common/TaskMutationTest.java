@@ -5,19 +5,26 @@ import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import graphql.language.SourceLocation;
+import org.apache.logging.log4j.util.TriConsumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+import reactor.util.function.Tuple3;
+import reactor.util.function.Tuples;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public abstract class TaskMutationTest<R extends BaseTaskResponse> extends TaskIntegrationTest {
+public abstract class TaskMutationTest<E extends BaseTaskEntity, R extends BaseTaskResponse> extends TaskIntegrationTest {
 
     private final int validationErrorSourceLocationColumn;
     protected final String subscriptionDocument;
@@ -25,6 +32,8 @@ public abstract class TaskMutationTest<R extends BaseTaskResponse> extends TaskI
     protected final Class<? extends BaseTaskEvent<? extends BaseTaskResponse>> subscriptionEntityType;
     @Autowired
     public TaskEventPublisher<R> taskEventPublisher;
+    @Autowired
+    private BaseTaskRepository<E> repository;
 
     protected TaskMutationTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn,
                                String subscriptionDocument, String subscriptionPath, Class<? extends BaseTaskEvent<? extends BaseTaskResponse>> subscriptionEntityType) {
@@ -113,6 +122,33 @@ public abstract class TaskMutationTest<R extends BaseTaskResponse> extends TaskI
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, LocalDate.of(2024, 1, 1), null);
 
         assertResponseErrors(sendTaskRequestWithErrors(userEntity, taskDTO), path, "Target end date cannot be in the past.");
+    }
+
+    protected void assertTaskMutationAndSubscription(UserEntity userEntity, R request, TaskEventType taskEventType, TriConsumer<E, R, BaseTaskEvent<R>> assertions) {
+        Flux<BaseTaskEvent<R>> eventFlux = createWebSocketGraphQlTester(userEntity)
+                .document(subscriptionDocument)
+                .executeSubscription().toFlux()
+                .map(r -> (BaseTaskEvent<R>) r.path(subscriptionPath).entity(subscriptionEntityType).get());
+
+        Mono<R> mutationMono = Mono.fromCallable(() -> request);
+
+        Flux<Tuple3<BaseTaskEvent<R>, R, E>> combined = eventFlux
+                .take(1)
+                .zipWith(mutationMono)
+                .flatMap(tuple ->
+                        repository.findById(tuple.getT2().getId())
+                                .map(entity -> Tuples.of(tuple.getT1(), tuple.getT2(), entity))
+                );
+        StepVerifier.create(combined)
+                .assertNext(tuple -> {
+                    BaseTaskEvent<R> taskEvent = tuple.getT1();
+                    R taskResponse = tuple.getT2();
+                    E updatedTaskEntity = tuple.getT3();
+                    assertThat(taskEvent.getTaskEventType()).isEqualTo(taskEventType);
+                    assertions.accept(updatedTaskEntity, taskResponse, taskEvent);
+                })
+                .thenCancel()
+                .verify(Duration.ofSeconds(5));
     }
 
     protected abstract GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, TaskDTO taskDTO);
