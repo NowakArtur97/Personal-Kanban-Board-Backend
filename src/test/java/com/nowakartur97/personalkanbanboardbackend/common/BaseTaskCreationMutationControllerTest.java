@@ -28,12 +28,7 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
         UserEntity assignedTo = createUser("developer", "developer@domain.com");
         TaskDTO taskDTO = new TaskDTO("title", "description", TaskStatus.IN_PROGRESS, TaskPriority.MEDIUM, LocalDate.now(), assignedTo.getUserId());
 
-        assertTaskMutationAndSubscription(userEntity, sendCreateTaskRequest(userEntity, taskDTO), TaskEventType.CREATE,
-                (taskEntity, taskResponse, taskEvent) -> {
-                    assertTaskEntity(taskEntity, taskDTO, userEntity.getUserId(), assignedTo.getUserId());
-                    assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), assignedTo.getUsername());
-                    assertTaskEventResponse(taskEvent.getTask(), createExpectedSubscriptionResponse(taskEntity, userEntity.getUsername(), assignedTo.getUsername()));
-                });
+        assertTaskMutationAndSubscription(userEntity, assignedTo, taskDTO);
     }
 
     @Test
@@ -42,15 +37,19 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
         UserEntity userEntity = createUser();
         TaskDTO taskDTO = new TaskDTO("title", "description", null, null, null, null);
 
-        assertTaskMutationAndSubscription(userEntity, sendCreateTaskRequest(userEntity, taskDTO), TaskEventType.CREATE,
-                (taskEntity, taskResponse, taskEvent) -> {
-                    assertTaskEntity(taskEntity, taskDTO, userEntity.getUserId(), userEntity.getUserId());
-                    assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), userEntity.getUsername());
-                    assertTaskEventResponse(taskEvent.getTask(), createExpectedSubscriptionResponse(taskEntity, userEntity.getUsername(), userEntity.getUsername()));
-                });
+        assertTaskMutationAndSubscription(userEntity, userEntity, taskDTO);
     }
 
     protected abstract R sendCreateTaskRequest(UserEntity userEntity, TaskDTO taskDTO);
+
+    private void assertTaskMutationAndSubscription(UserEntity userEntity, UserEntity assignedTo, TaskDTO taskDTO) {
+        assertTaskMutationAndSubscription(userEntity, sendCreateTaskRequest(userEntity, taskDTO), TaskEventType.CREATE,
+                (taskEntity, taskResponse, taskEvent) -> {
+                    assertTaskEntity(taskEntity, taskDTO, userEntity.getUserId(), assignedTo.getUserId());
+                    assertTaskResponse(taskResponse, taskDTO, userEntity.getUsername(), assignedTo.getUsername());
+                    assertTaskEventResponse(taskEvent.getTask(), createExpectedSubscriptionResponse(taskEntity, userEntity.getUsername(), assignedTo.getUsername()));
+                });
+    }
 
     protected abstract void assertTaskEntity(E taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo);
 
