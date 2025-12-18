@@ -37,6 +37,18 @@ public class TaskCreationMutationControllerTest extends BaseTaskCreationMutation
     }
 
     @Override
+    protected GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, TaskDTO taskDTO) {
+        RequestVariable reqVariable = new RequestVariable(requestVariable.getName(), taskDTO);
+        return sendRequestWithErrors(userEntity, document, reqVariable);
+    }
+
+    @Override
+    protected void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
+        assertBaseTaskEntity(taskEntity, taskDTO, createdBy, assignedTo);
+        assertThat(taskEntity.getTaskId()).isNotNull();
+    }
+
+    @Override
     protected void assertTaskResponse(TaskResponse taskResponse, TaskDTO taskDTO, String createdBy, String assignedTo) {
         assertBaseTaskResponse(taskResponse, taskDTO, createdBy, assignedTo);
         assertThat(taskResponse.getTaskId()).isNotNull();
@@ -47,18 +59,6 @@ public class TaskCreationMutationControllerTest extends BaseTaskCreationMutation
     protected void assertTaskEventResponse(TaskResponse mutationTaskResponse, TaskResponse subscriptionTaskResponse) {
         assertBaseTaskResponse(mutationTaskResponse, subscriptionTaskResponse);
         assertTrue(subscriptionTaskResponse.getSubtasks().isEmpty());
-    }
-
-    @Override
-    protected void assertTaskEntity(TaskEntity taskEntity, TaskDTO taskDTO, UUID createdBy, UUID assignedTo) {
-        assertBaseTaskEntity(taskEntity, taskDTO, createdBy, assignedTo);
-        assertThat(taskEntity.getTaskId()).isNotNull();
-    }
-
-    @Override
-    protected GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, TaskDTO taskDTO) {
-        RequestVariable reqVariable = new RequestVariable(requestVariable.getName(), taskDTO);
-        return sendRequestWithErrors(userEntity, document, reqVariable);
     }
 
     @Override

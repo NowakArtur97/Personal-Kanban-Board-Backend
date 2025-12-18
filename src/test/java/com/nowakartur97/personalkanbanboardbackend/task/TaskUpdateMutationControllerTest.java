@@ -2,14 +2,18 @@ package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskUpdateMutationControllerTest;
 import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.TaskEvent;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.graphql.test.tester.GraphQlTester;
 
+import java.util.Collections;
 import java.util.UUID;
 
+import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.TASK_EVENT;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.UPDATE_TASK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TaskUpdateMutationControllerTest extends BaseTaskUpdateMutationControllerTest<TaskEntity, TaskResponse> {
 
@@ -18,7 +22,8 @@ public class TaskUpdateMutationControllerTest extends BaseTaskUpdateMutationCont
     public TaskUpdateMutationControllerTest() {
         super(UPDATE_TASK_PATH, UPDATE_TASK,
                 new DoubleRequestVariable("taskDTO", new TaskDTO("title", "description", null, null, null, null), "taskId", UUID.randomUUID()),
-                38, "Task", "taskId", 22);
+                38, TASK_EVENT, "taskEvent", TaskEvent.class,
+                "Task", "taskId", 22);
     }
 
     @BeforeEach
@@ -55,5 +60,29 @@ public class TaskUpdateMutationControllerTest extends BaseTaskUpdateMutationCont
         assertBaseTaskResponse(taskResponse, taskEntity, taskDTO, createdBy, updatedBy, assignedTo);
         assertThat(taskResponse.getTaskId()).isEqualTo(taskEntity.getTaskId());
         assertThat(taskResponse.getSubtasks()).isNull();
+    }
+
+    @Override
+    protected void assertTaskEventResponse(TaskResponse mutationTaskResponse, TaskResponse subscriptionTaskResponse) {
+        assertBaseTaskResponse(mutationTaskResponse, subscriptionTaskResponse);
+        assertTrue(subscriptionTaskResponse.getSubtasks().isEmpty());
+    }
+
+    @Override
+    protected TaskResponse createExpectedSubscriptionResponse(TaskEntity taskEntity, TaskDTO taskDTO, String createdBy, String updatedBy, String assignedTo) {
+        return new TaskResponse(
+                taskEntity.getTaskId(),
+                taskDTO.getTitle(),
+                taskDTO.getDescription(),
+                taskDTO.getStatus() != null ? taskDTO.getStatus() : TaskStatus.READY_TO_START,
+                taskDTO.getPriority() != null ? taskDTO.getPriority() : TaskPriority.LOW,
+                taskDTO.getTargetEndDate(),
+                createdBy,
+                taskEntity.getCreatedOn().toString(),
+                updatedBy,
+                taskEntity.getUpdatedOn().toString(),
+                assignedTo,
+                Collections.emptyList()
+        );
     }
 }

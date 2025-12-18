@@ -5,7 +5,9 @@ import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import graphql.language.SourceLocation;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
@@ -15,12 +17,14 @@ import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public abstract class TaskMutationTest extends TaskIntegrationTest {
+public abstract class TaskMutationTest<R extends BaseTaskResponse> extends TaskIntegrationTest {
 
     private final int validationErrorSourceLocationColumn;
     protected final String subscriptionDocument;
     protected final String subscriptionPath;
     protected final Class<? extends BaseTaskEvent<? extends BaseTaskResponse>> subscriptionEntityType;
+    @Autowired
+    public TaskEventPublisher<R> taskEventPublisher;
 
     protected TaskMutationTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn,
                                String subscriptionDocument, String subscriptionPath, Class<? extends BaseTaskEvent<? extends BaseTaskResponse>> subscriptionEntityType) {
@@ -29,6 +33,12 @@ public abstract class TaskMutationTest extends TaskIntegrationTest {
         this.subscriptionDocument = subscriptionDocument;
         this.subscriptionPath = subscriptionPath;
         this.subscriptionEntityType = subscriptionEntityType;
+    }
+
+    @BeforeEach
+    public void resetSink() {
+        // TODO: Remove?
+        taskEventPublisher.resetSink();
     }
 
     @Test

@@ -64,16 +64,10 @@ public class SubtaskCreationMutationControllerTest extends BaseTaskCreationMutat
     }
 
     @Override
-    protected void assertTaskResponse(SubtaskResponse subtaskResponse, TaskDTO subTaskDTO, String createdBy, String assignedTo) {
-        assertBaseTaskResponse(subtaskResponse, subTaskDTO, createdBy, assignedTo);
-        assertThat(subtaskResponse.getSubtaskId()).isNotNull();
-        assertThat(subtaskResponse.getTaskId()).isEqualTo(taskId);
-    }
-
-    @Override
-    protected void assertTaskEventResponse(SubtaskResponse mutationSubtaskResponse, SubtaskResponse subscriptionSubtaskResponse) {
-        assertBaseTaskResponse(mutationSubtaskResponse, subscriptionSubtaskResponse);
-        assertThat(subscriptionSubtaskResponse.getTaskId()).isEqualTo(mutationSubtaskResponse.getTaskId());
+    protected GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, TaskDTO subTaskDTO) {
+        UUID taskId = createTask(userEntity.getUserId()).getTaskId();
+        DoubleRequestVariable doubleRequestVariable = new DoubleRequestVariable(requestVariable.getName(), subTaskDTO, "taskId", taskId);
+        return sendRequestWithErrors(userEntity, document, doubleRequestVariable);
     }
 
     @Override
@@ -84,10 +78,16 @@ public class SubtaskCreationMutationControllerTest extends BaseTaskCreationMutat
     }
 
     @Override
-    protected GraphQlTester.Errors sendTaskRequestWithErrors(UserEntity userEntity, TaskDTO subTaskDTO) {
-        UUID taskId = createTask(userEntity.getUserId()).getTaskId();
-        DoubleRequestVariable doubleRequestVariable = new DoubleRequestVariable(requestVariable.getName(), subTaskDTO, "taskId", taskId);
-        return sendRequestWithErrors(userEntity, document, doubleRequestVariable);
+    protected void assertTaskResponse(SubtaskResponse subtaskResponse, TaskDTO subTaskDTO, String createdBy, String assignedTo) {
+        assertBaseTaskResponse(subtaskResponse, subTaskDTO, createdBy, assignedTo);
+        assertThat(subtaskResponse.getSubtaskId()).isNotNull();
+        assertThat(subtaskResponse.getTaskId()).isEqualTo(taskId);
+    }
+
+    @Override
+    protected void assertTaskEventResponse(SubtaskResponse mutationSubtaskResponse, SubtaskResponse subscriptionSubtaskResponse) {
+        assertBaseTaskResponse(mutationSubtaskResponse, subscriptionSubtaskResponse);
+        assertThat(subscriptionSubtaskResponse.getSubtaskId()).isEqualTo(mutationSubtaskResponse.getSubtaskId());
     }
 
     @Override
