@@ -11,10 +11,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class UserQueryControllerTest extends BasicIntegrationTest {
 
-    private final static String FIND_ALL_USERS_PATH = "users";
-
     public UserQueryControllerTest() {
-        super(FIND_ALL_USERS_PATH, FIND_ALL_USERS, null);
+        super("users", FIND_ALL_USERS, null);
     }
 
     @ParameterizedTest

@@ -16,10 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TaskCreationMutationControllerTest extends BaseTaskCreationMutationControllerTest<TaskEntity, TaskResponse> {
 
-    private final static String CREATE_TASK_PATH = "createTask";
-
     public TaskCreationMutationControllerTest() {
-        super(CREATE_TASK_PATH, CREATE_TASK,
+        super("createTask", CREATE_TASK,
                 new RequestVariable("taskDTO", new TaskDTO("title", "description", null, null, null, null)),
                 22, TASK_EVENT, "taskEvent", TaskEvent.class);
     }

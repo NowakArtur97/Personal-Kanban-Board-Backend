@@ -19,10 +19,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class SubtaskUpdateMutationControllerTest extends BaseTaskUpdateMutationControllerTest<SubtaskEntity, SubtaskResponse> {
 
-    private final static String UPDATE_SUBTASK_PATH = "updateSubtask";
-
     public SubtaskUpdateMutationControllerTest() {
-        super(UPDATE_SUBTASK_PATH, UPDATE_SUBTASK,
+        super("updateSubtask", UPDATE_SUBTASK,
                 new DoubleRequestVariable("subtaskDTO", new TaskDTO("title", "description", null, null, null, null), "subtaskId", UUID.randomUUID()),
                 44, SUBTASK_EVENT, "subtaskEvent", SubtaskEvent.class,
                 "Subtask", "subtaskId", 25);

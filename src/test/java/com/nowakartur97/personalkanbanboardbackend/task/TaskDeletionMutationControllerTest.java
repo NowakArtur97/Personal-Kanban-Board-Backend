@@ -15,10 +15,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class TaskDeletionMutationControllerTest extends BaseTaskDeletionMutationControllerTest<TaskEntity> {
 
-    private final static String DELETE_TASK_PATH = "deleteTask";
-
     public TaskDeletionMutationControllerTest() {
-        super(DELETE_TASK_PATH, DELETE_TASK, new RequestVariable("taskId", UUID.randomUUID()), 22,
+        super("deleteTask", DELETE_TASK, new RequestVariable("taskId", UUID.randomUUID()), 22,
                 DELETE_TASK_EVENT, "deleteTaskEvent", UUID.class);
     }
 

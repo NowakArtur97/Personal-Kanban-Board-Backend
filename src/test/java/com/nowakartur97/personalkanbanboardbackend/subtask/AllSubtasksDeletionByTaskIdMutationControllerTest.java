@@ -15,12 +15,10 @@ import java.util.UUID;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_ALL_SUBTASKS_BY_TASK_ID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class AllSubtasksDeletionByTaskIdMutationControllerTest extends TaskIntegrationTest {
-
-    private final static String DELETE_ALL_SUBTASKS_BY_TASK_ID_PATH = "deleteAllSubtasksByTaskId";
+public class AllSubtasksDeletionByTaskIdMutationControllerTest extends TaskIntegrationTest<SubtaskEntity> {
 
     public AllSubtasksDeletionByTaskIdMutationControllerTest() {
-        super(DELETE_ALL_SUBTASKS_BY_TASK_ID_PATH, DELETE_ALL_SUBTASKS_BY_TASK_ID,
+        super("deleteAllSubtasksByTaskId", DELETE_ALL_SUBTASKS_BY_TASK_ID,
                 new RequestVariable("taskId", UUID.randomUUID()));
     }
 

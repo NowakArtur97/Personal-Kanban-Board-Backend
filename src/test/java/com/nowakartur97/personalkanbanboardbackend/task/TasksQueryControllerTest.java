@@ -13,12 +13,10 @@ import java.util.List;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.FIND_ALL_TASKS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class TasksQueryControllerTest extends TaskIntegrationTest {
-
-    private final static String TASKS_PATH = "tasks";
+public class TasksQueryControllerTest extends TaskIntegrationTest<TaskEntity> {
 
     public TasksQueryControllerTest() {
-        super(TASKS_PATH, FIND_ALL_TASKS, null);
+        super("tasks", FIND_ALL_TASKS, null);
     }
 
     @ParameterizedTest

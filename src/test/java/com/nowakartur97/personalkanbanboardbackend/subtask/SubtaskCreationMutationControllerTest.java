@@ -18,11 +18,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class SubtaskCreationMutationControllerTest extends BaseTaskCreationMutationControllerTest<SubtaskEntity, SubtaskResponse> {
 
-    private final static String CREATE_SUBTASK_PATH = "createSubtask";
     private UUID taskId;
 
     public SubtaskCreationMutationControllerTest() {
-        super(CREATE_SUBTASK_PATH, CREATE_SUBTASK,
+        super("createSubtask", CREATE_SUBTASK,
                 new DoubleRequestVariable("subtaskDTO", new TaskDTO("title", "description", null, null, null, null),
                         "taskId", UUID.randomUUID()), 41,
                 SUBTASK_EVENT, "subtaskEvent", SubtaskEvent.class);

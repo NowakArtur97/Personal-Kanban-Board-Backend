@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.util.StringUtils;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,9 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class UserValidatorControllerTest extends IntegrationTest {
 
     private final static String USER_DATA_VALIDATOR_PATH = "/api/v1/user-data-validator";
-
-    @LocalServerPort
-    private int port;
 
     private final TestRestTemplate restTemplate = new TestRestTemplate();
 

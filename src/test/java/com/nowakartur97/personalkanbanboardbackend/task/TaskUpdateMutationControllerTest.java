@@ -16,10 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TaskUpdateMutationControllerTest extends BaseTaskUpdateMutationControllerTest<TaskEntity, TaskResponse> {
 
-    private final static String UPDATE_TASK_PATH = "updateTask";
-
     public TaskUpdateMutationControllerTest() {
-        super(UPDATE_TASK_PATH, UPDATE_TASK,
+        super("updateTask", UPDATE_TASK,
                 new DoubleRequestVariable("taskDTO", new TaskDTO("title", "description", null, null, null, null), "taskId", UUID.randomUUID()),
                 38, TASK_EVENT, "taskEvent", TaskEvent.class,
                 "Task", "taskId", 22);

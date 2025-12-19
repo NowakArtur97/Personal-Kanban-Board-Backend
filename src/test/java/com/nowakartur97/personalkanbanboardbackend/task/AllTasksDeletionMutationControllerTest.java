@@ -8,12 +8,10 @@ import org.junit.jupiter.api.Test;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_ALL_TASKS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class AllTasksDeletionMutationControllerTest extends TaskIntegrationTest {
-
-    private final static String DELETE_ALL_TASKS_PATH = "deleteAllTasks";
+public class AllTasksDeletionMutationControllerTest extends TaskIntegrationTest<TaskEntity> {
 
     public AllTasksDeletionMutationControllerTest() {
-        super(DELETE_ALL_TASKS_PATH, DELETE_ALL_TASKS, null);
+        super("deleteAllTasks", DELETE_ALL_TASKS, null);
     }
 
     @Test
@@ -44,7 +42,7 @@ public class AllTasksDeletionMutationControllerTest extends TaskIntegrationTest 
 
         UserEntity userEntity = createUser();
 
-        asserForbiddenErrorResponse(sendRequestWithErrors(userEntity, document, null), DELETE_ALL_TASKS_PATH);
+        asserForbiddenErrorResponse(sendRequestWithErrors(userEntity, document, null), "deleteAllTasks");
     }
 
     private void sendDeleteAllTasksRequest(UserEntity userEntity) {

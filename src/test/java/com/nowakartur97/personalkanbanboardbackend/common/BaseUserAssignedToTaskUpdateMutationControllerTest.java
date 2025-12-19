@@ -11,7 +11,7 @@ import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.util.UUID;
 
-public abstract class BaseUserAssignedToTaskUpdateMutationControllerTest<E extends BaseTaskEntity, R extends BaseTaskResponse> extends TaskIntegrationTest {
+public abstract class BaseUserAssignedToTaskUpdateMutationControllerTest<E extends BaseTaskEntity, R extends BaseTaskResponse> extends TaskIntegrationTest<E> {
 
     private final String className;
     private final String idFieldName;

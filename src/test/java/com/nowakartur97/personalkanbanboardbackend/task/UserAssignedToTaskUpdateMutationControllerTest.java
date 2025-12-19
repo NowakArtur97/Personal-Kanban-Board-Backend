@@ -13,10 +13,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class UserAssignedToTaskUpdateMutationControllerTest extends BaseUserAssignedToTaskUpdateMutationControllerTest<TaskEntity, TaskResponse> {
 
-    private final static String UPDATE_USER_ASSIGNED_TO_TASK_PATH = "updateUserAssignedToTask";
-
     public UserAssignedToTaskUpdateMutationControllerTest() {
-        super(UPDATE_USER_ASSIGNED_TO_TASK_PATH, UPDATE_USER_ASSIGNED_TO_TASK,
+        super("updateUserAssignedToTask", UPDATE_USER_ASSIGNED_TO_TASK,
                 new DoubleRequestVariable("taskId", UUID.randomUUID(), "assignedToId", UUID.randomUUID()),
                 "Task", "taskId", 39, 55);
     }

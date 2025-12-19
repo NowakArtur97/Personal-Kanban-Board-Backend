@@ -1,6 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.common;
 
-public class TaskSubscriptionIntegrationTest<E extends BaseTaskEntity> extends TaskIntegrationTest<E> {
+public abstract class TaskSubscriptionIntegrationTest<E extends BaseTaskEntity> extends TaskIntegrationTest<E> {
 
     protected final String subscriptionDocument;
     protected final String subscriptionPath;

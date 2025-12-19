@@ -11,10 +11,8 @@ import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQue
 
 public class SubtaskDeletionMutationControllerTest extends BaseTaskDeletionMutationControllerTest<SubtaskEntity> {
 
-    private final static String DELETE_SUBTASK_PATH = "deleteSubtask";
-
     public SubtaskDeletionMutationControllerTest() {
-        super(DELETE_SUBTASK_PATH, DELETE_SUBTASK, new RequestVariable("subtaskId", UUID.randomUUID()), 25,
+        super("deleteSubtask", DELETE_SUBTASK, new RequestVariable("subtaskId", UUID.randomUUID()), 25,
                 DELETE_SUBTASK_EVENT, "deleteSubtaskEvent", UUID.class);
     }
 
