@@ -120,17 +120,6 @@ public class GraphQLQueries {
             }
             """;
 
-    public static final String DELETE_TASK = """
-            mutation DELETE_TASK($taskId: UUID!) {
-              deleteTask(taskId: $taskId)
-            }
-            """;
-    public static final String DELETE_ALL_TASKS = """
-            mutation DELETE_ALL_TASKS {
-              deleteAllTasks
-            }
-            """;
-
     public static final String TASK_EVENT = """
             subscription TASK_EVENT {
               taskEvent {
@@ -163,6 +152,24 @@ public class GraphQLQueries {
                  }
                  taskEventType
               }
+            }
+            """;
+
+    public static final String DELETE_TASK = """
+            mutation DELETE_TASK($taskId: UUID!) {
+              deleteTask(taskId: $taskId)
+            }
+            """;
+
+    public static final String DELETE_TASK_EVENT = """
+            subscription DELETE_TASK_EVENT {
+              deleteTaskEvent
+            }
+            """;
+
+    public static final String DELETE_ALL_TASKS = """
+            mutation DELETE_ALL_TASKS {
+              deleteAllTasks
             }
             """;
 
@@ -223,18 +230,6 @@ public class GraphQLQueries {
             }
             """;
 
-    public static final String DELETE_SUBTASK = """
-            mutation DELETE_SUBTASK($subtaskId: UUID!) {
-              deleteSubtask(subtaskId: $subtaskId)
-            }
-            """;
-
-    public static final String DELETE_ALL_SUBTASKS_BY_TASK_ID = """
-            mutation DELETE_ALL_SUBTASKS_BY_TASK_ID($taskId: UUID!) {
-              deleteAllSubtasksByTaskId(taskId: $taskId)
-            }
-            """;
-
     public static final String SUBTASK_EVENT = """
             subscription SUBTASK_EVENT {
               subtaskEvent {
@@ -254,6 +249,24 @@ public class GraphQLQueries {
                  }
                  taskEventType
               }
+            }
+            """;
+
+    public static final String DELETE_SUBTASK = """
+            mutation DELETE_SUBTASK($subtaskId: UUID!) {
+              deleteSubtask(subtaskId: $subtaskId)
+            }
+            """;
+
+    public static final String DELETE_SUBTASK_EVENT = """
+            subscription DELETE_SUBTASK_EVENT {
+              deleteSubtaskEvent
+            }
+            """;
+
+    public static final String DELETE_ALL_SUBTASKS_BY_TASK_ID = """
+            mutation DELETE_ALL_SUBTASKS_BY_TASK_ID($taskId: UUID!) {
+              deleteAllSubtasksByTaskId(taskId: $taskId)
             }
             """;
 

@@ -16,7 +16,7 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
 
     protected BaseTaskCreationMutationControllerTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn,
                                                      String subscriptionDocument, String subscriptionPath,
-                                                     Class<? extends BaseTaskEvent<? extends BaseTaskResponse>> subscriptionEntityType) {
+                                                     Class<?> subscriptionEntityType) {
         super(path, document, requestVariable, validationErrorSourceLocationColumn, subscriptionDocument, subscriptionPath, subscriptionEntityType);
     }
 

@@ -23,7 +23,7 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
 
     protected BaseTaskUpdateMutationControllerTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn,
                                                    String subscriptionDocument, String subscriptionPath,
-                                                   Class<? extends BaseTaskEvent<? extends BaseTaskResponse>> subscriptionEntityTyp,
+                                                   Class<?> subscriptionEntityTyp,
                                                    String className, String idFieldName, int taskIdErrorSourceLocationColumn) {
         super(path, document, requestVariable, validationErrorSourceLocationColumn, subscriptionDocument, subscriptionPath, subscriptionEntityTyp);
         this.className = className;

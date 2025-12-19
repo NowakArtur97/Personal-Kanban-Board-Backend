@@ -6,6 +6,7 @@ import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -13,7 +14,10 @@ import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public abstract class TaskIntegrationTest extends BasicIntegrationTest {
+public abstract class TaskIntegrationTest<E extends BaseTaskEntity> extends BasicIntegrationTest {
+
+    @Autowired
+    protected BaseTaskRepository<E> repository;
 
     public TaskIntegrationTest(String path, String document, RequestVariable requestVariable) {
         super(path, document, requestVariable);

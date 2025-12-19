@@ -128,14 +128,6 @@ mutation UPDATE_USER_ASSIGNED_TO_TASK {
   }
 }
 
-mutation DELETE_TASK {
-  deleteTask(taskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af")
-}
-
-mutation DELETE_ALL_TASKS {
-  deleteAllTasks
-}
-
 subscription TASK_EVENT {
   taskEvent {
      task {
@@ -167,6 +159,14 @@ subscription TASK_EVENT {
      }
      taskEventType
   }
+}
+
+mutation DELETE_TASK {
+  deleteTask(taskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af")
+}
+
+mutation DELETE_ALL_TASKS {
+  deleteAllTasks
 }
 
 subscription DELETE_TASK_EVENT {
@@ -247,14 +247,6 @@ mutation UPDATE_USER_ASSIGNED_TO_SUBTASK {
   }
 }
 
-mutation DELETE_SUBTASK {
-  deleteSubtask(subtaskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af")
-}
-
-mutation DELETE_ALL_SUBTASKS_BY_TASK_ID {
-  deleteAllSubtasksByTaskId(taskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af")
-}
-
 subscription SUBTASK_EVENT {
   subtaskEvent {
      task {
@@ -273,6 +265,14 @@ subscription SUBTASK_EVENT {
      }
      taskEventType
   }
+}
+
+mutation DELETE_SUBTASK {
+  deleteSubtask(subtaskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af")
+}
+
+mutation DELETE_ALL_SUBTASKS_BY_TASK_ID {
+  deleteAllSubtasksByTaskId(taskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af")
 }
 
 subscription DELETE_SUBTASK_EVENT {

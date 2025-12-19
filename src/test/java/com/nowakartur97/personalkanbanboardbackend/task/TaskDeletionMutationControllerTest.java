@@ -10,14 +10,16 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.UUID;
 
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_TASK;
+import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_TASK_EVENT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class TaskDeletionMutationControllerTest extends BaseTaskDeletionMutationControllerTest {
+public class TaskDeletionMutationControllerTest extends BaseTaskDeletionMutationControllerTest<TaskEntity> {
 
     private final static String DELETE_TASK_PATH = "deleteTask";
 
     public TaskDeletionMutationControllerTest() {
-        super(DELETE_TASK_PATH, DELETE_TASK, new RequestVariable("taskId", UUID.randomUUID()), 22);
+        super(DELETE_TASK_PATH, DELETE_TASK, new RequestVariable("taskId", UUID.randomUUID()), 22,
+                DELETE_TASK_EVENT, "deleteTaskEvent", UUID.class);
     }
 
     @ParameterizedTest

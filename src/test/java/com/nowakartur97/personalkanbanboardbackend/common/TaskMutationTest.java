@@ -24,24 +24,16 @@ import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public abstract class TaskMutationTest<E extends BaseTaskEntity, R extends BaseTaskResponse> extends TaskIntegrationTest {
+public abstract class TaskMutationTest<E extends BaseTaskEntity, R extends BaseTaskResponse> extends TaskSubscriptionIntegrationTest<E> {
 
     private final int validationErrorSourceLocationColumn;
-    protected final String subscriptionDocument;
-    protected final String subscriptionPath;
-    protected final Class<? extends BaseTaskEvent<? extends BaseTaskResponse>> subscriptionEntityType;
     @Autowired
     public TaskEventPublisher<R> taskEventPublisher;
-    @Autowired
-    private BaseTaskRepository<E> repository;
 
     protected TaskMutationTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn,
-                               String subscriptionDocument, String subscriptionPath, Class<? extends BaseTaskEvent<? extends BaseTaskResponse>> subscriptionEntityType) {
-        super(path, document, requestVariable);
+                               String subscriptionDocument, String subscriptionPath, Class<?> subscriptionEntityType) {
+        super(path, document, requestVariable, subscriptionDocument, subscriptionPath, subscriptionEntityType);
         this.validationErrorSourceLocationColumn = validationErrorSourceLocationColumn;
-        this.subscriptionDocument = subscriptionDocument;
-        this.subscriptionPath = subscriptionPath;
-        this.subscriptionEntityType = subscriptionEntityType;
     }
 
     @BeforeEach
