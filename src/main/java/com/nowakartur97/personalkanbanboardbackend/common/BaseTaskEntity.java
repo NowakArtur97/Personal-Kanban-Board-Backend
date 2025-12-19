@@ -36,4 +36,6 @@ public abstract class BaseTaskEntity extends Auditable<UUID> {
     private LocalDate targetEndDate;
     @Column(name = "assigned_to", nullable = false)
     private UUID assignedTo;
+
+    public abstract UUID getId();
 }

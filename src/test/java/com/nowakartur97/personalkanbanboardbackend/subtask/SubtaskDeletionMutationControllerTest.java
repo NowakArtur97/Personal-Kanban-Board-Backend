@@ -2,6 +2,7 @@ package com.nowakartur97.personalkanbanboardbackend.subtask;
 
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskDeletionMutationControllerTest;
 import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 
 import java.util.UUID;
@@ -14,6 +15,12 @@ public class SubtaskDeletionMutationControllerTest extends BaseTaskDeletionMutat
     public SubtaskDeletionMutationControllerTest() {
         super("deleteSubtask", DELETE_SUBTASK, new RequestVariable("subtaskId", UUID.randomUUID()), 25,
                 DELETE_SUBTASK_EVENT, "deleteSubtaskEvent", UUID.class);
+    }
+
+    @Override
+    protected SubtaskEntity createTask(UserEntity userEntity) {
+        TaskEntity taskEntity = createTask(userEntity.getUserId(), userEntity.getUserId(), userEntity.getUserId());
+        return createSubtask(taskEntity.getTaskId(), userEntity.getUserId(), userEntity.getUserId(), userEntity.getUserId());
     }
 
     @Override

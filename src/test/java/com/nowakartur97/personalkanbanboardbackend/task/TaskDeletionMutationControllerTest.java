@@ -28,10 +28,13 @@ public class TaskDeletionMutationControllerTest extends BaseTaskDeletionMutation
         TaskEntity taskEntity = createTask(userEntity.getUserId());
         createSubtask(taskEntity.getTaskId(), userEntity.getUserId());
 
-        sendDeleteTaskRequest(userEntity, taskEntity.getTaskId());
-
-        assertThat(taskRepository.count().block()).isZero();
+        assertTaskDeletionAndSubscription(userEntity, taskEntity.getTaskId());
         assertThat(subtaskRepository.count().block()).isZero();
+    }
+
+    @Override
+    protected TaskEntity createTask(UserEntity userEntity) {
+        return createTask(userEntity.getUserId());
     }
 
     @Override

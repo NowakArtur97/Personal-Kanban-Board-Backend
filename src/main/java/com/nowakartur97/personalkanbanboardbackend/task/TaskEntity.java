@@ -39,4 +39,9 @@ public class TaskEntity extends BaseTaskEntity {
                 ", assignedTo=" + getAssignedTo() +
                 '}';
     }
+
+    @Override
+    public UUID getId() {
+        return getTaskId();
+    }
 }

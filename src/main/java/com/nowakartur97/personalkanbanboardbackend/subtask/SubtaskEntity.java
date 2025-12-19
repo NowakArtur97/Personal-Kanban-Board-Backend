@@ -43,4 +43,9 @@ public class SubtaskEntity extends BaseTaskEntity {
                 ", assignedTo=" + getAssignedTo() +
                 '}';
     }
+
+    @Override
+    public UUID getId() {
+        return getSubtaskId();
+    }
 }

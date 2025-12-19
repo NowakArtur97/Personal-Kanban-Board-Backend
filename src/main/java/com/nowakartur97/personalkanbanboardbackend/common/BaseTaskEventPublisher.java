@@ -8,7 +8,7 @@ import reactor.core.publisher.Sinks;
 import java.util.UUID;
 
 @Component
-public class TaskEventPublisher<R extends BaseTaskResponse> {
+public class BaseTaskEventPublisher<R extends BaseTaskResponse> {
 
     private Sinks.Many<BaseTaskEvent<R>> sink = Sinks.many().replay().limit(1);
     private Sinks.Many<UUID> deleteTaskSink = Sinks.many().replay().limit(1);

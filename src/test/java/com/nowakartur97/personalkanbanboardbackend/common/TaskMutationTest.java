@@ -28,7 +28,7 @@ public abstract class TaskMutationTest<E extends BaseTaskEntity, R extends BaseT
 
     private final int validationErrorSourceLocationColumn;
     @Autowired
-    public TaskEventPublisher<R> taskEventPublisher;
+    public BaseTaskEventPublisher<R> baseTaskEventPublisher;
 
     protected TaskMutationTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn,
                                String subscriptionDocument, String subscriptionPath, Class<?> subscriptionEntityType) {
@@ -39,7 +39,7 @@ public abstract class TaskMutationTest<E extends BaseTaskEntity, R extends BaseT
     @BeforeEach
     public void resetSink() {
         // TODO: Remove?
-        taskEventPublisher.resetSink();
+        baseTaskEventPublisher.resetSink();
     }
 
     @Test
@@ -124,20 +124,20 @@ public abstract class TaskMutationTest<E extends BaseTaskEntity, R extends BaseT
 
         Mono<R> mutationMono = Mono.fromCallable(() -> request);
 
-        Flux<Tuple3<BaseTaskEvent<R>, R, E>> combined = eventFlux
+        Flux<Tuple3<E, R, BaseTaskEvent<R>>> combined = eventFlux
                 .take(1)
                 .zipWith(mutationMono)
                 .flatMap(tuple ->
                         repository.findById(tuple.getT2().getId())
-                                .map(entity -> Tuples.of(tuple.getT1(), tuple.getT2(), entity))
+                                .map(entity -> Tuples.of(entity, tuple.getT2(), tuple.getT1()))
                 );
         StepVerifier.create(combined)
                 .assertNext(tuple -> {
-                    BaseTaskEvent<R> taskEvent = tuple.getT1();
+                    E taskEntity = tuple.getT1();
                     R taskResponse = tuple.getT2();
-                    E updatedTaskEntity = tuple.getT3();
+                    BaseTaskEvent<R> taskEvent = tuple.getT3();
                     assertThat(taskEvent.getTaskEventType()).isEqualTo(taskEventType);
-                    assertions.accept(updatedTaskEntity, taskResponse, taskEvent);
+                    assertions.accept(taskEntity, taskResponse, taskEvent);
                 })
                 .thenCancel()
                 .verify(Duration.ofSeconds(5));

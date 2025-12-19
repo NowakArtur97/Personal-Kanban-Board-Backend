@@ -3,6 +3,7 @@ package com.nowakartur97.personalkanbanboardbackend.common;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
+import org.apache.logging.log4j.util.TriConsumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -32,29 +33,9 @@ public abstract class BaseTaskDeletionMutationControllerTest<E extends BaseTaskE
     public void whenDeleteExistingTask_shouldReturnEmptyResponse(UserRole role) {
 
         UserEntity userEntity = createUser(role);
+        E taskEntity = createTask(userEntity);
 
-        Flux<UUID> eventFlux = createWebSocketGraphQlTester(userEntity)
-                .document(subscriptionDocument)
-                .executeSubscription().toFlux()
-                .map(r -> (UUID) r.path(subscriptionPath).entity(subscriptionEntityType).get());
-
-        Mono<UUID> mutationMono = Mono.fromCallable(() -> sendDeleteTaskRequest(userEntity));
-
-        Flux<Tuple3<UUID, UUID, Long>> combined = eventFlux
-                .take(1)
-                .zipWith(mutationMono)
-                .flatMap(tuple ->
-                        repository.count()
-                                .map(entity -> Tuples.of(tuple.getT1(), tuple.getT2(), entity))
-                );
-        StepVerifier.create(combined)
-                .assertNext(tuple -> {
-                    assertThat(tuple.getT3()).isZero();
-                    UUID taskEvent = tuple.getT1();
-                    assertThat(taskEvent).isEqualTo(tuple.getT2());
-                })
-                .thenCancel()
-                .verify(Duration.ofSeconds(5));
+        assertTaskDeletionAndSubscription(userEntity, taskEntity.getId());
     }
 
     @Test
@@ -62,9 +43,7 @@ public abstract class BaseTaskDeletionMutationControllerTest<E extends BaseTaskE
 
         UserEntity userEntity = createUser();
 
-        sendDeleteTaskRequest(userEntity, UUID.randomUUID());
-
-        assertThat(taskRepository.count().block()).isZero();
+        assertTaskDeletionAndSubscription(userEntity, UUID.randomUUID());
     }
 
     @Test
@@ -76,11 +55,39 @@ public abstract class BaseTaskDeletionMutationControllerTest<E extends BaseTaskE
                 "Variable '" + requestVariable.getName() + "' has an invalid value: Variable '" + requestVariable.getName() + "' has coerced Null value for NonNull type 'UUID!'");
     }
 
-    private UUID sendDeleteTaskRequest(UserEntity userEntity) {
-        UUID taskId = UUID.randomUUID();
-        sendDeleteTaskRequest(userEntity, taskId);
-        return taskId;
-    }
+    protected abstract E createTask(UserEntity userEntity);
 
     protected abstract void sendDeleteTaskRequest(UserEntity userEntity, UUID taskId);
+
+    protected void assertTaskDeletionAndSubscription(UserEntity userEntity, UUID uuid) {
+        assertTaskDeletionAndSubscription(userEntity, uuid,
+                (count, taskId, taskEvent) -> {
+                    assertThat(count).isZero();
+                    assertThat(taskEvent).isEqualTo(taskId);
+                });
+    }
+
+    private void assertTaskDeletionAndSubscription(UserEntity userEntity, UUID taskId, TriConsumer<Long, UUID, UUID> assertions) {
+        Flux<UUID> eventFlux = createWebSocketGraphQlTester(userEntity)
+                .document(subscriptionDocument)
+                .executeSubscription().toFlux()
+                .map(r -> (UUID) r.path(subscriptionPath).entity(subscriptionEntityType).get());
+
+        Mono<UUID> mutationMono = Mono.fromCallable(() -> {
+            sendDeleteTaskRequest(userEntity, taskId);
+            return taskId;
+        });
+
+        Flux<Tuple3<Long, UUID, UUID>> combined = eventFlux
+                .take(1)
+                .zipWith(mutationMono)
+                .flatMap(tuple ->
+                        repository.count()
+                                .map(count -> Tuples.of(count, tuple.getT2(), tuple.getT1()))
+                );
+        StepVerifier.create(combined)
+                .assertNext(tuple -> assertions.accept(tuple.getT1(), tuple.getT2(), tuple.getT3()))
+                .thenCancel()
+                .verify(Duration.ofSeconds(5));
+    }
 }
