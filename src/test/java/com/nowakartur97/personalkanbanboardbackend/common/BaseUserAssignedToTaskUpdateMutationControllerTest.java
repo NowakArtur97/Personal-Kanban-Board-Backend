@@ -7,18 +7,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.graphql.test.tester.GraphQlTester;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-import reactor.util.function.Tuple3;
-import reactor.util.function.Tuples;
 
-import java.time.Duration;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public abstract class BaseUserAssignedToTaskUpdateMutationControllerTest<E extends BaseTaskEntity, R extends BaseTaskResponse> extends TaskSubscriptionIntegrationTest<E> {
+public abstract class BaseUserAssignedToTaskUpdateMutationControllerTest<E extends BaseTaskEntity, R extends BaseTaskResponse> extends TaskSubscriptionMutationIntegrationTest<E, R> {
 
     private final String className;
     private final String idFieldName;
@@ -35,7 +29,6 @@ public abstract class BaseUserAssignedToTaskUpdateMutationControllerTest<E exten
         this.assignedToIdErrorSourceLocationColumn = assignedToIdErrorSourceLocationColumn;
     }
 
-
     @ParameterizedTest
     @EnumSource(value = UserRole.class)
     public void whenUpdateUserAssignedToTask_shouldReturnTaskResponse(UserRole role) {
@@ -44,32 +37,7 @@ public abstract class BaseUserAssignedToTaskUpdateMutationControllerTest<E exten
         E taskEntity = createTask(userEntity);
         UserEntity assignedTo = createUser("developer", "developer@domain.com");
 
-        Flux<BaseTaskEvent<R>> eventFlux = createWebSocketGraphQlTester(userEntity)
-                .document(subscriptionDocument)
-                .executeSubscription().toFlux()
-                .map(r -> (BaseTaskEvent<R>) r.path(subscriptionPath).entity(subscriptionEntityType).get());
-
-        Mono<R> mutationMono = Mono.fromCallable(() -> sendUpdateUserAssignedToTaskRequest(userEntity, taskEntity, assignedTo.getUserId()));
-
-        Flux<Tuple3<E, R, BaseTaskEvent<R>>> combined = eventFlux
-                .take(1)
-                .zipWith(mutationMono)
-                .flatMap(tuple ->
-                        repository.findById(tuple.getT2().getId())
-                                .map(entity -> Tuples.of(entity, tuple.getT2(), tuple.getT1()))
-                );
-        StepVerifier.create(combined)
-                .assertNext(tuple -> {
-                    E updatedTaskEntity = tuple.getT1();
-                    R taskResponse = tuple.getT2();
-                    BaseTaskEvent<R> taskEvent = tuple.getT3();
-                    assertTaskEntity(taskEntity, updatedTaskEntity, assignedTo.getUserId());
-                    assertTaskResponse(taskResponse, updatedTaskEntity, assignedTo, userEntity);
-                    assertThat(taskEvent.getTaskEventType()).isEqualTo(taskEvent.getTaskEventType());
-                    assertTaskEventResponse(taskEvent.getTask(), createExpectedSubscriptionResponse(updatedTaskEntity, userEntity.getUsername(), userEntity.getUsername(), assignedTo.getUsername()));
-                })
-                .thenCancel()
-                .verify(Duration.ofSeconds(5));
+        assertTaskMutationAndSubscription(userEntity, taskEntity, assignedTo);
     }
 
     @Test
@@ -123,6 +91,16 @@ public abstract class BaseUserAssignedToTaskUpdateMutationControllerTest<E exten
     }
 
     protected abstract GraphQlTester.Errors sendUpdateUserAssignedToTaskRequestWithErrors(UserEntity userEntity, E taskEntity, UUID assignedToId);
+
+    private void assertTaskMutationAndSubscription(UserEntity author, E taskEntity, UserEntity assignedTo) {
+        assertTaskMutationAndSubscription(author, sendUpdateUserAssignedToTaskRequest(author, taskEntity, assignedTo.getUserId()), TaskEventType.UPDATE,
+                (updatedTaskEntity, taskResponse, taskEvent) -> {
+                    assertTaskEntity(taskEntity, updatedTaskEntity, assignedTo.getUserId());
+                    assertTaskResponse(taskResponse, updatedTaskEntity, assignedTo, author);
+                    assertThat(taskEvent.getTaskEventType()).isEqualTo(taskEvent.getTaskEventType());
+                    assertTaskEventResponse(taskEvent.getTask(), createExpectedSubscriptionResponse(updatedTaskEntity, author.getUsername(), author.getUsername(), assignedTo.getUsername()));
+                });
+    }
 
     protected abstract void assertTaskEntity(E taskEntity, E taskEntityAfterUpdate, UUID assignedTo);
 
