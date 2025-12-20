@@ -1,14 +1,14 @@
 package com.nowakartur97.personalkanbanboardbackend.subtask;
 
-import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskDeletionMutationControllerTest;
-import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.test.BaseTaskDeletionMutationControllerTest;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 
 import java.util.UUID;
 
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_SUBTASK;
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_SUBTASK_EVENT;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.DELETE_SUBTASK;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.DELETE_SUBTASK_EVENT;
 
 public class SubtaskDeletionMutationControllerTest extends BaseTaskDeletionMutationControllerTest<SubtaskEntity> {
 

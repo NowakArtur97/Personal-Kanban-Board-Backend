@@ -1,6 +1,6 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.common.TaskIntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.test.TaskIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.List;
 
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.FIND_ALL_TASKS;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.FIND_ALL_TASKS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class TasksQueryControllerTest extends TaskIntegrationTest<TaskEntity> {

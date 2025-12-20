@@ -1,4 +1,4 @@
-package com.nowakartur97.personalkanbanboardbackend.integration;
+package com.nowakartur97.personalkanbanboardbackend.common.testcontainer;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;

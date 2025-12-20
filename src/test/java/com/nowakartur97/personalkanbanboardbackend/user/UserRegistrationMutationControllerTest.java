@@ -1,7 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.user;
 
-import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
-import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.test.IntegrationTest;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.REGISTER_USER;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.REGISTER_USER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class UserRegistrationMutationControllerTest extends IntegrationTest {

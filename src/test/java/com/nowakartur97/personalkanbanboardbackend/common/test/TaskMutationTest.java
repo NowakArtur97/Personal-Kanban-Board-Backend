@@ -1,5 +1,8 @@
-package com.nowakartur97.personalkanbanboardbackend.common;
+package com.nowakartur97.personalkanbanboardbackend.common.test;
 
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
+import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;

@@ -1,4 +1,4 @@
-package com.nowakartur97.personalkanbanboardbackend.common;
+package com.nowakartur97.personalkanbanboardbackend.common.request;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

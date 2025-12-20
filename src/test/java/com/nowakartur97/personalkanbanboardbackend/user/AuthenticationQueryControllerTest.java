@@ -1,13 +1,13 @@
 package com.nowakartur97.personalkanbanboardbackend.user;
 
-import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
-import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.test.IntegrationTest;
 import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.AUTHENTICATE_USER;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.AUTHENTICATE_USER;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class AuthenticationQueryControllerTest extends IntegrationTest {

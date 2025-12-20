@@ -1,6 +1,6 @@
-package com.nowakartur97.personalkanbanboardbackend.common;
+package com.nowakartur97.personalkanbanboardbackend.common.test;
 
-import com.nowakartur97.personalkanbanboardbackend.integration.IntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;

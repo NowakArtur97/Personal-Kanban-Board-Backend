@@ -1,5 +1,7 @@
-package com.nowakartur97.personalkanbanboardbackend.common;
+package com.nowakartur97.personalkanbanboardbackend.common.test;
 
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;

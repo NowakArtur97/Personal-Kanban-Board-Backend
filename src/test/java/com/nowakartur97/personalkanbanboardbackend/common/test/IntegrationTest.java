@@ -1,9 +1,9 @@
-package com.nowakartur97.personalkanbanboardbackend.integration;
+package com.nowakartur97.personalkanbanboardbackend.common.test;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTConfigurationProperties;
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
-import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
-import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.request.DoubleRequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskRepository;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskRepository;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;

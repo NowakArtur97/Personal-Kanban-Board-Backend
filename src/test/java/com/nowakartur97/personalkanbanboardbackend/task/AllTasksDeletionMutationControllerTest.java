@@ -1,11 +1,11 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.common.TaskIntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.test.TaskIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import org.junit.jupiter.api.Test;
 
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_ALL_TASKS;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.DELETE_ALL_TASKS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class AllTasksDeletionMutationControllerTest extends TaskIntegrationTest<TaskEntity> {

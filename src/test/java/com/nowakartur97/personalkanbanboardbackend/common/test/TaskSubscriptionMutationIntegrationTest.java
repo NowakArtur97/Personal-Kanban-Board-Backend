@@ -1,5 +1,10 @@
-package com.nowakartur97.personalkanbanboardbackend.common;
+package com.nowakartur97.personalkanbanboardbackend.common.test;
 
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEvent;
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
+import com.nowakartur97.personalkanbanboardbackend.common.TaskEventType;
+import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import org.apache.logging.log4j.util.TriConsumer;
 import reactor.core.publisher.Flux;

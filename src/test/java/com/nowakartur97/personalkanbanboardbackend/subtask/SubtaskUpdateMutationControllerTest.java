@@ -1,9 +1,9 @@
 package com.nowakartur97.personalkanbanboardbackend.subtask;
 
-import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskUpdateMutationControllerTest;
-import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
-import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.SubtaskEvent;
+import com.nowakartur97.personalkanbanboardbackend.common.request.DoubleRequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.test.BaseTaskUpdateMutationControllerTest;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskPriority;
@@ -13,8 +13,8 @@ import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.util.UUID;
 
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.SUBTASK_EVENT;
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.UPDATE_SUBTASK;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.SUBTASK_EVENT;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.UPDATE_SUBTASK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class SubtaskUpdateMutationControllerTest extends BaseTaskUpdateMutationControllerTest<SubtaskEntity, SubtaskResponse> {

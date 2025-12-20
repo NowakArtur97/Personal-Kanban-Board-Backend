@@ -1,12 +1,12 @@
 package com.nowakartur97.personalkanbanboardbackend.user;
 
-import com.nowakartur97.personalkanbanboardbackend.common.BasicIntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.test.BasicIntegrationTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.List;
 
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.FIND_ALL_USERS;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.FIND_ALL_USERS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class UserQueryControllerTest extends BasicIntegrationTest {

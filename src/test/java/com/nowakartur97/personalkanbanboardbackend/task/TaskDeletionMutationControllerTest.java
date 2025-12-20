@@ -1,7 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskDeletionMutationControllerTest;
-import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.test.BaseTaskDeletionMutationControllerTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -9,8 +9,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.UUID;
 
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_TASK;
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_TASK_EVENT;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.DELETE_TASK;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.DELETE_TASK_EVENT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class TaskDeletionMutationControllerTest extends BaseTaskDeletionMutationControllerTest<TaskEntity> {

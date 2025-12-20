@@ -1,9 +1,9 @@
 package com.nowakartur97.personalkanbanboardbackend.subtask;
 
-import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskCreationMutationControllerTest;
-import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
-import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.SubtaskEvent;
+import com.nowakartur97.personalkanbanboardbackend.common.request.DoubleRequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.test.BaseTaskCreationMutationControllerTest;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import graphql.language.SourceLocation;
@@ -12,8 +12,8 @@ import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.util.UUID;
 
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.CREATE_SUBTASK;
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.SUBTASK_EVENT;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.CREATE_SUBTASK;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.SUBTASK_EVENT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class SubtaskCreationMutationControllerTest extends BaseTaskCreationMutationControllerTest<SubtaskEntity, SubtaskResponse> {

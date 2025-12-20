@@ -1,7 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
-import com.nowakartur97.personalkanbanboardbackend.common.TaskIntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.test.TaskIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.subtask.SubtaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.List;
 import java.util.UUID;
 
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.FIND_ALL_TASKS_ASSIGNED_TO;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.FIND_ALL_TASKS_ASSIGNED_TO;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class TasksAssignedToQueryControllerTest extends TaskIntegrationTest<TaskEntity> {

@@ -1,16 +1,20 @@
-package com.nowakartur97.personalkanbanboardbackend.common;
+package com.nowakartur97.personalkanbanboardbackend.common.test;
 
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
+import com.nowakartur97.personalkanbanboardbackend.common.TaskEventType;
+import com.nowakartur97.personalkanbanboardbackend.common.request.DoubleRequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.util.UUID;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public abstract class BaseUserAssignedToTaskUpdateMutationControllerTest<E extends BaseTaskEntity, R extends BaseTaskResponse> extends TaskSubscriptionMutationIntegrationTest<E, R> {
 
@@ -97,7 +101,7 @@ public abstract class BaseUserAssignedToTaskUpdateMutationControllerTest<E exten
                 (updatedTaskEntity, taskResponse, taskEvent) -> {
                     assertTaskEntity(taskEntity, updatedTaskEntity, assignedTo.getUserId());
                     assertTaskResponse(taskResponse, updatedTaskEntity, assignedTo, author);
-                    assertThat(taskEvent.getTaskEventType()).isEqualTo(taskEvent.getTaskEventType());
+                    AssertionsForClassTypes.assertThat(taskEvent.getTaskEventType()).isEqualTo(taskEvent.getTaskEventType());
                     assertTaskEventResponse(taskEvent.getTask(), createExpectedSubscriptionResponse(updatedTaskEntity, author.getUsername(), author.getUsername(), assignedTo.getUsername()));
                 });
     }

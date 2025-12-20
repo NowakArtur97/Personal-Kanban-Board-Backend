@@ -1,16 +1,16 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskCreationMutationControllerTest;
-import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.TaskEvent;
+import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.test.BaseTaskCreationMutationControllerTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.util.Collections;
 import java.util.UUID;
 
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.CREATE_TASK;
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.TASK_EVENT;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.CREATE_TASK;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.TASK_EVENT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

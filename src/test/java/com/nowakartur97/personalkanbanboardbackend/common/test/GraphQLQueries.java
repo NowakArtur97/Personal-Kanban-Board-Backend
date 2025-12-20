@@ -1,4 +1,4 @@
-package com.nowakartur97.personalkanbanboardbackend.integration;
+package com.nowakartur97.personalkanbanboardbackend.common.test;
 
 public class GraphQLQueries {
 

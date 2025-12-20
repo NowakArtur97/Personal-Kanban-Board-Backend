@@ -1,7 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.subtask;
 
-import com.nowakartur97.personalkanbanboardbackend.common.RequestVariable;
-import com.nowakartur97.personalkanbanboardbackend.common.TaskIntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.test.TaskIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.UUID;
 
-import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.DELETE_ALL_SUBTASKS_BY_TASK_ID;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.DELETE_ALL_SUBTASKS_BY_TASK_ID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 public class AllSubtasksDeletionByTaskIdMutationControllerTest extends TaskIntegrationTest<SubtaskEntity> {
