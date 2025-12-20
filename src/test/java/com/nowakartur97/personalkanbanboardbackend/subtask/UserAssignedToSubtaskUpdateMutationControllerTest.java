@@ -2,13 +2,14 @@ package com.nowakartur97.personalkanbanboardbackend.subtask;
 
 import com.nowakartur97.personalkanbanboardbackend.common.BaseUserAssignedToTaskUpdateMutationControllerTest;
 import com.nowakartur97.personalkanbanboardbackend.common.DoubleRequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.common.SubtaskEvent;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.graphql.test.tester.GraphQlTester;
 
 import java.util.UUID;
 
+import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.SUBTASK_EVENT;
 import static com.nowakartur97.personalkanbanboardbackend.integration.GraphQLQueries.UPDATE_USER_ASSIGNED_TO_SUBTASK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -17,12 +18,8 @@ public class UserAssignedToSubtaskUpdateMutationControllerTest extends BaseUserA
     public UserAssignedToSubtaskUpdateMutationControllerTest() {
         super("updateUserAssignedToSubtask", UPDATE_USER_ASSIGNED_TO_SUBTASK,
                 new DoubleRequestVariable("subtaskId", UUID.randomUUID(), "assignedToId", UUID.randomUUID()),
+                SUBTASK_EVENT, "subtaskEvent", SubtaskEvent.class,
                 "Subtask", "subtaskId", 42, 61);
-    }
-
-    @BeforeEach
-    public void setRepository() {
-        setRepository(subtaskRepository);
     }
 
     @Override
@@ -52,5 +49,29 @@ public class UserAssignedToSubtaskUpdateMutationControllerTest extends BaseUserA
     @Override
     protected void assertTaskResponse(SubtaskResponse subtaskResponse, SubtaskEntity updatedSubtaskEntity, UserEntity assignedTo, UserEntity userEntity) {
         assertSubtaskResponse(subtaskResponse, updatedSubtaskEntity, assignedTo.getUsername(), userEntity.getUsername(), userEntity.getUsername());
+    }
+
+    @Override
+    protected void assertTaskEventResponse(SubtaskResponse mutationSubtaskResponse, SubtaskResponse subscriptionSubtaskResponse) {
+        assertBaseTaskResponse(mutationSubtaskResponse, subscriptionSubtaskResponse);
+        assertThat(subscriptionSubtaskResponse.getSubtaskId()).isEqualTo(mutationSubtaskResponse.getSubtaskId());
+    }
+
+    @Override
+    protected SubtaskResponse createExpectedSubscriptionResponse(SubtaskEntity subtaskEntity, String createdBy, String updatedBy, String assignedTo) {
+        return new SubtaskResponse(
+                subtaskEntity.getSubtaskId(),
+                subtaskEntity.getTaskId(),
+                subtaskEntity.getTitle(),
+                subtaskEntity.getDescription(),
+                subtaskEntity.getStatus(),
+                subtaskEntity.getPriority(),
+                subtaskEntity.getTargetEndDate(),
+                createdBy,
+                subtaskEntity.getCreatedOn().toString(),
+                updatedBy,
+                subtaskEntity.getUpdatedOn().toString(),
+                assignedTo
+        );
     }
 }

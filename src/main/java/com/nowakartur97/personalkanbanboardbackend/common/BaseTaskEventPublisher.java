@@ -10,8 +10,8 @@ import java.util.UUID;
 @Component
 public class BaseTaskEventPublisher<R extends BaseTaskResponse> {
 
-    private Sinks.Many<BaseTaskEvent<R>> sink = Sinks.many().replay().limit(1);
-    private Sinks.Many<UUID> deleteTaskSink = Sinks.many().replay().limit(1);
+    private final Sinks.Many<BaseTaskEvent<R>> sink = Sinks.many().replay().limit(1);
+    private final Sinks.Many<UUID> deleteTaskSink = Sinks.many().replay().limit(1);
 
     @PreDestroy
     public void shutdown() {
@@ -33,10 +33,5 @@ public class BaseTaskEventPublisher<R extends BaseTaskResponse> {
 
     public void emitDeleteTaskEvent(UUID taskId) {
         deleteTaskSink.tryEmitNext(taskId);
-    }
-
-    public void resetSink() {
-        sink = Sinks.many().replay().limit(1);
-        deleteTaskSink = Sinks.many().replay().limit(1);
     }
 }

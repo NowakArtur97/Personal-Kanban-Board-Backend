@@ -22,8 +22,7 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
     private final int taskIdErrorSourceLocationColumn;
 
     protected BaseTaskUpdateMutationControllerTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn,
-                                                   String subscriptionDocument, String subscriptionPath,
-                                                   Class<?> subscriptionEntityTyp,
+                                                   String subscriptionDocument, String subscriptionPath, Class<?> subscriptionEntityTyp,
                                                    String className, String idFieldName, int taskIdErrorSourceLocationColumn) {
         super(path, document, requestVariable, validationErrorSourceLocationColumn, subscriptionDocument, subscriptionPath, subscriptionEntityTyp);
         this.className = className;
@@ -121,8 +120,6 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
 
     protected abstract void assertTaskResponse(R taskResponse, E taskEntity, TaskDTO taskDTO,
                                                String createdBy, String updatedBy, String assignedTo);
-
-    protected abstract void assertTaskEventResponse(R mutationTaskResponse, R subscriptionTaskResponse);
 
     protected abstract R createExpectedSubscriptionResponse(E taskEntity, TaskDTO taskDTO, String createdBy, String updatedBy, String assignedTo);
 }

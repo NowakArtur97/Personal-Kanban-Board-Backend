@@ -6,9 +6,7 @@ import com.nowakartur97.personalkanbanboardbackend.task.TaskStatus;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import graphql.language.SourceLocation;
 import org.apache.logging.log4j.util.TriConsumer;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.test.tester.GraphQlTester;
 import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 import reactor.core.publisher.Flux;
@@ -27,19 +25,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 public abstract class TaskMutationTest<E extends BaseTaskEntity, R extends BaseTaskResponse> extends TaskSubscriptionIntegrationTest<E> {
 
     private final int validationErrorSourceLocationColumn;
-    @Autowired
-    public BaseTaskEventPublisher<R> baseTaskEventPublisher;
 
     protected TaskMutationTest(String path, String document, RequestVariable requestVariable, int validationErrorSourceLocationColumn,
                                String subscriptionDocument, String subscriptionPath, Class<?> subscriptionEntityType) {
         super(path, document, requestVariable, subscriptionDocument, subscriptionPath, subscriptionEntityType);
         this.validationErrorSourceLocationColumn = validationErrorSourceLocationColumn;
-    }
-
-    @BeforeEach
-    public void resetSink() {
-        // TODO: Remove?
-        baseTaskEventPublisher.resetSink();
     }
 
     @Test
@@ -186,21 +176,5 @@ public abstract class TaskMutationTest<E extends BaseTaskEntity, R extends BaseT
         assertThat(taskResponse.getUpdatedBy()).isEqualTo(updatedBy);
     }
 
-    protected void assertBaseTaskResponse(BaseTaskResponse mutationTaskResponse, BaseTaskResponse subscriptionTaskResponse) {
-        assertThat(subscriptionTaskResponse).isNotNull();
-        assertThat(subscriptionTaskResponse.getTaskId()).isEqualTo(mutationTaskResponse.getTaskId());
-        assertThat(subscriptionTaskResponse.getTitle()).isEqualTo(mutationTaskResponse.getTitle());
-        assertThat(subscriptionTaskResponse.getStatus()).isEqualTo(mutationTaskResponse.getStatus());
-        assertThat(subscriptionTaskResponse.getPriority()).isEqualTo(mutationTaskResponse.getPriority());
-        assertThat(subscriptionTaskResponse.getTargetEndDate()).isEqualTo(mutationTaskResponse.getTargetEndDate());
-        assertThat(subscriptionTaskResponse.getAssignedTo()).isEqualTo(mutationTaskResponse.getAssignedTo());
-        assertThat(Instant.parse(subscriptionTaskResponse.getCreatedOn()).toEpochMilli()).isEqualTo(Instant.parse(mutationTaskResponse.getCreatedOn()).toEpochMilli());
-        assertThat(subscriptionTaskResponse.getCreatedBy()).isEqualTo(mutationTaskResponse.getCreatedBy());
-        if (subscriptionTaskResponse.getUpdatedBy() != null) {
-            assertThat(Instant.parse(subscriptionTaskResponse.getUpdatedOn()).toEpochMilli()).isEqualTo(Instant.parse(mutationTaskResponse.getUpdatedOn()).toEpochMilli());
-        } else {
-            assertThat(subscriptionTaskResponse.getUpdatedOn()).isNull();
-        }
-        assertThat(subscriptionTaskResponse.getUpdatedBy()).isEqualTo(subscriptionTaskResponse.getUpdatedBy());
-    }
+    protected abstract void assertTaskEventResponse(R mutationTaskResponse, R subscriptionTaskResponse);
 }

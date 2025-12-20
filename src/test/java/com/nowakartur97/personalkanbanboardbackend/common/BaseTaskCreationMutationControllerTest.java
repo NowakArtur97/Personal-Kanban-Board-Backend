@@ -55,7 +55,5 @@ public abstract class BaseTaskCreationMutationControllerTest<E extends BaseTaskE
 
     protected abstract void assertTaskResponse(R taskResponse, TaskDTO taskDTO, String createdBy, String assignedTo);
 
-    protected abstract void assertTaskEventResponse(R mutationTaskResponse, R subscriptionTaskResponse);
-
     protected abstract R createExpectedSubscriptionResponse(E taskEntity, String createdBy, String assignedTo);
 }
