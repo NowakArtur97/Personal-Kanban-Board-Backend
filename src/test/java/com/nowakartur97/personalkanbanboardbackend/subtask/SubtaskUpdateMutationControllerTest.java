@@ -1,6 +1,5 @@
 package com.nowakartur97.personalkanbanboardbackend.subtask;
 
-import com.nowakartur97.personalkanbanboardbackend.common.SubtaskEvent;
 import com.nowakartur97.personalkanbanboardbackend.common.request.DoubleRequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.test.BaseTaskUpdateMutationControllerTest;

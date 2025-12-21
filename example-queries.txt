@@ -130,6 +130,8 @@ mutation UPDATE_USER_ASSIGNED_TO_TASK {
 
 subscription TASK_EVENT {
   taskEvent {
+     taskEventType
+     taskId
      task {
        taskId
        title
@@ -157,7 +159,6 @@ subscription TASK_EVENT {
          updatedOn
        }
      }
-     taskEventType
   }
 }
 
@@ -167,10 +168,6 @@ mutation DELETE_TASK {
 
 mutation DELETE_ALL_TASKS {
   deleteAllTasks
-}
-
-subscription DELETE_TASK_EVENT {
-  deleteTaskEvent
 }
 
 mutation CREATE_SUBTASK {
@@ -249,6 +246,8 @@ mutation UPDATE_USER_ASSIGNED_TO_SUBTASK {
 
 subscription SUBTASK_EVENT {
   subtaskEvent {
+     taskEventType
+     taskId
      task {
         subtaskId
         taskId
@@ -263,7 +262,6 @@ subscription SUBTASK_EVENT {
         updatedOn
         updatedBy
      }
-     taskEventType
   }
 }
 
@@ -273,10 +271,6 @@ mutation DELETE_SUBTASK {
 
 mutation DELETE_ALL_SUBTASKS_BY_TASK_ID {
   deleteAllSubtasksByTaskId(taskId: "d8f30b14-ff48-4870-88cb-2926f7cf33af")
-}
-
-subscription DELETE_SUBTASK_EVENT {
-  deleteSubtaskEvent
 }
 
 mutation REGISTER_USER {

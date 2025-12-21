@@ -123,6 +123,8 @@ public class GraphQLQueries {
     public static final String TASK_EVENT = """
             subscription TASK_EVENT {
               taskEvent {
+                 taskEventType
+                 taskId
                  task {
                    taskId
                    title
@@ -150,7 +152,6 @@ public class GraphQLQueries {
                      updatedOn
                    }
                  }
-                 taskEventType
               }
             }
             """;
@@ -158,12 +159,6 @@ public class GraphQLQueries {
     public static final String DELETE_TASK = """
             mutation DELETE_TASK($taskId: UUID!) {
               deleteTask(taskId: $taskId)
-            }
-            """;
-
-    public static final String DELETE_TASK_EVENT = """
-            subscription DELETE_TASK_EVENT {
-              deleteTaskEvent
             }
             """;
 
@@ -233,6 +228,8 @@ public class GraphQLQueries {
     public static final String SUBTASK_EVENT = """
             subscription SUBTASK_EVENT {
               subtaskEvent {
+                 taskEventType
+                 taskId
                  task {
                     subtaskId
                     taskId
@@ -247,7 +244,6 @@ public class GraphQLQueries {
                     updatedOn
                     updatedBy
                  }
-                 taskEventType
               }
             }
             """;
@@ -255,12 +251,6 @@ public class GraphQLQueries {
     public static final String DELETE_SUBTASK = """
             mutation DELETE_SUBTASK($subtaskId: UUID!) {
               deleteSubtask(subtaskId: $subtaskId)
-            }
-            """;
-
-    public static final String DELETE_SUBTASK_EVENT = """
-            subscription DELETE_SUBTASK_EVENT {
-              deleteSubtaskEvent
             }
             """;
 

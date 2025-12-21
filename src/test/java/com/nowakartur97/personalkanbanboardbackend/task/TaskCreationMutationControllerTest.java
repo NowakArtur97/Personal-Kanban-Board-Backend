@@ -1,6 +1,5 @@
 package com.nowakartur97.personalkanbanboardbackend.task;
 
-import com.nowakartur97.personalkanbanboardbackend.common.TaskEvent;
 import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.common.test.BaseTaskCreationMutationControllerTest;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;

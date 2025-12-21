@@ -1,15 +1,19 @@
 interface BaseTaskEvent {
     taskEventType: TaskEventType!
+    task: BaseTaskResponse
+    taskId: UUID
 }
 
 type TaskEvent implements  BaseTaskEvent{
-    task: TaskResponse!
     taskEventType: TaskEventType!
+    task: TaskResponse
+    taskId: UUID
 }
 
 type SubtaskEvent implements  BaseTaskEvent{
-    task: SubtaskResponse!
     taskEventType: TaskEventType!
+    task: SubtaskResponse
+    taskId: UUID
 }
 
 enum TaskEventType {

@@ -43,9 +43,9 @@ public abstract class TaskSubscriptionMutationIntegrationTest<E extends BaseTask
                 .assertNext(tuple -> {
                     E taskEntity = tuple.getT1();
                     R taskResponse = tuple.getT2();
-                    BaseTaskEvent<R> taskEvent = tuple.getT3();
-                    assertThat(taskEvent.getTaskEventType()).isEqualTo(taskEventType);
-                    assertions.accept(taskEntity, taskResponse, taskEvent);
+                    BaseTaskEvent<R> baseTaskEvent = tuple.getT3();
+                    assertThat(baseTaskEvent.getTaskEventType()).isEqualTo(taskEventType);
+                    assertions.accept(taskEntity, taskResponse, baseTaskEvent);
                 })
                 .thenCancel()
                 .verify(Duration.ofSeconds(5));

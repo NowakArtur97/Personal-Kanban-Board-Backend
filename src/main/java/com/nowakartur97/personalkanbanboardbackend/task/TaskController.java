@@ -75,12 +75,6 @@ public class TaskController extends BaseTaskController<TaskEntity, TaskResponse>
 
     @SubscriptionMapping
     public Flux<BaseTaskEvent<TaskResponse>> taskEvent() {
-        return baseTaskEventPublisher.tasksEvents()
-                .filter(e -> e.getTask().getClass() == TaskResponse.class);
-    }
-
-    @SubscriptionMapping
-    public Flux<UUID> deleteTaskEvent() {
-        return baseTaskEventPublisher.deleteTasksEvents();
+        return baseTaskEventPublisher.tasksEvents();
     }
 }

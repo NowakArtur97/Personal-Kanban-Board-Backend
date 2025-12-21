@@ -67,12 +67,6 @@ public class SubtaskController extends BaseTaskController<SubtaskEntity, Subtask
 
     @SubscriptionMapping
     public Flux<BaseTaskEvent<SubtaskResponse>> subtaskEvent() {
-        return baseTaskEventPublisher.tasksEvents()
-                .filter(e -> e.getTask().getClass() == SubtaskResponse.class);
-    }
-
-    @SubscriptionMapping
-    public Flux<UUID> deleteSubtaskEvent() {
-        return baseTaskEventPublisher.deleteTasksEvents();
+        return baseTaskEventPublisher.tasksEvents();
     }
 }
