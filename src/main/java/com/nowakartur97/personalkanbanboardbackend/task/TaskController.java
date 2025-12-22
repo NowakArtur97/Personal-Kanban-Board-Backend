@@ -29,7 +29,7 @@ public class TaskController extends BaseTaskController<TaskEntity, TaskResponse>
     public TaskController(TaskService taskService, UserService userService, JWTUtil jwtUtil,
                           TaskMapper taskMapper, BaseTaskValidator baseTaskValidator,
                           BaseTaskEventPublisher<TaskResponse> taskEventPublisher) {
-        super(taskService, userService, jwtUtil, taskMapper, baseTaskValidator, taskEventPublisher);
+        super(taskService, userService, jwtUtil, taskMapper, baseTaskValidator, taskEventPublisher, true);
         this.taskService = taskService;
     }
 
@@ -75,6 +75,7 @@ public class TaskController extends BaseTaskController<TaskEntity, TaskResponse>
 
     @SubscriptionMapping
     public Flux<BaseTaskEvent<TaskResponse>> taskEvent() {
-        return baseTaskEventPublisher.tasksEvents();
+        return baseTaskEventPublisher.tasksEvents()
+                .filter(BaseTaskEvent::isEventForTask);
     }
 }

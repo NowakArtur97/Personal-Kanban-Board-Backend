@@ -30,7 +30,7 @@ public class SubtaskController extends BaseTaskController<SubtaskEntity, Subtask
     public SubtaskController(SubtaskService subtaskService, UserService userService, JWTUtil jwtUtil,
                              SubtaskMapper subtaskMapper, SubtaskValidator subtaskValidator,
                              BaseTaskEventPublisher<SubtaskResponse> subtaskEventPublisher) {
-        super(subtaskService, userService, jwtUtil, subtaskMapper, subtaskValidator, subtaskEventPublisher);
+        super(subtaskService, userService, jwtUtil, subtaskMapper, subtaskValidator, subtaskEventPublisher, false);
         this.subtaskService = subtaskService;
     }
 
@@ -67,6 +67,7 @@ public class SubtaskController extends BaseTaskController<SubtaskEntity, Subtask
 
     @SubscriptionMapping
     public Flux<BaseTaskEvent<SubtaskResponse>> subtaskEvent() {
-        return baseTaskEventPublisher.tasksEvents();
+        return baseTaskEventPublisher.tasksEvents()
+                .filter(event -> !event.isEventForTask());
     }
 }
