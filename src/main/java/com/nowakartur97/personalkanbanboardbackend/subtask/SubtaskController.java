@@ -2,8 +2,6 @@ package com.nowakartur97.personalkanbanboardbackend.subtask;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskController;
-import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEvent;
-import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEventPublisher;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskDTO;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
@@ -26,12 +24,14 @@ import java.util.UUID;
 public class SubtaskController extends BaseTaskController<SubtaskEntity, SubtaskResponse> {
 
     private final SubtaskService subtaskService;
+    private final SubtaskEventPublisher subtaskEventPublisher;
 
     public SubtaskController(SubtaskService subtaskService, UserService userService, JWTUtil jwtUtil,
                              SubtaskMapper subtaskMapper, SubtaskValidator subtaskValidator,
-                             BaseTaskEventPublisher<SubtaskResponse> subtaskEventPublisher) {
-        super(subtaskService, userService, jwtUtil, subtaskMapper, subtaskValidator, subtaskEventPublisher, false);
+                             SubtaskEventPublisher subtaskEventPublisher) {
+        super(subtaskService, userService, jwtUtil, subtaskMapper, subtaskValidator, subtaskEventPublisher);
         this.subtaskService = subtaskService;
+        this.subtaskEventPublisher = subtaskEventPublisher;
     }
 
     @SchemaMapping(typeName = "TaskResponse", field = "subtasks")
@@ -66,8 +66,7 @@ public class SubtaskController extends BaseTaskController<SubtaskEntity, Subtask
     }
 
     @SubscriptionMapping
-    public Flux<BaseTaskEvent<SubtaskResponse>> subtaskEvent() {
-        return baseTaskEventPublisher.tasksEvents()
-                .filter(event -> !event.isEventForTask());
+    public Flux<SubtaskEvent> subtaskEvent() {
+        return subtaskEventPublisher.tasksEvents();
     }
 }

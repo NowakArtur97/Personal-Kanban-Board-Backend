@@ -1,16 +1,10 @@
-interface BaseTaskEvent {
-    taskEventType: TaskEventType!
-    task: BaseTaskResponse
-    taskId: UUID
-}
-
-type TaskEvent implements  BaseTaskEvent{
+type TaskEvent {
     taskEventType: TaskEventType!
     task: TaskResponse
     taskId: UUID
 }
 
-type SubtaskEvent implements  BaseTaskEvent{
+type SubtaskEvent {
     taskEventType: TaskEventType!
     task: SubtaskResponse
     taskId: UUID

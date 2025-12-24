@@ -1,25 +1,10 @@
 package com.nowakartur97.personalkanbanboardbackend.common;
 
-import jakarta.annotation.PreDestroy;
-import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Sinks;
+import java.util.UUID;
 
-@Component
-public class BaseTaskEventPublisher<R extends BaseTaskResponse> {
+public interface BaseTaskEventPublisher<R extends BaseTaskResponse> {
 
-    private final Sinks.Many<BaseTaskEvent<R>> sink = Sinks.many().replay().limit(1);
+    void emitTaskEvent(R task, TaskEventType taskEventType);
 
-    @PreDestroy
-    public void shutdown() {
-        sink.tryEmitComplete();
-    }
-
-    public Flux<BaseTaskEvent<R>> tasksEvents() {
-        return sink.asFlux();
-    }
-
-    public void emitTaskEvent(BaseTaskEvent<R> taskEvent) {
-        sink.tryEmitNext(taskEvent);
-    }
+    void emitTaskEvent(UUID taskId);
 }

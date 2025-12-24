@@ -2,8 +2,6 @@ package com.nowakartur97.personalkanbanboardbackend.task;
 
 import com.nowakartur97.personalkanbanboardbackend.auth.JWTUtil;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskController;
-import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEvent;
-import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEventPublisher;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskValidator;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import graphql.schema.DataFetchingEnvironment;
@@ -25,12 +23,14 @@ import java.util.UUID;
 public class TaskController extends BaseTaskController<TaskEntity, TaskResponse> {
 
     private final TaskService taskService;
+    private final TaskEventPublisher taskEventPublisher;
 
     public TaskController(TaskService taskService, UserService userService, JWTUtil jwtUtil,
                           TaskMapper taskMapper, BaseTaskValidator baseTaskValidator,
-                          BaseTaskEventPublisher<TaskResponse> taskEventPublisher) {
-        super(taskService, userService, jwtUtil, taskMapper, baseTaskValidator, taskEventPublisher, true);
+                          TaskEventPublisher taskEventPublisher) {
+        super(taskService, userService, jwtUtil, taskMapper, baseTaskValidator, taskEventPublisher);
         this.taskService = taskService;
+        this.taskEventPublisher = taskEventPublisher;
     }
 
     @QueryMapping
@@ -74,8 +74,7 @@ public class TaskController extends BaseTaskController<TaskEntity, TaskResponse>
     }
 
     @SubscriptionMapping
-    public Flux<BaseTaskEvent<TaskResponse>> taskEvent() {
-        return baseTaskEventPublisher.tasksEvents()
-                .filter(BaseTaskEvent::isEventForTask);
+    public Flux<TaskEvent> taskEvent() {
+        return taskEventPublisher.tasksEvents();
     }
 }
