@@ -2,18 +2,18 @@ package com.nowakartur97.personalkanbanboardbackend.common.test;
 
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEvent;
+import com.nowakartur97.personalkanbanboardbackend.common.TaskEventType;
 import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import graphql.language.SourceLocation;
-import org.apache.logging.log4j.util.TriConsumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import reactor.util.function.Tuple3;
+import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import java.time.Duration;
@@ -62,15 +62,7 @@ public abstract class BaseTaskDeletionMutationControllerTest<E extends BaseTaskE
 
     protected abstract void sendDeleteTaskRequest(UserEntity userEntity, UUID taskId);
 
-    protected void assertTaskDeletionAndSubscription(UserEntity userEntity, UUID uuid) {
-        assertTaskDeletionAndSubscription(userEntity, uuid,
-                (count, taskId, taskEvent) -> {
-                    assertThat(count).isZero();
-                    assertThat(taskEvent).isEqualTo(taskId);
-                });
-    }
-
-    private void assertTaskDeletionAndSubscription(UserEntity userEntity, UUID taskId, TriConsumer<Long, UUID, UUID> assertions) {
+    protected void assertTaskDeletionAndSubscription(UserEntity userEntity, UUID taskId) {
         Flux<BaseTaskEvent> eventFlux = createWebSocketGraphQlTester(userEntity)
                 .document(subscriptionDocument)
                 .executeSubscription().toFlux()
@@ -81,15 +73,19 @@ public abstract class BaseTaskDeletionMutationControllerTest<E extends BaseTaskE
             return taskId;
         });
 
-        Flux<Tuple3<Long, UUID, BaseTaskEvent>> combined = eventFlux
+        Flux<Tuple2<Long, BaseTaskEvent>> combined = eventFlux
                 .take(1)
                 .zipWith(mutationMono)
                 .flatMap(tuple ->
                         repository.count()
-                                .map(count -> Tuples.of(count, tuple.getT2(), tuple.getT1()))
+                                .map(count -> Tuples.of(count, tuple.getT1()))
                 );
         StepVerifier.create(combined)
-                .assertNext(tuple -> assertions.accept(tuple.getT1(), tuple.getT2(), tuple.getT3().getTaskId()))
+                .assertNext(tuple -> {
+                    assertThat(tuple.getT1()).isZero();
+                    assertThat(tuple.getT2().getTaskEventType()).isEqualTo(TaskEventType.DELETE);
+                    assertThat(tuple.getT2().getTaskId()).isEqualTo(taskId);
+                })
                 .thenCancel()
                 .verify(Duration.ofSeconds(5));
     }
