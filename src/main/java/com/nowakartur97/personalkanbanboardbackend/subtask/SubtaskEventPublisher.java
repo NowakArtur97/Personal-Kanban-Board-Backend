@@ -24,7 +24,7 @@ public class SubtaskEventPublisher implements BaseTaskEventPublisher<SubtaskResp
     }
 
     @Override
-    public void emitTaskEvent(SubtaskResponse task, TaskEventType taskEventType) {
+    public void emitTaskEvent(TaskEventType taskEventType, SubtaskResponse task) {
         sink.tryEmitNext(new SubtaskEvent(taskEventType, task));
     }
 

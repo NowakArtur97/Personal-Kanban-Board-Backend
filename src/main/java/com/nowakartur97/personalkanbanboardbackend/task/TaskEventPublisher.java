@@ -23,12 +23,8 @@ public class TaskEventPublisher implements BaseTaskEventPublisher<TaskResponse> 
         return sink.asFlux();
     }
 
-    public void emitTaskEvent(TaskEvent taskEvent) {
-        sink.tryEmitNext(taskEvent);
-    }
-
     @Override
-    public void emitTaskEvent(TaskResponse task, TaskEventType taskEventType) {
+    public void emitTaskEvent(TaskEventType taskEventType, TaskResponse task) {
         sink.tryEmitNext(new TaskEvent(taskEventType, task));
     }
 

@@ -64,7 +64,7 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
                     .flatMap(user -> Mono.just(mapper.mapToEntity(taskId, taskDTO, user.getUserId()))
                             .flatMap(service::save)
                             .map(task -> mapper.mapToResponse(task, user.getUsername())))
-                    .doOnNext(task -> baseTaskEventPublisher.emitTaskEvent(task, TaskEventType.CREATE));
+                    .doOnNext(task -> baseTaskEventPublisher.emitTaskEvent(TaskEventType.CREATE, task));
         }
         Mono<UserEntity> assignedTo = userService.findById(taskDTO.getAssignedTo());
         return validator.validate(taskId)
@@ -72,7 +72,7 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
                 .flatMap(tuple -> Mono.just(mapper.mapToEntity(taskId, taskDTO, tuple.getT1().getUserId(), tuple.getT2().getUserId()))
                         .flatMap(service::save)
                         .map(task -> mapper.mapToResponse(task, tuple.getT1().getUsername(), tuple.getT2().getUsername())))
-                .doOnNext(task -> baseTaskEventPublisher.emitTaskEvent(task, TaskEventType.CREATE));
+                .doOnNext(task -> baseTaskEventPublisher.emitTaskEvent(TaskEventType.CREATE, task));
     }
 
     protected Mono<R> update(UUID taskId, TaskDTO taskDTO, DataFetchingEnvironment env) {
@@ -86,14 +86,14 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
                     .flatMap(tuple -> Mono.just(mapper.updateEntity(tuple.getT1(), taskDTO, tuple.getT3().getUserId()))
                             .flatMap(service::update)
                             .map(task -> mapper.mapToResponse(task, username, tuple.getT2().getUsername(), tuple.getT3().getUsername())))
-                    .doOnNext(task -> baseTaskEventPublisher.emitTaskEvent(task, TaskEventType.UPDATE));
+                    .doOnNext(task -> baseTaskEventPublisher.emitTaskEvent(TaskEventType.UPDATE, task));
         }
         Mono<UserEntity> assignedTo = userService.findById(taskDTO.getAssignedTo());
         return Mono.zip(taskById, createdBy, updatedBy, assignedTo)
                 .flatMap(tuple -> Mono.just(mapper.updateEntity(tuple.getT1(), taskDTO, tuple.getT3().getUserId(), tuple.getT4().getUserId()))
                         .flatMap(service::update)
                         .map(task -> mapper.mapToResponse(task, tuple.getT2().getUsername(), tuple.getT3().getUsername(), tuple.getT4().getUsername())))
-                .doOnNext(task -> baseTaskEventPublisher.emitTaskEvent(task, TaskEventType.UPDATE));
+                .doOnNext(task -> baseTaskEventPublisher.emitTaskEvent(TaskEventType.UPDATE, task));
     }
 
     protected Mono<R> updateUserAssignedTo(UUID taskId, UUID assignedToId, DataFetchingEnvironment env) {
@@ -107,7 +107,7 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
                 .flatMap(tuple -> Mono.just(mapper.updateUserAssignedToEntity(tuple.getT1(), tuple.getT3().getUserId(), tuple.getT4().getUserId()))
                         .flatMap(service::updateAssignedTo)
                         .map(task -> mapper.mapToResponse(task, tuple.getT2().getUsername(), tuple.getT3().getUsername(), tuple.getT4().getUsername())))
-                .doOnNext(task -> baseTaskEventPublisher.emitTaskEvent(task, TaskEventType.UPDATE));
+                .doOnNext(task -> baseTaskEventPublisher.emitTaskEvent(TaskEventType.UPDATE, task));
     }
 
     protected Mono<Void> deleteById(UUID taskId) {
