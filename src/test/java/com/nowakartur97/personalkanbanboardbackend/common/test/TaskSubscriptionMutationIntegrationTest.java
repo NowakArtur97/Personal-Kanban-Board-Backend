@@ -26,10 +26,7 @@ public abstract class TaskSubscriptionMutationIntegrationTest<E extends BaseTask
 
     protected void assertTaskMutationAndSubscription(UserEntity userEntity, R request, TaskEventType taskEventType,
                                                      TriConsumer<E, R, BaseTaskEvent> assertions) {
-        Flux<BaseTaskEvent> eventFlux = createWebSocketGraphQlTester(userEntity)
-                .document(subscriptionDocument)
-                .executeSubscription().toFlux()
-                .map(r -> (BaseTaskEvent) r.path(subscriptionPath).entity(subscriptionEntityType).get());
+        Flux<BaseTaskEvent> eventFlux = createEventFlux(userEntity);
 
         Mono<R> mutationMono = Mono.fromCallable(() -> request);
 

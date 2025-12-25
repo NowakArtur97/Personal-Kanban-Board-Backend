@@ -58,10 +58,7 @@ public class AllTasksDeletionMutationControllerTest extends TaskSubscriptionInte
     }
 
     private void assertAllTasksDeletionAndSubscription(UserEntity userEntity) {
-        Flux<BaseTaskEvent> eventFlux = createWebSocketGraphQlTester(userEntity)
-                .document(subscriptionDocument)
-                .executeSubscription().toFlux()
-                .map(r -> (BaseTaskEvent) r.path(subscriptionPath).entity(subscriptionEntityType).get());
+        Flux<BaseTaskEvent> eventFlux = createEventFlux(userEntity);
 
         Mono<UUID> mutationMono = Mono.fromCallable(() -> {
             sendDeleteAllTasksRequest(userEntity);

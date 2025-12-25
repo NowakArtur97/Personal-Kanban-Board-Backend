@@ -63,10 +63,7 @@ public abstract class BaseTaskDeletionMutationControllerTest<E extends BaseTaskE
     protected abstract void sendDeleteTaskRequest(UserEntity userEntity, UUID taskId);
 
     protected void assertTaskDeletionAndSubscription(UserEntity userEntity, UUID taskId) {
-        Flux<BaseTaskEvent> eventFlux = createWebSocketGraphQlTester(userEntity)
-                .document(subscriptionDocument)
-                .executeSubscription().toFlux()
-                .map(r -> (BaseTaskEvent) r.path(subscriptionPath).entity(subscriptionEntityType).get());
+        Flux<BaseTaskEvent> eventFlux = createEventFlux(userEntity);
 
         Mono<UUID> mutationMono = Mono.fromCallable(() -> {
             sendDeleteTaskRequest(userEntity, taskId);

@@ -1,8 +1,11 @@
 package com.nowakartur97.personalkanbanboardbackend.common.test;
 
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEvent;
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskResponse;
 import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
+import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
+import reactor.core.publisher.Flux;
 
 import java.time.Instant;
 
@@ -20,6 +23,13 @@ public abstract class TaskSubscriptionIntegrationTest<E extends BaseTaskEntity> 
         this.subscriptionDocument = subscriptionDocument;
         this.subscriptionPath = subscriptionPath;
         this.subscriptionEntityType = subscriptionEntityType;
+    }
+
+    protected Flux<BaseTaskEvent> createEventFlux(UserEntity userEntity) {
+        return createWebSocketGraphQlTester(userEntity)
+                .document(subscriptionDocument)
+                .executeSubscription().toFlux()
+                .map(r -> (BaseTaskEvent) r.path(subscriptionPath).entity(subscriptionEntityType).get());
     }
 
     protected void assertBaseTaskResponse(BaseTaskResponse mutationTaskResponse, BaseTaskResponse subscriptionTaskResponse) {
