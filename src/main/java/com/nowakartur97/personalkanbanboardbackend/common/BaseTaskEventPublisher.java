@@ -6,5 +6,5 @@ public interface BaseTaskEventPublisher<R extends BaseTaskResponse> {
 
     void emitTaskEvent(R task, TaskEventType taskEventType);
 
-    void emitTaskEvent(UUID taskId);
+    void emitDeleteTaskEvent(UUID taskId);
 }

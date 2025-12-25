@@ -70,7 +70,8 @@ public class TaskController extends BaseTaskController<TaskEntity, TaskResponse>
     @MutationMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     public Mono<Void> deleteAllTasks() {
-        return taskService.deleteAll();
+        return taskService.deleteAll()
+                .then(Mono.fromRunnable(taskEventPublisher::emitDeleteAllTaskEvent));
     }
 
     @SubscriptionMapping

@@ -29,7 +29,7 @@ public class SubtaskEventPublisher implements BaseTaskEventPublisher<SubtaskResp
     }
 
     @Override
-    public void emitTaskEvent(UUID taskId) {
+    public void emitDeleteTaskEvent(UUID taskId) {
         sink.tryEmitNext(new SubtaskEvent(TaskEventType.DELETE, taskId));
     }
 }

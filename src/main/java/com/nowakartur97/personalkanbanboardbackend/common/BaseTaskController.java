@@ -112,7 +112,7 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
 
     protected Mono<Void> deleteById(UUID taskId) {
         return service.deleteById(taskId)
-                .then(Mono.fromRunnable(() -> baseTaskEventPublisher.emitTaskEvent(taskId)));
+                .then(Mono.fromRunnable(() -> baseTaskEventPublisher.emitDeleteTaskEvent(taskId)));
     }
 
     protected List<UUID> getUuidsFromTasksByProperty(List<E> tasks, Function<E, UUID> byProperty) {

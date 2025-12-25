@@ -15,13 +15,17 @@ public class TaskEvent implements BaseTaskEvent {
     private TaskResponse task;
     private UUID taskId;
 
-    public TaskEvent(TaskEventType taskEventType, TaskResponse task) {
+    public TaskEvent(TaskEventType taskEventType) {
         this.taskEventType = taskEventType;
+    }
+
+    public TaskEvent(TaskEventType taskEventType, TaskResponse task) {
+        this(taskEventType);
         this.task = task;
     }
 
     public TaskEvent(TaskEventType taskEventType, UUID taskId) {
-        this.taskEventType = taskEventType;
+        this(taskEventType);
         this.taskId = taskId;
     }
 }

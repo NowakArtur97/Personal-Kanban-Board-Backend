@@ -33,7 +33,11 @@ public class TaskEventPublisher implements BaseTaskEventPublisher<TaskResponse> 
     }
 
     @Override
-    public void emitTaskEvent(UUID taskId) {
+    public void emitDeleteTaskEvent(UUID taskId) {
         sink.tryEmitNext(new TaskEvent(TaskEventType.DELETE, taskId));
+    }
+
+    public void emitDeleteAllTaskEvent() {
+        sink.tryEmitNext(new TaskEvent(TaskEventType.DELETE_ALL));
     }
 }
