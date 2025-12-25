@@ -100,7 +100,7 @@ public abstract class BaseTaskUpdateMutationControllerTest<E extends BaseTaskEnt
                     assertTaskEntity(updatedTaskEntity, taskDTO, author, updatedBy, assignedTo);
                     assertTaskId(updatedTaskEntity, taskEntity);
                     assertTaskResponse(taskResponse, updatedTaskEntity, taskDTO, author.getUsername(), updatedBy.getUsername(), assignedTo.getUsername());
-                    assertTaskEventResponse(taskEvent.getTask(), createExpectedSubscriptionResponse(updatedTaskEntity, taskDTO, author.getUsername(), updatedBy.getUsername(), assignedTo.getUsername()));
+                    assertTaskEventResponse((R) taskEvent.getTask(), createExpectedSubscriptionResponse(updatedTaskEntity, taskDTO, author.getUsername(), updatedBy.getUsername(), assignedTo.getUsername()));
                 });
     }
 

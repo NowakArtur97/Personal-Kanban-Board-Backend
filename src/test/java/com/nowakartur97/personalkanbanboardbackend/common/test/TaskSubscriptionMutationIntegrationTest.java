@@ -24,15 +24,16 @@ public abstract class TaskSubscriptionMutationIntegrationTest<E extends BaseTask
         super(path, document, requestVariable, subscriptionDocument, subscriptionPath, subscriptionEntityType);
     }
 
-    protected void assertTaskMutationAndSubscription(UserEntity userEntity, R request, TaskEventType taskEventType, TriConsumer<E, R, BaseTaskEvent<R>> assertions) {
-        Flux<BaseTaskEvent<R>> eventFlux = createWebSocketGraphQlTester(userEntity)
+    protected void assertTaskMutationAndSubscription(UserEntity userEntity, R request, TaskEventType taskEventType,
+                                                     TriConsumer<E, R, BaseTaskEvent> assertions) {
+        Flux<BaseTaskEvent> eventFlux = createWebSocketGraphQlTester(userEntity)
                 .document(subscriptionDocument)
                 .executeSubscription().toFlux()
-                .map(r -> (BaseTaskEvent<R>) r.path(subscriptionPath).entity(subscriptionEntityType).get());
+                .map(r -> (BaseTaskEvent) r.path(subscriptionPath).entity(subscriptionEntityType).get());
 
         Mono<R> mutationMono = Mono.fromCallable(() -> request);
 
-        Flux<Tuple3<E, R, BaseTaskEvent<R>>> combined = eventFlux
+        Flux<Tuple3<E, R, BaseTaskEvent>> combined = eventFlux
                 .take(1)
                 .zipWith(mutationMono)
                 .flatMap(tuple ->
@@ -43,7 +44,7 @@ public abstract class TaskSubscriptionMutationIntegrationTest<E extends BaseTask
                 .assertNext(tuple -> {
                     E taskEntity = tuple.getT1();
                     R taskResponse = tuple.getT2();
-                    BaseTaskEvent<R> baseTaskEvent = tuple.getT3();
+                    BaseTaskEvent baseTaskEvent = tuple.getT3();
                     assertThat(baseTaskEvent.getTaskEventType()).isEqualTo(taskEventType);
                     assertions.accept(taskEntity, taskResponse, baseTaskEvent);
                 })

@@ -8,13 +8,13 @@ import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import java.util.UUID;
 
 import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.DELETE_SUBTASK;
-import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.DELETE_SUBTASK_EVENT;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.SUBTASK_EVENT;
 
 public class SubtaskDeletionMutationControllerTest extends BaseTaskDeletionMutationControllerTest<SubtaskEntity> {
 
     public SubtaskDeletionMutationControllerTest() {
         super("deleteSubtask", DELETE_SUBTASK, new RequestVariable("subtaskId", UUID.randomUUID()), 25,
-                DELETE_SUBTASK_EVENT, "deleteSubtaskEvent", UUID.class);
+                SUBTASK_EVENT, "subtaskEvent", SubtaskEvent.class);
     }
 
     @Override

@@ -1,14 +1,17 @@
 package com.nowakartur97.personalkanbanboardbackend.subtask;
 
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEvent;
 import com.nowakartur97.personalkanbanboardbackend.common.TaskEventType;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Getter
-public class SubtaskEvent {
+@NoArgsConstructor
+public class SubtaskEvent implements BaseTaskEvent {
 
-    private final TaskEventType taskEventType;
+    private TaskEventType taskEventType;
     private SubtaskResponse task;
     private UUID taskId;
 

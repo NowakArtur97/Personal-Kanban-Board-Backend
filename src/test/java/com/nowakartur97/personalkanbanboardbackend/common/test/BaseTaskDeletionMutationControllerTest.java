@@ -1,6 +1,7 @@
 package com.nowakartur97.personalkanbanboardbackend.common.test;
 
 import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEntity;
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEvent;
 import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
@@ -70,17 +71,17 @@ public abstract class BaseTaskDeletionMutationControllerTest<E extends BaseTaskE
     }
 
     private void assertTaskDeletionAndSubscription(UserEntity userEntity, UUID taskId, TriConsumer<Long, UUID, UUID> assertions) {
-        Flux<UUID> eventFlux = createWebSocketGraphQlTester(userEntity)
+        Flux<BaseTaskEvent> eventFlux = createWebSocketGraphQlTester(userEntity)
                 .document(subscriptionDocument)
                 .executeSubscription().toFlux()
-                .map(r -> (UUID) r.path(subscriptionPath).entity(subscriptionEntityType).get());
+                .map(r -> (BaseTaskEvent) r.path(subscriptionPath).entity(subscriptionEntityType).get());
 
         Mono<UUID> mutationMono = Mono.fromCallable(() -> {
             sendDeleteTaskRequest(userEntity, taskId);
             return taskId;
         });
 
-        Flux<Tuple3<Long, UUID, UUID>> combined = eventFlux
+        Flux<Tuple3<Long, UUID, BaseTaskEvent>> combined = eventFlux
                 .take(1)
                 .zipWith(mutationMono)
                 .flatMap(tuple ->
@@ -88,7 +89,7 @@ public abstract class BaseTaskDeletionMutationControllerTest<E extends BaseTaskE
                                 .map(count -> Tuples.of(count, tuple.getT2(), tuple.getT1()))
                 );
         StepVerifier.create(combined)
-                .assertNext(tuple -> assertions.accept(tuple.getT1(), tuple.getT2(), tuple.getT3()))
+                .assertNext(tuple -> assertions.accept(tuple.getT1(), tuple.getT2(), tuple.getT3().getTaskId()))
                 .thenCancel()
                 .verify(Duration.ofSeconds(5));
     }
