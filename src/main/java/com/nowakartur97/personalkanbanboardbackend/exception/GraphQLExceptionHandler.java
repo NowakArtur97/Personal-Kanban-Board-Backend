@@ -22,14 +22,6 @@ public class GraphQLExceptionHandler extends DataFetcherExceptionResolverAdapter
     private final static String CONSTRAINT_VALIDATION_EXCEPTION_MESSAGE_PREFIX = ": ";
 
     @Override
-    protected GraphQLError resolveToSingleError(Throwable ex, DataFetchingEnvironment env) {
-        if (ex instanceof ResourceNotFoundException) {
-            return createGraphQLError(ErrorType.NOT_FOUND, ex.getMessage(), env);
-        }
-        return null;
-    }
-
-    @Override
     protected List<GraphQLError> resolveToMultipleErrors(Throwable ex, DataFetchingEnvironment env) {
         if (ex instanceof ConstraintViolationException) {
             return mapToGraphQLErrors(ErrorType.BAD_REQUEST, ex, env);
