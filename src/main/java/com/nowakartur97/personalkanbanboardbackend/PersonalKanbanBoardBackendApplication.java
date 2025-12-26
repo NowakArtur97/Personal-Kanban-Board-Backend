@@ -47,9 +47,7 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
         if (activeProfile.equals("local")) {
             UserEntity user = createUser();
             createTestTask(user);
-            createTestTask(user);
             UserEntity admin = createAdminUser();
-            createTestTask(admin);
             createTestTask(admin);
         }
     }
@@ -85,11 +83,13 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
 
     private void createTestTask(UserEntity user) {
         Random random = new Random();
+        int desc = random.nextInt(100);
+        TaskStatus taskStatus = TaskStatus.values()[random.nextInt(TaskStatus.values().length)];
         TaskEntity task = TaskEntity.builder()
-                .title("task for user " + user.getUsername())
-                .description("description for user " + user.getUsername())
+                .title(desc + " : " + taskStatus + " : " + user.getUsername())
+                .description(desc + " " + taskStatus)
                 .assignedTo(user.getUserId())
-                .status(TaskStatus.values()[random.nextInt(TaskStatus.values().length)])
+                .status(taskStatus)
                 .priority(TaskPriority.values()[random.nextInt(TaskPriority.values().length)])
                 .targetEndDate(LocalDate.now().plusDays(random.nextInt(30)))
                 // TODO: Check in Postgres to see if the date is auto-populated
@@ -98,14 +98,15 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
                 .build();
         taskService.save(task).block();
 
-        int numberOfSubtasks = random.nextInt(3);
+        int numberOfSubtasks = 5; // random.nextInt(5);
         for (int i = 0; i < numberOfSubtasks; i++) {
+            TaskStatus subtaskStatus = TaskStatus.values()[random.nextInt(TaskStatus.values().length)];
             SubtaskEntity subtask = SubtaskEntity.builder()
                     .taskId(task.getTaskId())
-                    .title("subtask for user " + user.getUsername())
-                    .description("subtask description for user " + user.getUsername())
+                    .title(desc + " : " + subtaskStatus + " : " + user.getUsername())
+                    .description(desc + " " + subtaskStatus)
                     .assignedTo(user.getUserId())
-                    .status(TaskStatus.values()[random.nextInt(TaskStatus.values().length)])
+                    .status(subtaskStatus)
                     .priority(TaskPriority.values()[random.nextInt(TaskPriority.values().length)])
                     .targetEndDate(LocalDate.now().plusDays(random.nextInt(30)))
                     // TODO: Check in Postgres to see if the date is auto-populated
