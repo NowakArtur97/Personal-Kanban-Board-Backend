@@ -51,13 +51,11 @@ public class TaskController extends BaseTaskController<TaskEntity, TaskResponse>
     }
 
     @MutationMapping
-    // TODO: Add subtasks to response?
     public Mono<TaskResponse> updateTask(@Argument UUID taskId, @Argument @Valid TaskDTO taskDTO, DataFetchingEnvironment env) {
         return update(taskId, taskDTO, env);
     }
 
     @MutationMapping
-    // TODO: Add subtasks to response?
     public Mono<TaskResponse> updateUserAssignedToTask(@Argument UUID taskId, @Argument UUID assignedToId, DataFetchingEnvironment env) {
         return updateUserAssignedTo(taskId, assignedToId, env);
     }

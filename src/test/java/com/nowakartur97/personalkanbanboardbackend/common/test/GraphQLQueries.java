@@ -98,6 +98,20 @@ public class GraphQLQueries {
                 createdBy
                 updatedOn
                 updatedBy
+                subtasks {
+                  subtaskId
+                  taskId
+                  title
+                  description
+                  status
+                  priority
+                  targetEndDate
+                  assignedTo
+                  createdBy
+                  createdOn
+                  updatedBy
+                  updatedOn
+                }
               }
             }
             """;
@@ -116,6 +130,20 @@ public class GraphQLQueries {
                 createdBy
                 updatedOn
                 updatedBy
+                subtasks {
+                  subtaskId
+                  taskId
+                  title
+                  description
+                  status
+                  priority
+                  targetEndDate
+                  assignedTo
+                  createdBy
+                  createdOn
+                  updatedBy
+                  updatedOn
+                }
               }
             }
             """;

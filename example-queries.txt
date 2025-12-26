@@ -106,6 +106,20 @@ mutation UPDATE_TASK {
     createdBy
     updatedOn
     updatedBy
+    subtasks {
+      subtaskId
+      taskId
+      title
+      description
+      status
+      priority
+      targetEndDate
+      assignedTo
+      createdBy
+      createdOn
+      updatedBy
+      updatedOn
+    }
   }
 }
 
@@ -125,6 +139,20 @@ mutation UPDATE_USER_ASSIGNED_TO_TASK {
     createdBy
     updatedOn
     updatedBy
+    subtasks {
+      subtaskId
+      taskId
+      title
+      description
+      status
+      priority
+      targetEndDate
+      assignedTo
+      createdBy
+      createdOn
+      updatedBy
+      updatedOn
+    }
   }
 }
 
