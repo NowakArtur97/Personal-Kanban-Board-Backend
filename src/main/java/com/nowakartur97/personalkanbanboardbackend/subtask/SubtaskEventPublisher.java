@@ -32,4 +32,8 @@ public class SubtaskEventPublisher implements BaseTaskEventPublisher<SubtaskResp
     public void emitDeleteTaskEvent(UUID taskId) {
         sink.tryEmitNext(new SubtaskEvent(TaskEventType.DELETE, taskId));
     }
+
+    public void emitDeleteAllSubtasksForTaskEvent(UUID taskId) {
+        sink.tryEmitNext(new SubtaskEvent(TaskEventType.DELETE_ALL_SUBTASKS_FOR_TASK, taskId));
+    }
 }

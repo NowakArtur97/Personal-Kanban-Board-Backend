@@ -15,4 +15,5 @@ enum TaskEventType {
     UPDATE
     DELETE
     DELETE_ALL
+    DELETE_ALL_SUBTASKS_FOR_TASK
 }
