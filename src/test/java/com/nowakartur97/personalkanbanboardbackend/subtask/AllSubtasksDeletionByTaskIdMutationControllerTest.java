@@ -1,7 +1,9 @@
 package com.nowakartur97.personalkanbanboardbackend.subtask;
 
+import com.nowakartur97.personalkanbanboardbackend.common.BaseTaskEvent;
+import com.nowakartur97.personalkanbanboardbackend.common.TaskEventType;
 import com.nowakartur97.personalkanbanboardbackend.common.request.RequestVariable;
-import com.nowakartur97.personalkanbanboardbackend.common.test.TaskIntegrationTest;
+import com.nowakartur97.personalkanbanboardbackend.common.test.TaskSubscriptionIntegrationTest;
 import com.nowakartur97.personalkanbanboardbackend.task.TaskEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserEntity;
 import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
@@ -9,17 +11,25 @@ import graphql.language.SourceLocation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+import reactor.util.function.Tuple3;
+import reactor.util.function.Tuples;
 
+import java.time.Duration;
 import java.util.UUID;
 
 import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.DELETE_ALL_SUBTASKS_BY_TASK_ID;
+import static com.nowakartur97.personalkanbanboardbackend.common.test.GraphQLQueries.SUBTASK_EVENT;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class AllSubtasksDeletionByTaskIdMutationControllerTest extends TaskIntegrationTest<SubtaskEntity> {
+public class AllSubtasksDeletionByTaskIdMutationControllerTest extends TaskSubscriptionIntegrationTest<SubtaskEntity> {
 
     public AllSubtasksDeletionByTaskIdMutationControllerTest() {
         super("deleteAllSubtasksByTaskId", DELETE_ALL_SUBTASKS_BY_TASK_ID,
-                new RequestVariable("taskId", UUID.randomUUID()));
+                new RequestVariable("taskId", UUID.randomUUID()),
+                SUBTASK_EVENT, "subtaskEvent", SubtaskEvent.class);
     }
 
     @ParameterizedTest
@@ -31,10 +41,7 @@ public class AllSubtasksDeletionByTaskIdMutationControllerTest extends TaskInteg
         createSubtask(taskEntity.getTaskId(), userEntity.getUserId());
         createSubtask(taskEntity.getTaskId(), userEntity.getUserId());
 
-        sendDeleteAllSubtasksByTaskIdRequest(userEntity, taskEntity.getTaskId());
-
-        assertThat(subtaskRepository.count().block()).isZero();
-        assertThat(taskRepository.count().block()).isOne();
+        assertAllTaskSubtasksDeletionAndSubscription(userEntity, taskEntity.getId(), 1L);
     }
 
     @Test
@@ -42,9 +49,7 @@ public class AllSubtasksDeletionByTaskIdMutationControllerTest extends TaskInteg
 
         UserEntity userEntity = createUser();
 
-        sendDeleteAllSubtasksByTaskIdRequest(userEntity, UUID.randomUUID());
-
-        assertThat(taskRepository.count().block()).isZero();
+        assertAllTaskSubtasksDeletionAndSubscription(userEntity, UUID.randomUUID(), 0L);
     }
 
     @Test
@@ -59,5 +64,33 @@ public class AllSubtasksDeletionByTaskIdMutationControllerTest extends TaskInteg
     private void sendDeleteAllSubtasksByTaskIdRequest(UserEntity userEntity, UUID taskId) {
         RequestVariable reqVariable = new RequestVariable("taskId", taskId);
         sendRequest(userEntity, document, path, reqVariable, null, false);
+    }
+
+    protected void assertAllTaskSubtasksDeletionAndSubscription(UserEntity userEntity, UUID taskId,
+                                                                Long expectedNumberOfTasks) {
+        Flux<BaseTaskEvent> eventFlux = createEventFlux(userEntity);
+
+        Mono<UUID> mutationMono = Mono.fromCallable(() -> {
+            sendDeleteAllSubtasksByTaskIdRequest(userEntity, taskId);
+            return taskId;
+        });
+
+        Flux<Tuple3<Long, Long, BaseTaskEvent>> combined = eventFlux
+                .take(1)
+                .zipWith(mutationMono)
+                .flatMap(tuple ->
+                        subtaskRepository.count()
+                                .zipWith(taskRepository.count())
+                                .map(count -> Tuples.of(count.getT1(), count.getT2(), tuple.getT1()))
+                );
+        StepVerifier.create(combined)
+                .assertNext(tuple -> {
+                    assertThat(tuple.getT1()).isZero();
+                    assertThat(tuple.getT2()).isEqualTo(expectedNumberOfTasks);
+                    assertThat(tuple.getT3().getTaskEventType()).isEqualTo(TaskEventType.DELETE_ALL_SUBTASKS_FOR_TASK);
+                    assertThat(tuple.getT3().getTaskId()).isEqualTo(taskId);
+                })
+                .thenCancel()
+                .verify(Duration.ofSeconds(5));
     }
 }
