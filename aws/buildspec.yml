@@ -12,5 +12,5 @@ artifacts:
   files:
     - target/personalkanbanboardbackend-0.0.1-SNAPSHOT.jar
     - aws/ec2-scripts/*.sh
-    - appspec.yml
+    - aws/appspec.yml
   discard-paths: yes

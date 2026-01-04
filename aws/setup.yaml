@@ -29,7 +29,7 @@ Parameters:
   ImageId:
     Type: String
     Description: EC2 instance image id
-    Default: ami-07caf09b362be10b8
+    Default: ami-068c0051b15cdb816
   KeyPairName:
     Type: AWS::EC2::KeyPair::KeyName
     Description: Name of an EC2 KeyPair to enable SSH access to the instance
@@ -37,7 +37,7 @@ Parameters:
   BuildSpecPath:
     Type: String
     Description: Path to buildspec.yml file for CodeBuild
-    Default: buildspec.yml
+    Default: aws/buildspec.yml
   CodeBuildProjectName:
     Type: String
     Description: Name of the project in the CodeBuild
