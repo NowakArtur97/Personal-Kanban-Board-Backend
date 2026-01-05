@@ -1,9 +1,6 @@
 spring:
   application:
     name: personal-kanban-board-backend
-  # TODO: Remove
-  profiles:
-    active: local
   graphql:
     graphiql:
       enabled: true
