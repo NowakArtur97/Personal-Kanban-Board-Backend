@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -40,19 +41,18 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
     }
 
     protected Flux<R> mapToTasksResponse(Mono<List<E>> tasksList) {
-        return tasksList
-                .map(tasks -> Stream.of(
-                                getUuidsFromTasksByProperty(tasks, E::getCreatedBy),
-                                getUuidsFromTasksByProperty(tasks, E::getUpdatedBy),
-                                getUuidsFromTasksByProperty(tasks, E::getAssignedTo))
-                        .flatMap(Collection::stream)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toSet()))
-                .flatMap(userIds -> userService.findAllByIds(userIds.stream().toList()).collectList())
-                .zipWith(tasksList)
-                .flatMapIterable(tuple -> tuple.getT2().stream()
-                        .map(task -> mapper.mapToResponse(task, tuple.getT1()))
-                        .toList());
+        return tasksList.flatMapMany(tasks ->
+                userService.findAllByIds(new ArrayList<>(Stream.of(
+                                        getUuidsFromTasksByProperty(tasks, E::getCreatedBy),
+                                        getUuidsFromTasksByProperty(tasks, E::getUpdatedBy),
+                                        getUuidsFromTasksByProperty(tasks, E::getAssignedTo))
+                                .flatMap(Collection::stream)
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toSet())
+                        ))
+                        .collectList()
+                        .flatMapMany(users -> Flux.fromIterable(tasks)
+                                .map(task -> mapper.mapToResponse(task, users))));
     }
 
     protected Mono<R> create(UUID taskId, TaskDTO taskDTO, DataFetchingEnvironment env) {
