@@ -41,18 +41,22 @@ public abstract class BaseTaskController<E extends BaseTaskEntity, R extends Bas
     }
 
     protected Flux<R> mapToTasksResponse(Mono<List<E>> tasksList) {
-        return tasksList.flatMapMany(tasks ->
-                userService.findAllByIds(new ArrayList<>(Stream.of(
-                                        getUuidsFromTasksByProperty(tasks, E::getCreatedBy),
-                                        getUuidsFromTasksByProperty(tasks, E::getUpdatedBy),
-                                        getUuidsFromTasksByProperty(tasks, E::getAssignedTo))
-                                .flatMap(Collection::stream)
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toSet())
-                        ))
-                        .collectList()
-                        .flatMapMany(users -> Flux.fromIterable(tasks)
-                                .map(task -> mapper.mapToResponse(task, users))));
+        return tasksList
+                .flatMapMany(Flux::fromIterable)
+                .collectList()
+                .filter(list -> !list.isEmpty())
+                .flatMapMany(tasks ->
+                        userService.findAllByIds(new ArrayList<>(Stream.of(
+                                                getUuidsFromTasksByProperty(tasks, E::getCreatedBy),
+                                                getUuidsFromTasksByProperty(tasks, E::getUpdatedBy),
+                                                getUuidsFromTasksByProperty(tasks, E::getAssignedTo))
+                                        .flatMap(Collection::stream)
+                                        .filter(Objects::nonNull)
+                                        .collect(Collectors.toSet())
+                                ))
+                                .collectList()
+                                .flatMapMany(users -> Flux.fromIterable(tasks)
+                                        .map(task -> mapper.mapToResponse(task, users))));
     }
 
     protected Mono<R> create(UUID taskId, TaskDTO taskDTO, DataFetchingEnvironment env) {
