@@ -36,4 +36,4 @@ build/
 data/
 
 ### Logs ###
-spring.log
+spring.log*
