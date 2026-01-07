@@ -96,6 +96,10 @@ Parameters:
     Type: String
     Description: Name of the parameter for backend URL
     Default: BACKEND_URL
+  ParameterStoreWSURLParameterName:
+    Type: String
+    Description: Name of the parameter for websocket URL
+    Default: WS_URL
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -140,7 +144,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Select [0, !GetAZs ""]
+      AvailabilityZone: !Select [ 0, !GetAZs "" ]
       CidrBlock: 10.16.0.32/27
       Tags:
         - Key: Name
@@ -149,7 +153,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Select [1, !GetAZs ""]
+      AvailabilityZone: !Select [ 1, !GetAZs "" ]
       CidrBlock: 10.16.0.64/27
       Tags:
         - Key: Name
@@ -197,7 +201,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Select [0, !GetAZs ""]
+      AvailabilityZone: !Select [ 0, !GetAZs "" ]
       CidrBlock: 10.16.0.0/27
       MapPublicIpOnLaunch: true
       Tags:
@@ -213,11 +217,9 @@ Resources:
           FromPort: !Ref SshPort
           ToPort: !Ref SshPort
           IpProtocol: tcp
-          # TODO: Add frontend to security group (vpc endpoint?)
-        # - CidrIp: !Ref SourceCidr
         - CidrIp: 0.0.0.0/0
-          FromPort: 8080
-          ToPort: 8080
+          FromPort: "8080"
+          ToPort: "8080"
           IpProtocol: tcp
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
@@ -257,7 +259,9 @@ Resources:
               - Effect: Allow
                 Action:
                   - ssm:PutParameter
-                Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ParameterStoreBackendURLParameterName}"
+                Resource:
+                  - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ParameterStoreBackendURLParameterName}"
+                  - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ParameterStoreWSURLParameterName}"
   BackendEC2Instance:
     Type: AWS::EC2::Instance
     Properties:
@@ -290,8 +294,10 @@ Resources:
           touch application.properties
           printf -v lines "spring.r2dbc.username=${DBUsername}\nspring.r2dbc.password=${DBPassword}\nspring.r2dbc.url=r2dbc:postgresql://${Database.Endpoint.Address}:5432/${DBName}\nspring.flyway.user=${DBUsername}\nspring.flyway.password=${DBPassword}\nspring.flyway.url=jdbc:postgresql://${Database.Endpoint.Address}:5432/${DBName}"
           echo -e "$lines" >> application.properties
-          export BACKEND_URL="$(curl http://checkip.amazonaws.com):8080" >> /etc/profile
+          export BACKEND_URL="http://$(curl http://checkip.amazonaws.com):8080" >> /etc/profile
           aws ssm put-parameter --name "BACKEND_URL" --type "String" --value "$BACKEND_URL" --overwrite
+          export WS_URL="ws://$(curl -s http://checkip.amazonaws.com):8080/graphql" >> /etc/profile
+          aws ssm put-parameter --name "WS_URL" --type "String" --value "$WS_URL" --overwrite
   CodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
@@ -527,7 +533,7 @@ Resources:
       Role: !GetAtt S3BucketCleanerLambdaRole.Arn
       Environment:
         Variables:
-          BUCKETS_TO_CLEAN: !Join [",", [!Ref BuildArtifactsS3Bucket]]
+          BUCKETS_TO_CLEAN: !Join [ ",", [ !Ref BuildArtifactsS3Bucket ] ]
       Code:
         ZipFile: |
           import os.path
@@ -559,6 +565,9 @@ Outputs:
   BackendURL:
     Description: URL to backend server
     Value: !Sub http://${BackendEC2Instance.PublicIp}:8080
-  GrapqhQLPlayground:
-    Description: URL to GrapqhQL Playground
+  WebSocketURL:
+    Description: URL to web socket
+    Value: !Sub ws://${BackendEC2Instance.PublicIp}:8080/graphql
+  GraphQLPlayground:
+    Description: URL to GraphQL Playground
     Value: !Sub http://${BackendEC2Instance.PublicIp}:8080/graphiql?path=/graphql
