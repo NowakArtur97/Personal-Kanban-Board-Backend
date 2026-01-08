@@ -292,7 +292,7 @@ Resources:
           mkdir server
           cd /home/ec2-user/server
           touch application.properties
-          printf -v lines "spring.r2dbc.username=${DBUsername}\nspring.r2dbc.password=${DBPassword}\nspring.r2dbc.url=r2dbc:postgresql://${Database.Endpoint.Address}:5432/${DBName}\nspring.flyway.user=${DBUsername}\nspring.flyway.password=${DBPassword}\nspring.flyway.url=jdbc:postgresql://${Database.Endpoint.Address}:5432/${DBName}"
+          printf -v lines "spring.r2dbc.username=${DBUsername}\nspring.r2dbc.password=${DBPassword}\nspring.r2dbc.url=r2dbc:postgresql://${Database.Endpoint.Address}:5432/${DBName}?sslMode=require\nspring.flyway.user=${DBUsername}\nspring.flyway.password=${DBPassword}\nspring.flyway.url=jdbc:postgresql://${Database.Endpoint.Address}:5432/${DBName}"
           echo -e "$lines" >> application.properties
           export BACKEND_URL="http://$(curl http://checkip.amazonaws.com):8080" >> /etc/profile
           aws ssm put-parameter --name "BACKEND_URL" --type "String" --value "$BACKEND_URL" --overwrite
