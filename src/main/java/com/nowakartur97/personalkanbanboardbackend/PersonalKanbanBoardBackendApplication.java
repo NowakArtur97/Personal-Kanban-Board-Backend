@@ -12,7 +12,6 @@ import com.nowakartur97.personalkanbanboardbackend.user.UserRole;
 import com.nowakartur97.personalkanbanboardbackend.user.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -33,9 +32,6 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
         SpringApplication.run(PersonalKanbanBoardBackendApplication.class, args);
     }
 
-    @Value("${spring.profiles.active:default}")
-    private String activeProfile;
-
     private final UserService userService;
     private final TaskService taskService;
     private final SubtaskService subtaskService;
@@ -44,12 +40,10 @@ public class PersonalKanbanBoardBackendApplication implements CommandLineRunner 
 
     @Override
     public void run(String... args) {
-        if (activeProfile.equals("local")) {
-            UserEntity user = createUser();
-            createTestTask(user);
-            UserEntity admin = createAdminUser();
-            createTestTask(admin);
-        }
+        UserEntity user = createUser();
+        createTestTask(user);
+        UserEntity admin = createAdminUser();
+        createTestTask(admin);
     }
 
     private UserEntity createUser() {
