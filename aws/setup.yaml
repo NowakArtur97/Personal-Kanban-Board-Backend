@@ -173,8 +173,8 @@ Resources:
       VpcId: !Ref VPC
       SecurityGroupEgress:
         - IpProtocol: tcp
-          FromPort: 3306
-          ToPort: 3306
+          FromPort: 5432
+          ToPort: 5432
           DestinationSecurityGroupId: !Ref SecurityGroupBackend
   InstanceSecurityGroupIngress:
     Type: AWS::EC2::SecurityGroupIngress
